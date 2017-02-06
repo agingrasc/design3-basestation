@@ -5,8 +5,6 @@
     "author": "nathaniel simard",
     "license": "MIT",
     "dependencies": {
-        "fetch": "",
-        "jquery": "",
-        "request": ""
+        "materialize-css": ""
     }
 }
