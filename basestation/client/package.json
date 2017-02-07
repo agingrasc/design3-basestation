@@ -1,0 +1,10 @@
+{
+    "name": "Leonard",
+    "version": "0.1.0",
+    "main": "app.js",
+    "author": "nathaniel simard",
+    "license": "MIT",
+    "dependencies": {
+        "materialize-css": ""
+    }
+}
