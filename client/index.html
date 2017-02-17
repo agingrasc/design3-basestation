@@ -1,17 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Aurelia</title>
+  </head>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>That Vinci</title>
-</head>
-
-<body>
-    <input id="x">X Position : </input>
-    <input id="y">Y Position : </input>
-    <button onclick="goto_position()">Go To Position</button>
-    <script src="app.js"></script>
-</body>
-
+  <body aurelia-app="main">
+    <script src="scripts/vendor-bundle.js" data-main="aurelia-bootstrapper"></script>
+  </body>
 </html>
