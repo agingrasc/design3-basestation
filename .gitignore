@@ -5,6 +5,8 @@ __pycache__/
 
 # Web
 node_modules
+.idea
+.DS_STORE
 
 # C extensions
 *.so
