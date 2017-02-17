@@ -1,6 +1,6 @@
 import sys
 from flask import Flask, jsonify, make_response
-from basestation.server.api.gotoposition import gotoposition
+from api.gotoposition import gotoposition
 
 app = Flask(__name__)
 
