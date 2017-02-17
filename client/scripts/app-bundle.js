@@ -66,6 +66,43 @@ define('main',['exports', './environment'], function (exports, _environment) {
     });
   }
 });
+define('http/base-station-request',["exports"], function (exports) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    function _classCallCheck(instance, Constructor) {
+        if (!(instance instanceof Constructor)) {
+            throw new TypeError("Cannot call a class as a function");
+        }
+    }
+
+    var BaseStationRequest = exports.BaseStationRequest = function () {
+        function BaseStationRequest() {
+            _classCallCheck(this, BaseStationRequest);
+
+            this.baseStationUrl = "http://localhost:12345";
+        }
+
+        BaseStationRequest.prototype.post = function post(data, path) {
+            fetch(this.baseStationUrl + path, {
+                method: "POST",
+                headers: {
+                    'content-type': 'application/json'
+                },
+                body: data
+            }).then(function (res) {
+                return res.json();
+            }).then(function (data) {
+                console.log(JSON.stringify(data));
+            });
+        };
+
+        return BaseStationRequest;
+    }();
+});
 define('components/go-to-position',["exports", "../http/base-station-request"], function (exports, _baseStationRequest) {
     "use strict";
 
@@ -102,43 +139,6 @@ define('components/go-to-position',["exports", "../http/base-station-request"], 
         };
 
         return GoToPosition;
-    }();
-});
-define('http/base-station-request',["exports"], function (exports) {
-    "use strict";
-
-    Object.defineProperty(exports, "__esModule", {
-        value: true
-    });
-
-    function _classCallCheck(instance, Constructor) {
-        if (!(instance instanceof Constructor)) {
-            throw new TypeError("Cannot call a class as a function");
-        }
-    }
-
-    var BaseStationRequest = exports.BaseStationRequest = function () {
-        function BaseStationRequest() {
-            _classCallCheck(this, BaseStationRequest);
-
-            this.baseStationUrl = "http://localhost:12345";
-        }
-
-        BaseStationRequest.prototype.post = function post(data, path) {
-            fetch(this.baseStationUrl + path, {
-                method: "POST",
-                headers: {
-                    'content-type': 'application/json'
-                },
-                body: data
-            }).then(function (res) {
-                return res.json();
-            }).then(function (data) {
-                console.log(JSON.stringify(data));
-            });
-        };
-
-        return BaseStationRequest;
     }();
 });
 define('resources/index',["exports"], function (exports) {
