@@ -1,14 +1,18 @@
 import {
     BaseStationRequest
 } from '../http/base-station-request';
-
+import {
+    bindable,
+    bindingMode
+} from 'aurelia-framework';
 export class GoToPosition {
+
+    @bindable xPosition = 0;
+    @bindable yPosition = 0;
 
     constructor() {
         this.path = "/go-to-position/";
         this.httpClient = new BaseStationRequest();
-        this.xPosition = 0;
-        this.yPosition = 0;
     }
 
     execute() {

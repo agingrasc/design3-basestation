@@ -1,9 +1,11 @@
 <template>
-  <require from="./component.html"></require>
-  <require from="./components/go-to-position"></require>
+    <div>
+        <require from="./component.html"></require>
+        <require from="./components/navbar/navbar"></require>
+        <require from="./components/world-vision/world-vision"></require>
+        <navbar></navbar>
+        <world-vision></world-vision>
 
-  <component first-name="malade" last-name="caliss"></component>
-
-  <go-to-position></go-to-position>
-  <h1>${message}</h1>
+        <component first-name="" last-name=""></component>
+    </div>
 </template>
