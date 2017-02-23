@@ -34,6 +34,7 @@
 
 .container {
     display: flex;
+    padding: 10px;
     top: 0;
     left: 0;
 }
@@ -44,8 +45,21 @@
 
 label {
     color: #252839;
+    font-weight: bold;
 }
 
 h3 {
     color: #252839;
+}
+
+.float-right {
+    float: right;
+}
+
+.float-left {
+    float: left;
+}
+
+.text-number {
+    color: #963019;
 }

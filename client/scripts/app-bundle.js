@@ -251,7 +251,24 @@ define('components/world-vision/world-vision',["exports"], function (exports) {
             this.x_position = 0;
             this.y_position = 0;
             this.imagePath = "./src/components/world-vision/image14.jpg";
+            this.chosen_x_position = 0;
+            this.chosen_y_position = 0;
         }
+
+        WorldVision.prototype.attached = function attached() {
+            var canvas = document.getElementById(this.canvasId);
+            var context = canvas.getContext('2d');
+            var self = this;
+            canvas.addEventListener('mousemove', function (evt) {
+                var mousePos = self.getMousePos(canvas, evt);
+                self.x_position = Math.floor(mousePos.x);
+                self.y_position = Math.floor(mousePos.y);
+            }, false);
+            canvas.addEventListener('click', function (evt) {
+                self.chosen_x_position = self.x_position;
+                self.chosen_y_position = self.y_position;
+            }, false);
+        };
 
         WorldVision.prototype.getMousePos = function getMousePos(canvas, evt) {
             var rect = canvas.getBoundingClientRect();
@@ -261,23 +278,12 @@ define('components/world-vision/world-vision',["exports"], function (exports) {
             };
         };
 
-        WorldVision.prototype.start = function start() {
-            var canvas = document.getElementById(this.canvasId);
-            var context = canvas.getContext('2d');
-            var self = this;
-            canvas.addEventListener('mousemove', function (evt) {
-                var mousePos = self.getMousePos(canvas, evt);
-                self.x_position = mousePos.x;
-                self.y_position = mousePos.y;
-            }, false);
-        };
-
         return WorldVision;
     }();
 });
-define('text!app.html', ['module'], function(module) { module.exports = "<template><div><require from=\"./component.html\"></require><require from=\"./components/navbar/navbar\"></require><require from=\"./components/world-vision/world-vision\"></require><navbar></navbar><world-vision></world-vision><component first-name=\"\" last-name=\"\"></component></div></template>"; });
+define('text!app.html', ['module'], function(module) { module.exports = "<template><div><require from=\"./components/navbar/navbar\"></require><require from=\"./components/world-vision/world-vision\"></require><navbar></navbar><world-vision></world-vision></div></template>"; });
 define('text!component.html', ['module'], function(module) { module.exports = "<template bindable=\"firstName, lastName\">Hello, ${firstName} ${lastName}!</template>"; });
 define('text!components/go-to-position.html', ['module'], function(module) { module.exports = "<template><button class=\"color2 waves-effect waves-light btn\" click.trigger=\"execute()\">Go To Position</button></template>"; });
-define('text!components/navbar/navbar.html', ['module'], function(module) { module.exports = "<template><nav><div class=\"nav-wrapper color1\"><a href=\"#\" class=\"brand-logo\">Logo</a><ul id=\"nav-mobile\" class=\"right hide-on-med-and-down\"><li><a href=\"sass.html\">Sass</a></li><li><a href=\"badges.html\">Components</a></li><li><a href=\"collapsible.html\">JavaScript</a></li></ul></div></nav></template>"; });
-define('text!components/world-vision/world-vision.html', ['module'], function(module) { module.exports = "<template><require from=\"../go-to-position\"></require><div class=\"container\"><div class=\"row\"><div class=\"col s12 m12\"><div class=\"card\"><div class=\"card-content center-align\"><h3>Wolrd Vision</h3><div><div class=\"card-image\"><canvas id=\"${canvasId}\" width=\"640px\" height=\"480px\" style=\"background:url(${imagePath})\"></canvas></div><div class=\"card-content\"><span class=\"equidistant\"><label>Position x: ${x_position}</label><label>Position y: ${x_position}</label></span></div><div class=\"card-action\"><button class=\"color2 waves-effect waves-light btn\" click.trigger=\"start()\">start</button><go-to-position x-position=\"${x_position}\" y-position=\"${y_position}\"></go-to-position></div></div></div></div></div></div></div></template>"; });
+define('text!components/navbar/navbar.html', ['module'], function(module) { module.exports = "<template><nav><div class=\"nav-wrapper color1\"><a href=\"#\" class=\"brand-logo\">Leonard</a><ul id=\"nav-mobile\" class=\"right hide-on-med-and-down\"><li><a href=\"sass.html\">Clock</a></li></ul></div></nav></template>"; });
+define('text!components/world-vision/world-vision.html', ['module'], function(module) { module.exports = "<template><require from=\"../go-to-position\"></require><div class=\"container\"><div class=\"row\"><div class=\"col s12 m12\"><div class=\"card\"><div class=\"card-content center-align\"><h3>World Vision</h3><div><div class=\"card-image\"><canvas id=\"${canvasId}\" width=\"640px\" height=\"480px\" style=\"background:url(${imagePath})\"></canvas></div><div class=\"card-content\"><span class=\"equidistant float-left\"><label>Mouse position</label><label>x :</label><label class=\"text-number\">${x_position}</label><label>y :</label><label class=\"text-number\">${y_position}</label></span><span class=\"equidistant float-right\"><label>Chosen position</label><label>x :</label><label class=\"text-number\">${chosen_x_position}</label><label>y :</label><label class=\"text-number\">${chosen_y_position}</label></span></div><div class=\"card-action\"><go-to-position x-position=\"${chosen_x_position}\" y-position=\"${chosen_y_position}\"></go-to-position></div></div></div></div></div></div></div></template>"; });
 //# sourceMappingURL=app-bundle.js.map
