@@ -1,6 +1,6 @@
 import {
     BaseStationRequest
-} from '../http/base-station-request';
+} from '../../http/base-station-request';
 import {
     bindable,
     bindingMode

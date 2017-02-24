@@ -1,10 +1,10 @@
-export class WorldVision {
+export class WorldVisionDebug {
 
     constructor() {
-        this.canvasId = "monCanvas"
+        this.canvasId = "monCanvas";
         this.x_position = 0;
         this.y_position = 0;
-        this.imagePath = "./src/components/world-vision/image14.jpg"
+        this.imagePath = "./src/components/world-vision/image14.jpg";
         this.chosen_x_position = 0;
         this.chosen_y_position = 0;
     }
