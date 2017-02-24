@@ -1,16 +1,28 @@
 import base64
 from tornado import websocket
 import tornado.ioloop
+
+import numpy as np
+import cv2
+
+cam = cv2.VideoCapture(0)
+
 class EchoWebSocket(tornado.websocket.WebSocketHandler):
     def initialize(self):
         imageFile = open("test.png", "rb")
-        self.str = base64.b64encode(imageFile.read())
+        ret, frame = cam.read()
+        self.str = base64.b64encode(frame)
 
     def open(self):
         print("WebSocket opened")
         self.write_message(self.str)
 
     def on_message(self, message):
+        ret, frame = cam.read()
+        if not ret:
+            print("ERROR")
+        cnt = cv2.imencode('.png',frame)[1]
+        self.str = base64.b64encode(cnt)
         self.write_message(self.str)
 
     def on_close(self):
