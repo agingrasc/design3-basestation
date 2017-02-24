@@ -1,5 +1,1 @@
-export class Debug {
-    constructor() {
-        this.allo = "allo";
-    }
-}
+export class Debug {}

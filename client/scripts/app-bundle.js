@@ -156,6 +156,80 @@ define('services/startCompetition',["exports"], function (exports) {
         console.log(this.mesaa);
     };
 });
+define('services/timer',["exports"], function (exports) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    function _classCallCheck(instance, Constructor) {
+        if (!(instance instanceof Constructor)) {
+            throw new TypeError("Cannot call a class as a function");
+        }
+    }
+
+    var Timer = exports.Timer = function () {
+        function Timer() {
+            _classCallCheck(this, Timer);
+
+            this.begin = 0;
+            this.time = "Timer not started";
+        }
+
+        Timer.prototype.startTimer = function startTimer() {
+            var myVar = setInterval(myTimer, 1000);
+            var self = this;
+            var d = new Date();
+            this.begin = d.valueOf();
+
+            function myTimer() {
+                var d = new Date();
+                var time = d.valueOf() - self.begin;
+                var seconds = Math.floor(time / 1000 % 60);
+                var minutes = Math.floor(time / (1000 * 60) % 60);
+                var hours = Math.floor(time / (1000 * 60 * 60) % 24);
+                self.time = ("0" + hours).slice(-2) + ":" + ("0" + minutes).slice(-2) + ":" + ("0" + seconds).slice(-2);
+            }
+        };
+
+        Timer.prototype.getTime = function getTime() {
+            return this.time;
+        };
+
+        return Timer;
+    }();
+});
+define('services/worldImageService',["exports"], function (exports) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    function _classCallCheck(instance, Constructor) {
+        if (!(instance instanceof Constructor)) {
+            throw new TypeError("Cannot call a class as a function");
+        }
+    }
+
+    var WorldImageService = exports.WorldImageService = function () {
+        function WorldImageService() {
+            _classCallCheck(this, WorldImageService);
+
+            this.image = "";
+            this.message();
+        }
+
+        WorldImageService.prototype.message = function message() {};
+
+        WorldImageService.prototype.getImage = function getImage() {
+            return this.image;
+        };
+
+        return WorldImageService;
+    }();
+});
 define('components/competition/competition',["exports"], function (exports) {
   "use strict";
 
@@ -174,23 +248,21 @@ define('components/competition/competition',["exports"], function (exports) {
   };
 });
 define('components/debug/debug',["exports"], function (exports) {
-    "use strict";
+  "use strict";
 
-    Object.defineProperty(exports, "__esModule", {
-        value: true
-    });
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
 
-    function _classCallCheck(instance, Constructor) {
-        if (!(instance instanceof Constructor)) {
-            throw new TypeError("Cannot call a class as a function");
-        }
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
     }
+  }
 
-    var Debug = exports.Debug = function Debug() {
-        _classCallCheck(this, Debug);
-
-        this.allo = "allo";
-    };
+  var Debug = exports.Debug = function Debug() {
+    _classCallCheck(this, Debug);
+  };
 });
 define('components/go-to-position/go-to-position',['exports', '../../http/base-station-request', 'aurelia-framework'], function (exports, _baseStationRequest, _aureliaFramework) {
     'use strict';
@@ -310,49 +382,8 @@ define('components/navbar/navbar',["exports"], function (exports) {
         return Navbar;
     }();
 });
-define('components/timer/timer',["exports"], function (exports) {
-    "use strict";
-
-    Object.defineProperty(exports, "__esModule", {
-        value: true
-    });
-
-    function _classCallCheck(instance, Constructor) {
-        if (!(instance instanceof Constructor)) {
-            throw new TypeError("Cannot call a class as a function");
-        }
-    }
-
-    var Timer = exports.Timer = function () {
-        function Timer() {
-            _classCallCheck(this, Timer);
-
-            this.begin = 0;
-            this.time = "Timer not started";
-        }
-
-        Timer.prototype.startTimer = function startTimer() {
-            var myVar = setInterval(myTimer, 1000);
-            var self = this;
-            var d = new Date();
-            this.begin = d.valueOf();
-
-            function myTimer() {
-                var d = new Date();
-                var time = d.valueOf() - self.begin;
-                var seconds = Math.floor(time / 1000 % 60);
-                var minutes = Math.floor(time / (1000 * 60) % 60);
-                var hours = Math.floor(time / (1000 * 60 * 60) % 24);
-                self.time = ("0" + hours).slice(-2) + ":" + ("0" + minutes).slice(-2) + ":" + ("0" + seconds).slice(-2);
-            }
-        };
-
-        Timer.prototype.getTime = function getTime() {
-            return this.time;
-        };
-
-        return Timer;
-    }();
+define('components/stat/stat',[], function () {
+  "use strict";
 });
 define('components/world-vision/world-vision-competition',["exports"], function (exports) {
     "use strict";
@@ -465,135 +496,12 @@ define('components/world-vision/world-vision-debug',["exports", "../../services/
         return WorldVisionDebug;
     }();
 });
-define('services/timer/timer',["exports"], function (exports) {
-    "use strict";
-
-    Object.defineProperty(exports, "__esModule", {
-        value: true
-    });
-
-    function _classCallCheck(instance, Constructor) {
-        if (!(instance instanceof Constructor)) {
-            throw new TypeError("Cannot call a class as a function");
-        }
-    }
-
-    var Timer = exports.Timer = function () {
-        function Timer() {
-            _classCallCheck(this, Timer);
-
-            this.begin = 0;
-            this.time = "Timer not started";
-        }
-
-        Timer.prototype.startTimer = function startTimer() {
-            var myVar = setInterval(myTimer, 1000);
-            var self = this;
-            var d = new Date();
-            this.begin = d.valueOf();
-
-            function myTimer() {
-                var d = new Date();
-                var time = d.valueOf() - self.begin;
-                var seconds = Math.floor(time / 1000 % 60);
-                var minutes = Math.floor(time / (1000 * 60) % 60);
-                var hours = Math.floor(time / (1000 * 60 * 60) % 24);
-                self.time = ("0" + hours).slice(-2) + ":" + ("0" + minutes).slice(-2) + ":" + ("0" + seconds).slice(-2);
-            }
-        };
-
-        Timer.prototype.getTime = function getTime() {
-            return this.time;
-        };
-
-        return Timer;
-    }();
-});
-define('services/timer',["exports"], function (exports) {
-    "use strict";
-
-    Object.defineProperty(exports, "__esModule", {
-        value: true
-    });
-
-    function _classCallCheck(instance, Constructor) {
-        if (!(instance instanceof Constructor)) {
-            throw new TypeError("Cannot call a class as a function");
-        }
-    }
-
-    var Timer = exports.Timer = function () {
-        function Timer() {
-            _classCallCheck(this, Timer);
-
-            this.begin = 0;
-            this.time = "Timer not started";
-        }
-
-        Timer.prototype.startTimer = function startTimer() {
-            var myVar = setInterval(myTimer, 1000);
-            var self = this;
-            var d = new Date();
-            this.begin = d.valueOf();
-
-            function myTimer() {
-                var d = new Date();
-                var time = d.valueOf() - self.begin;
-                var seconds = Math.floor(time / 1000 % 60);
-                var minutes = Math.floor(time / (1000 * 60) % 60);
-                var hours = Math.floor(time / (1000 * 60 * 60) % 24);
-                self.time = ("0" + hours).slice(-2) + ":" + ("0" + minutes).slice(-2) + ":" + ("0" + seconds).slice(-2);
-            }
-        };
-
-        Timer.prototype.getTime = function getTime() {
-            return this.time;
-        };
-
-        return Timer;
-    }();
-});
-define('components/stat/stat',[], function () {
-  "use strict";
-});
-define('services/worldImageService',["exports"], function (exports) {
-    "use strict";
-
-    Object.defineProperty(exports, "__esModule", {
-        value: true
-    });
-
-    function _classCallCheck(instance, Constructor) {
-        if (!(instance instanceof Constructor)) {
-            throw new TypeError("Cannot call a class as a function");
-        }
-    }
-
-    var WorldImageService = exports.WorldImageService = function () {
-        function WorldImageService() {
-            _classCallCheck(this, WorldImageService);
-
-            this.image = "";
-            this.message();
-        }
-
-        WorldImageService.prototype.message = function message() {};
-
-        WorldImageService.prototype.getImage = function getImage() {
-            return this.image;
-        };
-
-        return WorldImageService;
-    }();
-});
 define('text!app.html', ['module'], function(module) { module.exports = "<template><div><require from=\"./components/navbar/navbar\"></require><navbar></navbar></div><router-view></router-view></template>"; });
 define('text!components/competition/competition.html', ['module'], function(module) { module.exports = "<template><require from=\"../world-vision/world-vision-competition\"></require><world-vision-competition></world-vision-competition><template></template></template>"; });
 define('text!components/debug/debug.html', ['module'], function(module) { module.exports = "<template><require from=\"../world-vision/world-vision-debug\"></require><world-vision-debug></world-vision-debug></template>"; });
 define('text!components/go-to-position/go-to-position.html', ['module'], function(module) { module.exports = "<template><button class=\"color2 waves-effect waves-light btn\" click.trigger=\"execute()\">Go To Position</button></template>"; });
 define('text!components/navbar/navbar.html', ['module'], function(module) { module.exports = "<template><nav><div class=\"nav-wrapper color1\"><img width=\"55px\" height=\"55px\" src=\"./img/robot.png\"><a href=\"#\" class=\"brand-logo center\">Leonard</a><ul id=\"nav-mobile\" class=\"right hide-on-med-and-down\"><li><a href=\"#/competition\">Competition</a></li><li><a href=\"#/debug\">Debug</a></li></ul></div></nav></template>"; });
-define('text!components/timer/timer.html', ['module'], function(module) { module.exports = "<template><label>${time}</label></template>"; });
+define('text!components/stat/stat.html', ['module'], function(module) { module.exports = ""; });
 define('text!components/world-vision/world-vision-competition.html', ['module'], function(module) { module.exports = "<template><div class=\"container\"><div class=\"row\"><div class=\"col s12 m12\"><div class=\"card\"><div class=\"card-content center-align\"><h3>World Vision</h3><div><div class=\"card-image\"><canvas id=\"${canvasId}\" width=\"640px\" height=\"480px\" style=\"background:url(${imagePath})\"></canvas></div><div class=\"card-content\"><span class=\"equidistant float-left\"><label>Robot position</label><label>x :</label><label class=\"text-number\">${x_position}</label><label>y :</label><label class=\"text-number\">${y_position}</label></span><span class=\"equidistant float-right\"></span></div><div class=\"card-action\"><button class=\"color2 waves-effect waves-light btn\" click.trigger=\"start()\">Start</button></div></div></div></div></div></div></div></template>"; });
 define('text!components/world-vision/world-vision-debug.html', ['module'], function(module) { module.exports = "<template><require from=\"../go-to-position/go-to-position\"></require><div class=\"container\"><div class=\"row\"><div class=\"col s12 m12\"><div class=\"card\"><div class=\"card-content center-align\"><h3>World Vision</h3><div><div class=\"card-image\"><canvas id=\"${canvasId}\" width=\"640px\" height=\"480px\" style=\"background:url(${imagePath})\"></canvas></div><div class=\"card-content\"><span class=\"equidistant float-left\"><label>Mouse position</label><label>x :</label><label class=\"text-number\">${x_position}</label><label>y :</label><label class=\"text-number\">${y_position}</label></span><span class=\"equidistant float-right\"><label>Chosen position</label><label>x :</label><label class=\"text-number\">${chosen_x_position}</label><label>y :</label><label class=\"text-number\">${chosen_y_position}</label></span></div><div class=\"card-action\"><go-to-position x-position=\"${chosen_x_position}\" y-position=\"${chosen_y_position}\"></go-to-position></div></div></div></div></div></div></div></template>"; });
-define('text!services/timer/timer.html', ['module'], function(module) { module.exports = "<template><label>${time}</label></template>"; });
-define('text!components/stat/stat.html', ['module'], function(module) { module.exports = ""; });
 //# sourceMappingURL=app-bundle.js.map

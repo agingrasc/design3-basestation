@@ -1,6 +1,1 @@
-export class Navbar {
-
-    constructor() {}
-
-    execute() {}
-}
+export class Navbar {}

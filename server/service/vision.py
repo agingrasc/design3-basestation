@@ -9,7 +9,6 @@ cam = cv2.VideoCapture(0)
 
 class EchoWebSocket(tornado.websocket.WebSocketHandler):
     def initialize(self):
-        imageFile = open("test.png", "rb")
         ret, frame = cam.read()
         self.str = base64.b64encode(frame)
 
