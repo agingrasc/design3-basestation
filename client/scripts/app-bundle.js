@@ -415,9 +415,6 @@ define('components/world-vision/world-vision-debug',["exports", "../../services/
             this.imagePath = "./src/components/world-vision/image14.jpg";
             this.chosen_x_position = 0;
             this.chosen_y_position = 0;
-            this.imageService = new _worldImageService.WorldImageService();
-            var image = this.imageService.getImage();
-            console.log(image);
         }
 
         WorldVisionDebug.prototype.attached = function attached() {
@@ -446,7 +443,7 @@ define('components/world-vision/world-vision-debug',["exports", "../../services/
         };
 
         WorldVisionDebug.prototype.update = function update() {
-            var myVar = setInterval(myTimer, 60);
+            var myVar = setInterval(refresh, 60);
             var canvas = document.getElementById(this.canvasId);
             var context = canvas.getContext('2d');
 
@@ -457,7 +454,7 @@ define('components/world-vision/world-vision-debug',["exports", "../../services/
 
             var self = this;
 
-            function myTimer() {
+            function refresh() {
                 ws.send("refresh_image");
                 ws.onmessage = function (evt) {
                     self.imagePath = "data:image/png;base64," + evt.data;
