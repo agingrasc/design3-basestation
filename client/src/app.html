@@ -1,9 +1,7 @@
 <template>
-  <require from="./component.html"></require>
-  <require from="./components/go-to-position"></require>
-
-  <component first-name="malade" last-name="caliss"></component>
-
-  <go-to-position></go-to-position>
-  <h1>${message}</h1>
+    <div>
+        <require from="./components/navbar/navbar"></require>
+        <navbar></navbar>
+    </div>
+    <router-view></router-view>
 </template>

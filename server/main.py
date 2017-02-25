@@ -8,6 +8,7 @@ app.register_blueprint(gotoposition)
 
 PORT = 12345
 
+
 @app.after_request
 def after_request(data):
     response = make_response(data)
@@ -26,6 +27,7 @@ def bad_request(error):
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'error': 'Not Found'}), 404)
+
 
 if __name__ == '__main__':
     url = sys.argv[1]

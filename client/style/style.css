@@ -1,0 +1,65 @@
+.center {
+    margin: auto;
+}
+
+.padding-main {
+    padding: 10px;
+}
+
+.color1 {
+    background-color: #252839;
+}
+
+.color2 {
+    background-color: #677077;
+}
+
+.color3 {
+    background-color: #b5b5b7;
+}
+
+.color4 {
+    background-color: #f2b632;
+}
+
+.equidistant label {
+    padding: 10px;
+}
+
+.component-border {
+    border-style: groove;
+    border-color: #252839;
+    border-bottom-width: 5px;
+}
+
+.container {
+    display: flex;
+    padding: 10px;
+    top: 0;
+    left: 0;
+}
+
+.container .row {
+    margin: 0 auto;
+}
+
+label {
+    color: #252839;
+    font-weight: bold;
+}
+
+h3 {
+    color: #252839;
+}
+
+.float-right {
+    float: right;
+}
+
+.float-left {
+    float: left;
+}
+
+.text-number {
+    color: #963019;
+}
