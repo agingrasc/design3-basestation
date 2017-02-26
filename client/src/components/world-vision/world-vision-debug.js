@@ -1,8 +1,3 @@
-import {
-    WorldImageService
-} from '../../services/worldImageService';
-
-
 export class WorldVisionDebug {
 
     constructor() {
