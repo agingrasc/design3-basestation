@@ -1,11 +1,14 @@
 import base64
 from tornado import websocket
+import gzip
 import tornado.ioloop
 
 import numpy as np
 import cv2
 
 cam = cv2.VideoCapture(0)
+cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 640)
+cam.set(cv2.CAP_PROP_FRAME_WIDTH, 480)
 
 class EchoWebSocket(tornado.websocket.WebSocketHandler):
     def initialize(self):
