@@ -6,6 +6,11 @@
         "type": "???",
         "url": "???"
     },
+    "scripts": {
+        "start": "au run",
+        "dev-server": "au run --watch",
+        "test": "au test --watch"
+    },
     "license": "MIT",
     "dependencies": {
         "aurelia-bootstrapper": "^1.0.0",
