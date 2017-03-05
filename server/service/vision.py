@@ -36,6 +36,8 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
             self.write_message(GLOBAL[visionformat.PULL_VISION_DATA])
 
     def on_close(self):
+        if any(self == connection for connection in REGISTER_VISION_DATA):
+            REGISTER_VISION_DATA.remove(self)
         print("WebSocket closed")
 
     def check_origin(self, origin):

@@ -5,19 +5,21 @@ import {
     bindable,
     bindingMode
 } from 'aurelia-framework';
+
 export class GoToPosition {
 
     @bindable xPosition = 0;
     @bindable yPosition = 0;
 
-    constructor() {
-        this.path = "/go-to-position/";
+    constructor(vision) {
+        this.vision = vision;
         this.httpClient = new BaseStationRequest();
     }
 
     execute() {
         console.log(this.xPosition);
         console.log(this.yPosition);
+        this.path = "/go-to-position/";
         var payload = {
             x: this.xPosition,
             y: this.yPosition

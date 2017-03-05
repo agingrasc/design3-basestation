@@ -1,11 +1,10 @@
 <template>
-    <require from="../go-to-position/go-to-position"></require>
-        <div class="col s6 container">
-           <div class="row">
-                <div class="no-right-padding">
-                    <div class="card">
-                        <div class="card-content center-align">
-                            <h3>World Vision</h3>
+    <div class="col s6 container">
+        <div class="row">
+            <div class="no-left-padding">
+                <div class="card">
+                    <div class="card-content center-align">
+                        <h3>World Vision</h3>
                         <div>
                             <div class="card-image">
                                 <canvas id="${canvasId}" width="640px" height="480px" style="background: url(${visionProperties.imagePath})"></canvas>
@@ -28,10 +27,10 @@
                             </div>
                             <div class="card-action">
                                 <go-to-position x-position="${chosen_x_position}" y-position="${chosen_y_position}"></go-to-position>
-                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 </template>
