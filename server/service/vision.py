@@ -8,6 +8,8 @@ import tornado.ioloop
 GLOBAL = {}
 GLOBAL[visionformat.PULL_VISION_DATA] = "heyHo"
 
+REGISTER_VISION_DATA = []
+
 
 class EchoWebSocket(tornado.websocket.WebSocketHandler):
     def initialize(self):
@@ -17,7 +19,6 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
 
     def open(self):
         print("WebSocket opened")
-        self.write_message(self.str)
 
     def on_message(self, message):
         value = json.loads(message)
@@ -25,8 +26,13 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
         if visionformat.PUSH_VISION_DATA == value[visionformat.HEADERS]:
             GLOBAL[visionformat.PULL_VISION_DATA] = value[visionformat.DATA]
             self.write_message("Ok")
+            for connection in REGISTER_VISION_DATA:
+                connection.write_message(GLOBAL[visionformat.PULL_VISION_DATA])
         if visionformat.PULL_VISION_DATA == value[visionformat.HEADERS]:
             print("im here")
+            self.write_message(GLOBAL[visionformat.PULL_VISION_DATA])
+        if visionformat.REGISTER_VISION_DATA == value[visionformat.HEADERS]:
+            REGISTER_VISION_DATA.append(self)
             self.write_message(GLOBAL[visionformat.PULL_VISION_DATA])
 
     def on_close(self):

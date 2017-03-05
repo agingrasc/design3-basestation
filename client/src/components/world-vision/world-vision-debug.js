@@ -34,28 +34,34 @@ export class WorldVisionDebug {
     }
 
     update() {
-        var myVar = setInterval(refresh, 20);
+        //var myVar = setInterval(refresh, 20);
         var canvas = document.getElementById(this.canvasId);
         var context = canvas.getContext('2d');
 
         var ws = new WebSocket("ws://localhost:3000");
 
         var tmp = {};
-        tmp.headers = "pull_vision_data";
+        tmp.headers = "register_vision_data";
         var value = JSON.stringify(tmp);
 
         ws.onopen = function() {
             ws.send(value);
         };
 
+        ws.onmessage = function(evt) {
+            var data = JSON.parse(evt.data);
+            self.imagePath = "data:image/png;base64," + data.vision_image;
+        };
+
         var self = this;
-
-        function refresh() {
-            ws.send(value);
-            ws.onmessage = function(evt) {
-                self.imagePath = "data:image/png;base64," + evt.data;
-            };
-        }
-
+        /*
+                function refresh() {
+                    ws.send(value);
+                    ws.onmessage = function(evt) {
+                        var data = JSON.parse(evt.data);
+                        self.imagePath = "data:image/png;base64," + data.vision_image;
+                    };
+                }
+        */
     }
 }

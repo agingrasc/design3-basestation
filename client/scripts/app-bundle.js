@@ -417,28 +417,25 @@ define('components/world-vision/world-vision-debug',["exports"], function (expor
         };
 
         WorldVisionDebug.prototype.update = function update() {
-            var myVar = setInterval(refresh, 20);
             var canvas = document.getElementById(this.canvasId);
             var context = canvas.getContext('2d');
 
             var ws = new WebSocket("ws://localhost:3000");
 
             var tmp = {};
-            tmp.headers = "pull_vision_data";
+            tmp.headers = "register_vision_data";
             var value = JSON.stringify(tmp);
 
             ws.onopen = function () {
                 ws.send(value);
             };
 
-            var self = this;
+            ws.onmessage = function (evt) {
+                var data = JSON.parse(evt.data);
+                self.imagePath = "data:image/png;base64," + data.vision_image;
+            };
 
-            function refresh() {
-                ws.send(value);
-                ws.onmessage = function (evt) {
-                    self.imagePath = "data:image/png;base64," + evt.data;
-                };
-            }
+            var self = this;
         };
 
         return WorldVisionDebug;
