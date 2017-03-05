@@ -1,31 +1,33 @@
 import base64
+import visionformat
+import json
 from tornado import websocket
 import gzip
 import tornado.ioloop
 
-import numpy as np
-import cv2
+GLOBAL = {}
+GLOBAL[visionformat.PULL_VISION_DATA] = "heyHo"
 
-cam = cv2.VideoCapture(0)
-cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 640)
-cam.set(cv2.CAP_PROP_FRAME_WIDTH, 480)
 
 class EchoWebSocket(tornado.websocket.WebSocketHandler):
     def initialize(self):
-        ret, frame = cam.read()
-        self.str = base64.b64encode(frame)
+        self.str = " Hello"
+        self.vision_data = "damnnnn"
+        self.connections = []
 
     def open(self):
         print("WebSocket opened")
         self.write_message(self.str)
 
     def on_message(self, message):
-        ret, frame = cam.read()
-        if not ret:
-            print("ERROR")
-        cnt = cv2.imencode('.png',frame)[1]
-        self.str = base64.b64encode(cnt)
-        self.write_message(self.str)
+        value = json.loads(message)
+        print(value[visionformat.HEADERS])
+        if visionformat.PUSH_VISION_DATA == value[visionformat.HEADERS]:
+            GLOBAL[visionformat.PULL_VISION_DATA] = value[visionformat.DATA]
+            self.write_message("Ok")
+        if visionformat.PULL_VISION_DATA == value[visionformat.HEADERS]:
+            print("im here")
+            self.write_message(GLOBAL[visionformat.PULL_VISION_DATA])
 
     def on_close(self):
         print("WebSocket closed")
@@ -35,7 +37,9 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
         return True
 
 
-application = tornado.web.Application([(r"/", EchoWebSocket),])
+application = tornado.web.Application([
+    (r"/", EchoWebSocket),
+])
 
 if __name__ == "__main__":
     application.listen(3000)
