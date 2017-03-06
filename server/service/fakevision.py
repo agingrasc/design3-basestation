@@ -33,9 +33,29 @@ def allo():
 
     obstacle1[visionformat.VISION_POSITION] = obstacle1_position
 
+    obstacle2 = {}
+    obstacle2[visionformat.VISION_OBSTABLE_WIDTH] = "15"
+    obstacle2[visionformat.VISION_OBSTACLE_TAG] = "OCPL"
+
+    obstacle2_position = {}
+    obstacle2_position[visionformat.VISION_X] = "15"
+    obstacle2_position[visionformat.VISION_Y] = "25"
+
+    obstacle2[visionformat.VISION_POSITION] = obstacle2_position
+
     obstacles.append(obstacle1)
+    obstacles.append(obstacle2)
+
+    robot = {}
+    robot_position = {}
+    robot_position[visionformat.VISION_X] = "35"
+    robot_position[visionformat.VISION_Y] = "95"
+
+    robot[visionformat.VISION_POSITION] = robot_position
+    robot[visionformat.VISION_ROBOT_ANGLE] = "45"
 
     data[visionformat.VISION_OBSTABLES] = obstacles
+    data[visionformat.VISION_ROBOT] = robot
     data[visionformat.VISION_IMAGE] = image.decode('utf-8')
 
     value = {}

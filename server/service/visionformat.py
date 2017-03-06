@@ -14,4 +14,7 @@ VISION_POSITION = "vision_position"
 VISION_X = "x"
 VISION_Y = "y"
 
+VISION_ROBOT = "vision_robot"
+VISION_ROBOT_ANGLE = "vision_robot_angle"
+
 REGISTER_VISION_DATA = "register_vision_data"

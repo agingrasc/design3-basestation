@@ -22,7 +22,9 @@ export class Vision {
         ws.onmessage = function(evt) {
             var data = JSON.parse(evt.data);
             self.imageView.imagePath = "data:image/png;base64," + data.vision_image;
-            self.informations.x = "yeh";
+            self.informations.obstacles = data.vision_obstacles;
+            self.informations.robot = data.vision_robot;
+            console.log(data);
         };
     }
 

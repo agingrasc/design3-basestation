@@ -12,7 +12,7 @@ export class Informations {
     constructor(vision) {
         this.vision = vision;
         this.informations = {};
-        this.informations.x = "lol";
+        this.informations.obstacles = [];
     }
 
     attached() {

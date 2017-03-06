@@ -4,29 +4,34 @@
             <div class="no-left-padding">
                 <div class="card">
                     <div class="card-content center-align">
-                        <h3>World Vision</h3>
+                        <h3>Informations</h3>
                         <div>
-                            <div class="card-image">
-                                <canvas id="${canvasId}" width="640px" height="480px" style="background: url(${visionProperties.imagePath})"></canvas>
-                            </div>
                             <div class="card-content">
-                                <span class="equidistant float-left" >
-                                    <label>Mouse position</label>
+                                <h5>Obstacles</h5>
+                                <div class="equidistant" repeat.for="obstacle of informations.obstacles">
                                     <label>x :</label>
-                                    <label class="text-number">${x_position}</label>
+                                    <label class="text-number">${obstacle.vision_position.x}</label>
                                     <label>y :</label>
-                                    <label class="text-number">${y_position}</label>
-                                </span>
-                                <span class="equidistant float-right" >
-                                    <label>Chosen position</label>
+                                    <label class="text-number">${obstacle.vision_position.y}</label>
+                                    <label>Tag :</label>
+                                    <label class="text-number">${obstacle.vision_obstacle_tag}</label>
+                                    <label>Width :</label>
+                                    <label class="text-number">${obstacle.vision_obstacle_width}</label>
+                                </div>
+                                <div class="card-action">
+                                </div>
+                                <h5>Robot</h5>
+                                <div class="equidistant">
                                     <label>x :</label>
-                                    <label class="text-number">${chosen_x_position}</label>
+                                    <label class="text-number">${informations.robot.vision_position.x}</label>
                                     <label>y :</label>
-                                    <label class="text-number">${chosen_y_position}</label>
-                                </span>
+                                    <label class="text-number">${informations.robot.vision_position.y}</label>
+                                    <label>Angle :</label>
+                                    <label class="text-number">${informations.robot.vision_robot_angle}</label>
+                                </div>
+                                <div class="card-action">
+                                </div>
                             </div>
-                            <div class="card-action">
-                                <go-to-position x-position="${chosen_x_position}" y-position="${chosen_y_position}"></go-to-position>
                         </div>
                     </div>
                 </div>
