@@ -202,12 +202,6 @@ define('services/vision',["exports"], function (exports) {
         }
 
         Vision.prototype.start = function start() {
-            if (this.imageView === undefined) {
-                return;
-            }
-            if (this.informations === undefined) {
-                return;
-            }
             var ws = new WebSocket("ws://localhost:3000");
             var tmp = {};
             tmp.headers = "register_vision_data";
@@ -221,18 +215,27 @@ define('services/vision',["exports"], function (exports) {
                 self.imageView.imagePath = "data:image/png;base64," + data.vision_image;
                 self.informations.obstacles = data.vision_obstacles;
                 self.informations.robot = data.vision_robot;
-                console.log(data);
             };
+        };
+
+        Vision.prototype.checkReadyToStart = function checkReadyToStart() {
+            if (this.imageView === undefined) {
+                return;
+            }
+            if (this.informations === undefined) {
+                return;
+            }
+            this.start();
         };
 
         Vision.prototype.registerImageView = function registerImageView(imageView) {
             this.imageView = imageView;
-            this.start();
+            this.checkReadyToStart();
         };
 
         Vision.prototype.registerInformations = function registerInformations(informations) {
             this.informations = informations;
-            this.start();
+            this.checkReadyToStart();
         };
 
         return Vision;

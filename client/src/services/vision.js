@@ -5,12 +5,6 @@ export class Vision {
     }
 
     start() {
-        if (this.imageView === undefined) {
-            return;
-        }
-        if (this.informations === undefined) {
-            return;
-        }
         var ws = new WebSocket("ws://localhost:3000");
         var tmp = {};
         tmp.headers = "register_vision_data";
@@ -24,17 +18,26 @@ export class Vision {
             self.imageView.imagePath = "data:image/png;base64," + data.vision_image;
             self.informations.obstacles = data.vision_obstacles;
             self.informations.robot = data.vision_robot;
-            console.log(data);
         };
     }
 
-    registerImageView(imageView) {
-        this.imageView = imageView;
+    checkReadyToStart() {
+        if (this.imageView === undefined) {
+            return;
+        }
+        if (this.informations === undefined) {
+            return;
+        }
         this.start();
     }
+    registerImageView(imageView) {
+        this.imageView = imageView;
+        this.checkReadyToStart();
+    }
+
 
     registerInformations(informations) {
         this.informations = informations;
-        this.start();
+        this.checkReadyToStart();
     }
 }
