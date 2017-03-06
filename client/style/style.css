@@ -33,14 +33,18 @@
 }
 
 .container {
-    display: flex;
-    padding: 10px;
-    top: 0;
-    left: 0;
+    padding: 0px;
+    bottom: 0px;
 }
 
-.container .row {
-    margin: 0 auto;
+.no-right-padding {
+    padding-right: 0px;
+    padding-left: 8px;
+}
+
+.no-left-padding {
+    padding-left: 8px;
+    padding-right: 8px;
 }
 
 label {
