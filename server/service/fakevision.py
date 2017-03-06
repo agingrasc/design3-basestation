@@ -1,18 +1,18 @@
-import base64
 import json
+import base64
 import cv2
 import visionformat
 from websocket import create_connection
 
-connection = create_connection("ws://localhost:3000")
+CONNECTION = create_connection("ws://localhost:3000")
 
-cam = cv2.VideoCapture(0)
-cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 640)
-cam.set(cv2.CAP_PROP_FRAME_WIDTH, 480)
+CAM = cv2.VideoCapture(0)
+CAM.set(cv2.CAP_PROP_FRAME_HEIGHT, 640)
+CAM.set(cv2.CAP_PROP_FRAME_WIDTH, 480)
 
 
-def allo():
-    ret, frame = cam.read()
+def build_fake_vision_info():
+    ret, frame = CAM.read()
     if not ret:
         print("ERROR")
     cnt = cv2.imencode('.png', frame)[1]
@@ -61,8 +61,8 @@ def allo():
     value = {}
     value[visionformat.HEADERS] = visionformat.PUSH_VISION_DATA
     value[visionformat.DATA] = data
-    connection.send(json.dumps(value))
+    CONNECTION.send(json.dumps(value))
 
 
 while True:
-    allo()
+    build_fake_vision_info()

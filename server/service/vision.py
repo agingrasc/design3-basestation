@@ -1,20 +1,17 @@
-import base64
-import visionformat
 import json
+import visionformat
+from tornado import ioloop
 from tornado import websocket
-import gzip
-import tornado.ioloop
+from tornado import web
 
 GLOBAL = {}
-GLOBAL[visionformat.PULL_VISION_DATA] = "heyHo"
+GLOBAL[visionformat.PULL_VISION_DATA] = ""
+REGISTERS_TO_VISION_DATA = []
 
-REGISTER_VISION_DATA = []
 
-
-class EchoWebSocket(tornado.websocket.WebSocketHandler):
+class EchoWebSocket(websocket.WebSocketHandler):
     def initialize(self):
-        self.str = " Hello"
-        self.vision_data = "damnnnn"
+        self.vision_data = ""
         self.connections = []
 
     def open(self):
@@ -24,20 +21,15 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
         value = json.loads(message)
         print(value[visionformat.HEADERS])
         if visionformat.PUSH_VISION_DATA == value[visionformat.HEADERS]:
-            GLOBAL[visionformat.PULL_VISION_DATA] = value[visionformat.DATA]
-            self.write_message("Ok")
-            for connection in REGISTER_VISION_DATA:
-                connection.write_message(GLOBAL[visionformat.PULL_VISION_DATA])
+            push_vision_data(self, value)
         if visionformat.PULL_VISION_DATA == value[visionformat.HEADERS]:
-            print("im here")
-            self.write_message(GLOBAL[visionformat.PULL_VISION_DATA])
+            pull_vision_data(self)
         if visionformat.REGISTER_VISION_DATA == value[visionformat.HEADERS]:
-            REGISTER_VISION_DATA.append(self)
-            self.write_message(GLOBAL[visionformat.PULL_VISION_DATA])
+            register_vision_data(self)
 
     def on_close(self):
-        if any(self == connection for connection in REGISTER_VISION_DATA):
-            REGISTER_VISION_DATA.remove(self)
+        if any(self == connection for connection in REGISTERS_TO_VISION_DATA):
+            REGISTERS_TO_VISION_DATA.remove(self)
         print("WebSocket closed")
 
     def check_origin(self, origin):
@@ -45,10 +37,26 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
         return True
 
 
-application = tornado.web.Application([
+def push_vision_data(connection, value):
+    GLOBAL[visionformat.PULL_VISION_DATA] = value[visionformat.DATA]
+    connection.write_message("Ok")
+    for connection in REGISTERS_TO_VISION_DATA:
+        connection.write_message(GLOBAL[visionformat.PULL_VISION_DATA])
+
+
+def pull_vision_data(connection):
+    connection.write_message(GLOBAL[visionformat.PULL_VISION_DATA])
+
+
+def register_vision_data(connection):
+    REGISTERS_TO_VISION_DATA.append(connection)
+    connection.write_message(GLOBAL[visionformat.PULL_VISION_DATA])
+
+
+APPLICATION = web.Application([
     (r"/", EchoWebSocket),
 ])
 
 if __name__ == "__main__":
-    application.listen(3000)
-    tornado.ioloop.IOLoop.instance().start()
+    APPLICATION.listen(3000)
+    ioloop.IOLoop.instance().start()
