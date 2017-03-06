@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import sys
 from flask import Flask, jsonify, make_response
 from api.gotoposition import gotoposition

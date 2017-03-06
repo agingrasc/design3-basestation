@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import json
 import base64
 import cv2

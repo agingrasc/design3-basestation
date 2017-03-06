@@ -241,23 +241,6 @@ define('services/vision',["exports"], function (exports) {
         return Vision;
     }();
 });
-define('components/debug/debug',["exports"], function (exports) {
-  "use strict";
-
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-
-  var Debug = exports.Debug = function Debug() {
-    _classCallCheck(this, Debug);
-  };
-});
 define('components/competition/competition',["exports"], function (exports) {
   "use strict";
 
@@ -273,6 +256,23 @@ define('components/competition/competition',["exports"], function (exports) {
 
   var Competition = exports.Competition = function Competition() {
     _classCallCheck(this, Competition);
+  };
+});
+define('components/debug/debug',["exports"], function (exports) {
+  "use strict";
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var Debug = exports.Debug = function Debug() {
+    _classCallCheck(this, Debug);
   };
 });
 define('components/go-to-position/go-to-position',['exports', '../../http/base-station-request', 'aurelia-framework'], function (exports, _baseStationRequest, _aureliaFramework) {
