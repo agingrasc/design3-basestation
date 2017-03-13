@@ -1,4 +1,9 @@
 import {
+    inject
+}
+from 'aurelia-framework';
+
+import {
     BaseStationRequest
 } from '../../http/base-station-request';
 import {
@@ -6,13 +11,17 @@ import {
     bindingMode
 } from 'aurelia-framework';
 
+import {
+    Timer
+} from '../../services/timer';
+@inject(Timer)
 export class GoToPosition {
 
     @bindable xPosition = 0;
     @bindable yPosition = 0;
 
-    constructor(vision) {
-        this.vision = vision;
+    constructor(timer) {
+        this.timer = timer;
         this.httpClient = new BaseStationRequest();
     }
 
@@ -26,5 +35,6 @@ export class GoToPosition {
         };
         var data = JSON.stringify(payload);
         this.httpClient.post(data, this.path);
+        this.timer.startTimer();
     }
 }

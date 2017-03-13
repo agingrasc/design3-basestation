@@ -7,9 +7,14 @@ import {
     Vision
 } from '../../services/vision';
 
-@inject(Vision)
+import {
+    Timer
+} from '../../services/timer';
+
+@inject(Vision, Timer)
 export class Informations {
-    constructor(vision) {
+    constructor(vision, timer) {
+        this.timer = timer;
         this.vision = vision;
         this.informations = {};
         this.informations.obstacles = [];
