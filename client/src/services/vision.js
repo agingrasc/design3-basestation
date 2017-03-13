@@ -18,12 +18,18 @@ export class Vision {
         var self = this;
         ws.onmessage = function(evt) {
             var data = JSON.parse(evt.data);
-            self.imageView.imagePath = "data:image/png;base64," + data.image.data;
+            if (data.image.origin.x != "") {
+                self.world_information.origin = data.image.origin;
+                self.world_information.ratio = data.image.ratio;
+            }
+
+            window.requestAnimationFrame(() => {
+                self.imageView.imagePath = "data:image/png;base64," + data.image.data;
+            });
+
             self.informations.obstacles = data.world.obstacles;
             self.informations.robot = data.world.robot;
-            self.world_information.origin = data.image.origin;
             self.world_information.world_dimension = data.image.sent_dimension;
-            self.world_information.ratio = data.image.ratio;
         };
     }
 

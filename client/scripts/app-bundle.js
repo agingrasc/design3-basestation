@@ -211,12 +211,18 @@ define('services/vision',["exports"], function (exports) {
             var self = this;
             ws.onmessage = function (evt) {
                 var data = JSON.parse(evt.data);
-                self.imageView.imagePath = "data:image/png;base64," + data.image.data;
+                if (data.image.origin.x != "") {
+                    self.world_information.origin = data.image.origin;
+                    self.world_information.ratio = data.image.ratio;
+                }
+
+                window.requestAnimationFrame(function () {
+                    self.imageView.imagePath = "data:image/png;base64," + data.image.data;
+                });
+
                 self.informations.obstacles = data.world.obstacles;
                 self.informations.robot = data.world.robot;
-                self.world_information.origin = data.image.origin;
                 self.world_information.world_dimension = data.image.sent_dimension;
-                self.world_information.ratio = data.image.ratio;
             };
         };
 
@@ -536,10 +542,12 @@ define('components/world-vision/world-vision-debug',['exports', 'aurelia-framewo
         };
 
         WorldVisionDebug.prototype.adjustPositions = function adjustPositions(mousePos) {
-            console.log(this.world_information.origin);
-            console.log(this.world_information.ratio);
-            this.x_position = Math.floor((mousePos.x - this.world_information.origin.x) / this.world_information.ratio);
-            this.y_position = Math.floor((mousePos.y - this.world_information.origin.y) / this.world_information.ratio);
+            var world_origin_x = parseFloat(this.world_information.origin.x);
+            var world_origin_y = parseFloat(this.world_information.origin.y);
+            var world_image_ratio = parseFloat(this.world_information.ratio);
+
+            this.x_position = Math.floor((mousePos.x - world_origin_x) / world_image_ratio);
+            this.y_position = Math.floor(-1 * (mousePos.y - world_origin_y) / world_image_ratio);
         };
 
         return WorldVisionDebug;
