@@ -11,6 +11,7 @@ export class WorldVisionDebug {
 
     constructor(vision) {
         this.vision = vision;
+
         this.canvasId = "monCanvas";
 
         this.visionProperties = {};
