@@ -195,6 +195,9 @@ define('services/vision',["exports"], function (exports) {
 
             this.informations = undefined;
             this.imageView = undefined;
+            this.world_information = undefined;
+            this.origin = undefined;
+            this.ratio = undefined;
         }
 
         Vision.prototype.start = function start() {
@@ -211,6 +214,9 @@ define('services/vision',["exports"], function (exports) {
                 self.imageView.imagePath = "data:image/png;base64," + data.image.data;
                 self.informations.obstacles = data.world.obstacles;
                 self.informations.robot = data.world.robot;
+                self.world_information.origin = data.image.origin;
+                self.world_information.world_dimension = data.image.sent_dimension;
+                self.world_information.ratio = data.image.ratio;
             };
         };
 
@@ -232,6 +238,10 @@ define('services/vision',["exports"], function (exports) {
         Vision.prototype.registerInformations = function registerInformations(informations) {
             this.informations = informations;
             this.checkReadyToStart();
+        };
+
+        Vision.prototype.registerGotoPosition = function registerGotoPosition(world_information) {
+            this.world_information = world_information;
         };
 
         return Vision;
@@ -340,6 +350,9 @@ define('components/go-to-position/go-to-position',['exports', 'aurelia-framework
 
             this.timer = timer;
             this.httpClient = new _baseStationRequest.BaseStationRequest();
+            this.origin = undefined;
+            this.world_dimension = undefined;
+            this.ratio = undefined;
         }
 
         GoToPosition.prototype.execute = function execute() {
@@ -490,6 +503,8 @@ define('components/world-vision/world-vision-debug',['exports', 'aurelia-framewo
 
             this.chosen_x_position = 0;
             this.chosen_y_position = 0;
+
+            this.world_information = {};
         }
 
         WorldVisionDebug.prototype.attached = function attached() {
@@ -500,8 +515,7 @@ define('components/world-vision/world-vision-debug',['exports', 'aurelia-framewo
 
             canvas.addEventListener('mousemove', function (evt) {
                 var mousePos = self.getMousePos(canvas, evt);
-                self.x_position = Math.floor(mousePos.x);
-                self.y_position = Math.floor(mousePos.y);
+                self.adjustPositions(mousePos);
             }, false);
 
             canvas.addEventListener('click', function (evt) {
@@ -510,6 +524,7 @@ define('components/world-vision/world-vision-debug',['exports', 'aurelia-framewo
             }, false);
 
             this.vision.registerImageView(this.visionProperties);
+            this.vision.registerGotoPosition(this.world_information);
         };
 
         WorldVisionDebug.prototype.getMousePos = function getMousePos(canvas, evt) {
@@ -518,6 +533,13 @@ define('components/world-vision/world-vision-debug',['exports', 'aurelia-framewo
                 x: evt.clientX - rect.left,
                 y: evt.clientY - rect.top
             };
+        };
+
+        WorldVisionDebug.prototype.adjustPositions = function adjustPositions(mousePos) {
+            console.log(this.world_information.origin);
+            console.log(this.world_information.ratio);
+            this.x_position = Math.floor((mousePos.x - this.world_information.origin.x) / this.world_information.ratio);
+            this.y_position = Math.floor((mousePos.y - this.world_information.origin.y) / this.world_information.ratio);
         };
 
         return WorldVisionDebug;

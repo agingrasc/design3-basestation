@@ -22,6 +22,8 @@ export class WorldVisionDebug {
 
         this.chosen_x_position = 0;
         this.chosen_y_position = 0;
+
+        this.world_information = {};
     }
 
     attached() {
@@ -32,8 +34,7 @@ export class WorldVisionDebug {
 
         canvas.addEventListener('mousemove', function(evt) {
             var mousePos = self.getMousePos(canvas, evt);
-            self.x_position = Math.floor(mousePos.x);
-            self.y_position = Math.floor(mousePos.y);
+            self.adjustPositions(mousePos);
         }, false);
 
         canvas.addEventListener('click', function(evt) {
@@ -42,6 +43,7 @@ export class WorldVisionDebug {
         }, false);
 
         this.vision.registerImageView(this.visionProperties);
+        this.vision.registerGotoPosition(this.world_information);
     }
 
     getMousePos(canvas, evt) {
@@ -50,5 +52,12 @@ export class WorldVisionDebug {
             x: evt.clientX - rect.left,
             y: evt.clientY - rect.top
         };
+    }
+
+    adjustPositions(mousePos) {
+        console.log(this.world_information.origin);
+        console.log(this.world_information.ratio);
+        this.x_position = Math.floor((mousePos.x - this.world_information.origin.x) / this.world_information.ratio);
+        this.y_position = Math.floor((mousePos.y - this.world_information.origin.y) / this.world_information.ratio);
     }
 }

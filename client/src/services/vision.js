@@ -2,6 +2,9 @@ export class Vision {
     constructor() {
         this.informations = undefined;
         this.imageView = undefined;
+        this.world_information = undefined;
+        this.origin = undefined;
+        this.ratio = undefined;
     }
 
     start() {
@@ -18,6 +21,9 @@ export class Vision {
             self.imageView.imagePath = "data:image/png;base64," + data.image.data;
             self.informations.obstacles = data.world.obstacles;
             self.informations.robot = data.world.robot;
+            self.world_information.origin = data.image.origin;
+            self.world_information.world_dimension = data.image.sent_dimension;
+            self.world_information.ratio = data.image.ratio;
         };
     }
 
@@ -39,5 +45,9 @@ export class Vision {
     registerInformations(informations) {
         this.informations = informations;
         this.checkReadyToStart();
+    }
+
+    registerGotoPosition(world_information) {
+        this.world_information = world_information;
     }
 }

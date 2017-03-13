@@ -27,6 +27,12 @@ def build_fake_vision_info():
     data["image"]["original_dimension"]["width"] = "1280"
     data["image"]["original_dimension"]["lenght"] = "800"
 
+    data["image"]["origin"] = {}
+    data["image"]["origin"]["x"] = "4"
+    data["image"]["origin"]["y"] = "34"
+
+    data["image"]["ratio"] = "3"
+
     data["image"]["sent_dimension"] = {}
     data["image"]["sent_dimension"]["width"] = "640"
     data["image"]["sent_dimension"]["lenght"] = "400"

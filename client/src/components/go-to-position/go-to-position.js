@@ -23,6 +23,9 @@ export class GoToPosition {
     constructor(timer) {
         this.timer = timer;
         this.httpClient = new BaseStationRequest();
+        this.origin = undefined;
+        this.world_dimension = undefined;
+        this.ratio = undefined;
     }
 
     execute() {
