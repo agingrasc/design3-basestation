@@ -2,10 +2,10 @@
     <require from="../go-to-position/go-to-position"></require>
         <div class="col s6 container">
            <div class="row">
-                <div class="no-right-padding">
+                <div class="side-padding">
                     <div class="card">
                         <div class="card-content center-align">
-                            <h3>World Vision</h3>
+                            <h4>World Vision</h4>
                         <div>
                             <div class="card-image">
                                 <canvas id="${canvasId}" width="640px" height="400px" style="background: url(${visionProperties.imagePath})"></canvas>
@@ -26,6 +26,7 @@
                                     <label class="text-number">${chosen_y_position}</label>
                                 </span>
                             </div>
+                            <div class="padding-main"></div>
                             <div class="card-action">
                                 <go-to-position x-position="${chosen_x_position}" y-position="${chosen_y_position}"></go-to-position>
                             </div>
