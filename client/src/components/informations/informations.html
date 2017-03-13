@@ -10,24 +10,24 @@
                                 <h5>Obstacles</h5>
                                 <div class="equidistant" repeat.for="obstacle of informations.obstacles">
                                     <label>x :</label>
-                                    <label class="text-number">${obstacle.vision_position.x}</label>
+                                    <label class="text-number">${obstacle.position.x}</label>
                                     <label>y :</label>
-                                    <label class="text-number">${obstacle.vision_position.y}</label>
+                                    <label class="text-number">${obstacle.position.y}</label>
                                     <label>Tag :</label>
-                                    <label class="text-number">${obstacle.vision_obstacle_tag}</label>
+                                    <label class="text-number">${obstacle.tag}</label>
                                     <label>Width :</label>
-                                    <label class="text-number">${obstacle.vision_obstacle_width}</label>
+                                    <label class="text-number">${obstacle.dimension.width}</label>
                                 </div>
                                 <div class="card-action">
                                 </div>
                                 <h5>Robot</h5>
                                 <div class="equidistant">
                                     <label>x :</label>
-                                    <label class="text-number">${informations.robot.vision_position.x}</label>
+                                    <label class="text-number">${informations.robot.position.x}</label>
                                     <label>y :</label>
-                                    <label class="text-number">${informations.robot.vision_position.y}</label>
+                                    <label class="text-number">${informations.robot.position.y}</label>
                                     <label>Angle :</label>
-                                    <label class="text-number">${informations.robot.vision_robot_angle}</label>
+                                    <label class="text-number">${informations.robot.orientation.value}</label>
                                 </div>
                                 <div class="card-action">
                                 </div>
