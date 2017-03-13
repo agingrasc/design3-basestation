@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import json
 import visionformat
 from tornado import ioloop
