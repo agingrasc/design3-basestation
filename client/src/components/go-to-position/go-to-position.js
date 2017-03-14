@@ -14,28 +14,35 @@ import {
 import {
     Timer
 } from '../../services/timer';
+
+import {
+    Vision
+} from '../../services/vision';
 @inject(Timer)
+@inject(Vision)
 export class GoToPosition {
 
     @bindable xPosition = 0;
     @bindable yPosition = 0;
 
-    constructor(timer) {
+    constructor(timer, vision) {
         this.timer = timer;
         this.httpClient = new BaseStationRequest();
-        this.origin = undefined;
-        this.world_dimension = undefined;
-        this.ratio = undefined;
+        this.vision = vision;
+        this.info = {};
+        this.vision.registerGoto(this.info);
     }
 
     execute() {
         console.log(this.xPosition);
         console.log(this.yPosition);
         this.path = "/go-to-position/";
-        var payload = {
+        var dimension = {
             x: this.xPosition,
             y: this.yPosition
         };
+        var payload = this.info
+        payload.dimension = dimension;
         var data = JSON.stringify(payload);
         this.httpClient.post(data, this.path);
         this.timer.startTimer();

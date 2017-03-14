@@ -5,6 +5,7 @@ export class Vision {
         this.world_information = undefined;
         this.origin = undefined;
         this.ratio = undefined;
+        this.goto = undefined;
     }
 
     start() {
@@ -29,6 +30,11 @@ export class Vision {
 
             self.informations.obstacles = data.world.obstacles;
             self.informations.robot = data.world.robot;
+            self.goto = data.world.robot;
+            self.goto["width"] = data.world.dimension.width;
+            self.goto["lenght"] = data.world.dimension.lenght;
+            self.goto["robot"]["position"]["theta"] = 1;
+            self.goto["obstacles"] = data.world.obstacles;
             self.world_information.world_dimension = data.image.sent_dimension;
         };
     }
@@ -47,7 +53,6 @@ export class Vision {
         this.checkReadyToStart();
     }
 
-
     registerInformations(informations) {
         this.informations = informations;
         this.checkReadyToStart();
@@ -55,5 +60,9 @@ export class Vision {
 
     registerGotoPosition(world_information) {
         this.world_information = world_information;
+    }
+
+    registerGoto(goto) {
+        this.goto = goto;
     }
 }
