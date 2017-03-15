@@ -198,6 +198,7 @@ define('services/vision',["exports"], function (exports) {
             this.world_information = undefined;
             this.origin = undefined;
             this.ratio = undefined;
+            this.goto = undefined;
         }
 
         Vision.prototype.start = function start() {
@@ -211,9 +212,13 @@ define('services/vision',["exports"], function (exports) {
             var self = this;
             ws.onmessage = function (evt) {
                 var data = JSON.parse(evt.data);
-                if (data.image.origin.x != "") {
+
+                self.goto = data.world.robot;
+                if (data.image.origin.x !== "") {
                     self.world_information.origin = data.image.origin;
                     self.world_information.ratio = data.image.ratio;
+                    self.goto["width"] = data.world.base_table.dimension.width;
+                    self.goto["length"] = data.world.base_table.dimension.length;
                 }
 
                 window.requestAnimationFrame(function () {
@@ -222,6 +227,12 @@ define('services/vision',["exports"], function (exports) {
 
                 self.informations.obstacles = data.world.obstacles;
                 self.informations.robot = data.world.robot;
+                self.goto['robot'] = {
+                    "position": {
+                        "theta": 1
+                    }
+                };
+                self.goto["obstacles"] = data.world.obstacles;
                 self.world_information.world_dimension = data.image.sent_dimension;
             };
         };
@@ -231,6 +242,9 @@ define('services/vision',["exports"], function (exports) {
                 return;
             }
             if (this.informations === undefined) {
+                return;
+            }
+            if (this.goto === undefined) {
                 return;
             }
             this.start();
@@ -248,6 +262,11 @@ define('services/vision',["exports"], function (exports) {
 
         Vision.prototype.registerGotoPosition = function registerGotoPosition(world_information) {
             this.world_information = world_information;
+        };
+
+        Vision.prototype.registerGoto = function registerGoto(goto) {
+            this.goto = goto;
+            this.checkReadyToStart();
         };
 
         return Vision;
@@ -287,7 +306,7 @@ define('components/debug/debug',["exports"], function (exports) {
     _classCallCheck(this, Debug);
   };
 });
-define('components/go-to-position/go-to-position',['exports', 'aurelia-framework', '../../http/base-station-request', '../../services/timer'], function (exports, _aureliaFramework, _baseStationRequest, _timer) {
+define('components/go-to-position/go-to-position',['exports', 'aurelia-framework', '../../http/base-station-request', '../../services/timer', '../../services/vision'], function (exports, _aureliaFramework, _baseStationRequest, _timer, _vision) {
     'use strict';
 
     Object.defineProperty(exports, "__esModule", {
@@ -346,8 +365,8 @@ define('components/go-to-position/go-to-position',['exports', 'aurelia-framework
 
     var _dec, _class, _desc, _value, _class2, _descriptor, _descriptor2;
 
-    var GoToPosition = exports.GoToPosition = (_dec = (0, _aureliaFramework.inject)(_timer.Timer), _dec(_class = (_class2 = function () {
-        function GoToPosition(timer) {
+    var GoToPosition = exports.GoToPosition = (_dec = (0, _aureliaFramework.inject)(_timer.Timer, _vision.Vision), _dec(_class = (_class2 = function () {
+        function GoToPosition(timer, vision) {
             _classCallCheck(this, GoToPosition);
 
             _initDefineProp(this, 'xPosition', _descriptor, this);
@@ -356,19 +375,21 @@ define('components/go-to-position/go-to-position',['exports', 'aurelia-framework
 
             this.timer = timer;
             this.httpClient = new _baseStationRequest.BaseStationRequest();
-            this.origin = undefined;
-            this.world_dimension = undefined;
-            this.ratio = undefined;
+            this.vision = vision;
+            this.info = {};
+            this.vision.registerGoto(this.info);
         }
 
         GoToPosition.prototype.execute = function execute() {
             console.log(this.xPosition);
             console.log(this.yPosition);
             this.path = "/go-to-position/";
-            var payload = {
+            var dimension = {
                 x: this.xPosition,
                 y: this.yPosition
             };
+            var payload = this.info;
+            payload.dimension = dimension;
             var data = JSON.stringify(payload);
             this.httpClient.post(data, this.path);
             this.timer.startTimer();
@@ -499,10 +520,10 @@ define('components/world-vision/world-vision-debug',['exports', 'aurelia-framewo
 
             this.vision = vision;
 
-            this.canvasId = "monCanvas";
+            this.canvasId = 'monCanvas';
 
             this.visionProperties = {};
-            this.visionProperties.imagePath = "./src/components/world-vision/image14.jpg";
+            this.visionProperties.imagePath = './src/components/world-vision/image14.jpg';
 
             this.x_position = 0;
             this.y_position = 0;
@@ -514,19 +535,18 @@ define('components/world-vision/world-vision-debug',['exports', 'aurelia-framewo
         }
 
         WorldVisionDebug.prototype.attached = function attached() {
-            var canvas = document.getElementById(this.canvasId);
-            var context = canvas.getContext('2d');
+            var _this = this;
 
-            var self = this;
+            var canvas = document.getElementById(this.canvasId);
 
             canvas.addEventListener('mousemove', function (evt) {
-                var mousePos = self.getMousePos(canvas, evt);
-                self.adjustPositions(mousePos);
+                var mousePos = _this.getMousePos(canvas, evt);
+                _this.adjustPositions(mousePos);
             }, false);
 
             canvas.addEventListener('click', function (evt) {
-                self.chosen_x_position = self.x_position;
-                self.chosen_y_position = self.y_position;
+                _this.chosen_x_position = _this.x_position;
+                _this.chosen_y_position = _this.y_position;
             }, false);
 
             this.vision.registerImageView(this.visionProperties);

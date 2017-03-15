@@ -19,9 +19,13 @@ export class Vision {
         var self = this;
         ws.onmessage = function(evt) {
             var data = JSON.parse(evt.data);
-            if (data.image.origin.x != "") {
+
+            self.goto = data.world.robot;
+            if (data.image.origin.x !== "") {
                 self.world_information.origin = data.image.origin;
                 self.world_information.ratio = data.image.ratio;
+                self.goto["width"] = data.world.base_table.dimension.width;
+                self.goto["length"] = data.world.base_table.dimension.length;
             }
 
             window.requestAnimationFrame(() => {
@@ -30,10 +34,11 @@ export class Vision {
 
             self.informations.obstacles = data.world.obstacles;
             self.informations.robot = data.world.robot;
-            self.goto = data.world.robot;
-            self.goto["width"] = data.world.dimension.width;
-            self.goto["lenght"] = data.world.dimension.lenght;
-            self.goto["robot"]["position"]["theta"] = 1;
+            self.goto['robot'] = {
+                "position": {
+                    "theta": 1
+                }
+            };
             self.goto["obstacles"] = data.world.obstacles;
             self.world_information.world_dimension = data.image.sent_dimension;
         };
@@ -44,6 +49,9 @@ export class Vision {
             return;
         }
         if (this.informations === undefined) {
+            return;
+        }
+        if (this.goto === undefined) {
             return;
         }
         this.start();
@@ -64,5 +72,6 @@ export class Vision {
 
     registerGoto(goto) {
         this.goto = goto;
+        this.checkReadyToStart();
     }
 }

@@ -18,8 +18,8 @@ import {
 import {
     Vision
 } from '../../services/vision';
-@inject(Timer)
-@inject(Vision)
+
+@inject(Timer, Vision)
 export class GoToPosition {
 
     @bindable xPosition = 0;
