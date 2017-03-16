@@ -209,16 +209,16 @@ define('services/vision',["exports"], function (exports) {
             ws.onopen = function () {
                 ws.send(value);
             };
+
             var self = this;
             ws.onmessage = function (evt) {
                 var data = JSON.parse(evt.data);
 
-                self.goto = data.world.robot;
                 if (data.image.origin.x !== "") {
                     self.world_information.origin = data.image.origin;
                     self.world_information.ratio = data.image.ratio;
-                    self.goto["width"] = data.world.base_table.dimension.width;
-                    self.goto["length"] = data.world.base_table.dimension.length;
+                    self.goto.width = data.world.base_table.dimension.width;
+                    self.goto.length = data.world.base_table.dimension.height;
                 }
 
                 window.requestAnimationFrame(function () {
@@ -226,13 +226,19 @@ define('services/vision',["exports"], function (exports) {
                 });
 
                 self.informations.obstacles = data.world.obstacles;
-                self.informations.robot = data.world.robot;
-                self.goto['robot'] = {
+
+                var robot = data.world.robot;
+                self.informations.robot = robot;
+                self.goto.robot = {
                     "position": {
-                        "theta": 1
+                        "x": robot.position.x,
+                        "y": robot.position.y,
+                        "theta": 0
                     }
                 };
-                self.goto["obstacles"] = data.world.obstacles;
+
+                self.goto.obstacles = [];
+
                 self.world_information.world_dimension = data.image.sent_dimension;
             };
         };
@@ -265,6 +271,7 @@ define('services/vision',["exports"], function (exports) {
         };
 
         Vision.prototype.registerGoto = function registerGoto(goto) {
+            console.log(goto);
             this.goto = goto;
             this.checkReadyToStart();
         };
@@ -381,17 +388,19 @@ define('components/go-to-position/go-to-position',['exports', 'aurelia-framework
         }
 
         GoToPosition.prototype.execute = function execute() {
-            console.log(this.xPosition);
-            console.log(this.yPosition);
             this.path = "/go-to-position/";
-            var dimension = {
+
+            var payload = this.info;
+            payload.destination = {
                 x: this.xPosition,
                 y: this.yPosition
             };
-            var payload = this.info;
-            payload.dimension = dimension;
+
+            console.log(payload);
+
             var data = JSON.stringify(payload);
             this.httpClient.post(data, this.path);
+
             this.timer.startTimer();
         };
 
@@ -566,8 +575,8 @@ define('components/world-vision/world-vision-debug',['exports', 'aurelia-framewo
             var world_origin_y = parseFloat(this.world_information.origin.y);
             var world_image_ratio = parseFloat(this.world_information.ratio);
 
-            this.x_position = Math.floor((mousePos.x - world_origin_x) / world_image_ratio);
-            this.y_position = Math.floor(-1 * (mousePos.y - world_origin_y) / world_image_ratio);
+            this.x_position = Math.floor((mousePos.x - world_origin_x) / world_image_ratio * 10);
+            this.y_position = Math.floor((mousePos.y - world_origin_y) / world_image_ratio * 10);
         };
 
         return WorldVisionDebug;
@@ -581,5 +590,5 @@ define('text!components/informations/informations.html', ['module'], function(mo
 define('text!components/navbar/navbar.html', ['module'], function(module) { module.exports = "<template><nav><div class=\"nav-wrapper color1\"><img width=\"55px\" height=\"55px\" src=\"./img/robot.png\"><a href=\"#\" class=\"brand-logo center\">Leonard</a><ul id=\"nav-mobile\" class=\"right hide-on-med-and-down\"><li><a href=\"#/competition\">Competition</a></li><li><a href=\"#/debug\">Debug</a></li></ul></div></nav></template>"; });
 define('text!components/stat/stat.html', ['module'], function(module) { module.exports = ""; });
 define('text!components/world-vision/world-vision-competition.html', ['module'], function(module) { module.exports = "<template><div class=\"container\"><div class=\"row\"><div class=\"col s12 m12\"><div class=\"card\"><div class=\"card-content center-align\"><h3>World Vision</h3><div><div class=\"card-image\"><canvas id=\"${canvasId}\" width=\"640px\" height=\"480px\" style=\"background:url(${imagePath})\"></canvas></div><div class=\"card-content\"><span class=\"equidistant float-left\"><label>Robot position</label><label>x :</label><label class=\"text-number\">${x_position}</label><label>y :</label><label class=\"text-number\">${y_position}</label></span><span class=\"equidistant float-right\"></span></div><div class=\"card-action\"><button class=\"color2 waves-effect waves-light btn\" click.trigger=\"start()\">Start</button></div></div></div></div></div></div></div></template>"; });
-define('text!components/world-vision/world-vision-debug.html', ['module'], function(module) { module.exports = "<template><require from=\"../go-to-position/go-to-position\"></require><div class=\"col s6 container\"><div class=\"row\"><div class=\"side-padding\"><div class=\"card\"><div class=\"card-content center-align\"><h4>World Vision</h4><div><div class=\"card-image\"><canvas id=\"${canvasId}\" width=\"640px\" height=\"400px\" style=\"background:url(${visionProperties.imagePath})\"></canvas></div><div class=\"card-content\"><span class=\"equidistant float-left\"><label>Mouse position</label><label>x :</label><label class=\"text-number\">${x_position}</label><label>y :</label><label class=\"text-number\">${y_position}</label></span><span class=\"equidistant float-right\"><label>Chosen position</label><label>x :</label><label class=\"text-number\">${chosen_x_position}</label><label>y :</label><label class=\"text-number\">${chosen_y_position}</label></span></div><div class=\"padding-main\"></div><div class=\"card-action\"><go-to-position x-position=\"${chosen_x_position}\" y-position=\"${chosen_y_position}\"></go-to-position></div></div></div></div></div></div></div></template>"; });
+define('text!components/world-vision/world-vision-debug.html', ['module'], function(module) { module.exports = "<template><require from=\"../go-to-position/go-to-position\"></require><style>canvas{cursor:crosshair}</style><div class=\"col s6 container\"><div class=\"row\"><div class=\"side-padding\"><div class=\"card\"><div class=\"card-content center-align\"><h4>World Vision</h4><div><div class=\"card-image\"><canvas id=\"${canvasId}\" width=\"640px\" height=\"400px\" style=\"background:url(${visionProperties.imagePath})\"></canvas></div><div class=\"card-content\"><span class=\"equidistant float-left\"><label>Mouse position</label><label>x :</label><label class=\"text-number\">${x_position}</label><label>y :</label><label class=\"text-number\">${y_position}</label></span><span class=\"equidistant float-right\"><label>Chosen position</label><label>x :</label><label class=\"text-number\">${chosen_x_position}</label><label>y :</label><label class=\"text-number\">${chosen_y_position}</label></span></div><div class=\"padding-main\"></div><div class=\"card-action\"><go-to-position x-position=\"${chosen_x_position}\" y-position=\"${chosen_y_position}\"></go-to-position></div></div></div></div></div></div></div></template>"; });
 //# sourceMappingURL=app-bundle.js.map

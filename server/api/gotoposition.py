@@ -1,7 +1,9 @@
+import datetime
+
 import requests as req
 from flask import jsonify, make_response, request, Blueprint
 
-ROBOT_API_URL = "http://localhost:5000/go-to-position"
+ROBOT_API_URL = "http://192.168.0.27:8080/go-to-position"
 
 gotoposition = Blueprint('goto_position', __name__)
 

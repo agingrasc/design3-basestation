@@ -34,17 +34,20 @@ export class GoToPosition {
     }
 
     execute() {
-        console.log(this.xPosition);
-        console.log(this.yPosition);
         this.path = "/go-to-position/";
-        var dimension = {
+
+        var payload = this.info;
+        payload.destination = {
             x: this.xPosition,
             y: this.yPosition
         };
-        var payload = this.info
-        payload.dimension = dimension;
+
+        console.log(payload);
+
+
         var data = JSON.stringify(payload);
         this.httpClient.post(data, this.path);
+
         this.timer.startTimer();
     }
 }

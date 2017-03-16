@@ -16,16 +16,17 @@ export class Vision {
         ws.onopen = function() {
             ws.send(value);
         };
+
         var self = this;
         ws.onmessage = function(evt) {
             var data = JSON.parse(evt.data);
 
-            self.goto = data.world.robot;
+
             if (data.image.origin.x !== "") {
                 self.world_information.origin = data.image.origin;
                 self.world_information.ratio = data.image.ratio;
-                self.goto["width"] = data.world.base_table.dimension.width;
-                self.goto["length"] = data.world.base_table.dimension.length;
+                self.goto.width = data.world.base_table.dimension.width;
+                self.goto.length = data.world.base_table.dimension.height;
             }
 
             window.requestAnimationFrame(() => {
@@ -33,13 +34,22 @@ export class Vision {
             });
 
             self.informations.obstacles = data.world.obstacles;
-            self.informations.robot = data.world.robot;
-            self.goto['robot'] = {
+
+            // Update robot position
+            var robot = data.world.robot;
+            self.informations.robot = robot;
+            self.goto.robot = {
                 "position": {
-                    "theta": 1
+                    "x": robot.position.x,
+                    "y": robot.position.y,
+                    "theta": 0
                 }
             };
-            self.goto["obstacles"] = data.world.obstacles;
+
+            // Update world obstacles
+            self.goto.obstacles = [];
+
+            // Update world dimension
             self.world_information.world_dimension = data.image.sent_dimension;
         };
     }
@@ -71,6 +81,7 @@ export class Vision {
     }
 
     registerGoto(goto) {
+        console.log(goto);
         this.goto = goto;
         this.checkReadyToStart();
     }

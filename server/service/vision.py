@@ -33,6 +33,8 @@ class VisionWebSocketHandler(websocket.WebSocketHandler):
         if visionformat.REGISTER_VISION_DATA == message[visionformat.HEADERS]:
             register_vision_data(self)
         if message[visionformat.HEADERS] == "pull_robot_position":
+            print("Asking robot position")
+            print(ROBOT_POSITION)
             self.write_message(ROBOT_POSITION)
 
     def on_close(self):
@@ -46,7 +48,8 @@ class VisionWebSocketHandler(websocket.WebSocketHandler):
 
 
 def update_robot_position(message_data):
-    ROBOT_POSITION = message_data["world"]["robot"]["position"]
+    ROBOT_POSITION['x'] = message_data["world"]["robot"]["position"]['x']
+    ROBOT_POSITION['y'] = message_data["world"]["robot"]["position"]['y']
 
 
 def update_global_data(message_data):
