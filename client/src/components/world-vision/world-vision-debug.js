@@ -10,6 +10,7 @@ import {
 export class WorldVisionDebug {
     constructor(vision) {
         this.vision = vision;
+        this.monPixel = "800"
 
         this.canvasId = 'monCanvas';
 

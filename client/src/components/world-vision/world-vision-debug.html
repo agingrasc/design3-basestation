@@ -1,16 +1,16 @@
 <template>
     <require from="../go-to-position/go-to-position"></require>
-        <style>
-            canvas {
-                cursor: crosshair
-            }
-        </style>
-        <div class="col s6 container">
-           <div class="row">
-                <div class="side-padding">
-                    <div class="card">
-                        <div class="card-content center-align">
-                            <h4>World Vision</h4>
+    <style>
+        canvas {
+            cursor: crosshair
+        }
+    </style>
+    <div class="col s6 container">
+       <div class="row">
+            <div class="side-padding">
+                <div class="card">
+                    <div class="card-content center-align component">
+                        <h4>World Vision</h4>
                         <div>
                             <div class="card-image">
                                 <canvas id="${canvasId}" width="640px" height="400px" style="background: url(${visionProperties.imagePath})"></canvas>
@@ -40,4 +40,5 @@
                 </div>
             </div>
         </div>
+    </div>
 </template>
