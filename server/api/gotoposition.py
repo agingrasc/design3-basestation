@@ -1,5 +1,6 @@
 import datetime
 
+import numpy as np
 import requests as req
 from flask import jsonify, make_response, request, Blueprint
 
@@ -10,6 +11,10 @@ gotoposition = Blueprint('goto_position', __name__)
 
 @gotoposition.route("/go-to-position/", methods=['POST'])
 def goto_position():
-    req.post(url=ROBOT_API_URL, json=request.json)
-    send_response = make_response(jsonify(request.json), 200)
+    data = request.json
+
+    data['destination']['theta'] = str(np.deg2rad(float(data['destination']['theta'])))
+
+    req.post(url=ROBOT_API_URL, json=data)
+    send_response = make_response(jsonify(data), 200)
     return send_response

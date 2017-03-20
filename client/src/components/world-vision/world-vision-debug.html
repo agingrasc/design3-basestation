@@ -30,10 +30,14 @@
                                     <label>y :</label>
                                     <label class="text-number">${chosen_y_position}</label>
                                 </span>
+                                <div>
+                                    <label>Theta :</label>
+                                    <input value.bind="theta" placeholder="theta">
+                                </div>
                             </div>
                             <div class="padding-main"></div>
                             <div class="card-action">
-                                <go-to-position x-position="${chosen_x_position}" y-position="${chosen_y_position}"></go-to-position>
+                                <go-to-position x-position="${chosen_x_position}" y-position="${chosen_y_position}" theta="${theta}"></go-to-position>
                             </div>
                         </div>
                     </div>

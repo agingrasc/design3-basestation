@@ -24,6 +24,7 @@ export class GoToPosition {
 
     @bindable xPosition = 0;
     @bindable yPosition = 0;
+    @bindable theta = 0
 
     constructor(timer, vision) {
         this.timer = timer;
@@ -38,12 +39,12 @@ export class GoToPosition {
 
         var payload = this.info;
         payload.destination = {
-            x: this.xPosition,
-            y: this.yPosition
+            "x": this.xPosition,
+            "y": this.yPosition,
+            "theta": this.theta
         };
 
         console.log(payload);
-
 
         var data = JSON.stringify(payload);
         this.httpClient.post(data, this.path);

@@ -370,7 +370,7 @@ define('components/go-to-position/go-to-position',['exports', 'aurelia-framework
         throw new Error('Decorating class property failed. Please ensure that transform-class-properties is enabled.');
     }
 
-    var _dec, _class, _desc, _value, _class2, _descriptor, _descriptor2;
+    var _dec, _class, _desc, _value, _class2, _descriptor, _descriptor2, _descriptor3;
 
     var GoToPosition = exports.GoToPosition = (_dec = (0, _aureliaFramework.inject)(_timer.Timer, _vision.Vision), _dec(_class = (_class2 = function () {
         function GoToPosition(timer, vision) {
@@ -379,6 +379,8 @@ define('components/go-to-position/go-to-position',['exports', 'aurelia-framework
             _initDefineProp(this, 'xPosition', _descriptor, this);
 
             _initDefineProp(this, 'yPosition', _descriptor2, this);
+
+            _initDefineProp(this, 'theta', _descriptor3, this);
 
             this.timer = timer;
             this.httpClient = new _baseStationRequest.BaseStationRequest();
@@ -392,8 +394,9 @@ define('components/go-to-position/go-to-position',['exports', 'aurelia-framework
 
             var payload = this.info;
             payload.destination = {
-                x: this.xPosition,
-                y: this.yPosition
+                "x": this.xPosition,
+                "y": this.yPosition,
+                "theta": this.theta
             };
 
             console.log(payload);
@@ -411,6 +414,11 @@ define('components/go-to-position/go-to-position',['exports', 'aurelia-framework
             return 0;
         }
     }), _descriptor2 = _applyDecoratedDescriptor(_class2.prototype, 'yPosition', [_aureliaFramework.bindable], {
+        enumerable: true,
+        initializer: function initializer() {
+            return 0;
+        }
+    }), _descriptor3 = _applyDecoratedDescriptor(_class2.prototype, 'theta', [_aureliaFramework.bindable], {
         enumerable: true,
         initializer: function initializer() {
             return 0;
@@ -591,9 +599,5 @@ define('text!components/informations/informations.html', ['module'], function(mo
 define('text!components/navbar/navbar.html', ['module'], function(module) { module.exports = "<template><nav><div class=\"nav-wrapper color1\"><img width=\"55px\" height=\"55px\" src=\"./img/robot.png\"><a href=\"#\" class=\"brand-logo center\">Leonard</a><ul id=\"nav-mobile\" class=\"right hide-on-med-and-down\"><li><a href=\"#/competition\">Competition</a></li><li><a href=\"#/debug\">Debug</a></li></ul></div></nav></template>"; });
 define('text!components/stat/stat.html', ['module'], function(module) { module.exports = ""; });
 define('text!components/world-vision/world-vision-competition.html', ['module'], function(module) { module.exports = "<template><div class=\"container\"><div class=\"row\"><div class=\"col s12 m12\"><div class=\"card\"><div class=\"card-content center-align\"><h3>World Vision</h3><div><div class=\"card-image\"><canvas id=\"${canvasId}\" width=\"640px\" height=\"480px\" style=\"background:url(${imagePath})\"></canvas></div><div class=\"card-content\"><span class=\"equidistant float-left\"><label>Robot position</label><label>x :</label><label class=\"text-number\">${x_position}</label><label>y :</label><label class=\"text-number\">${y_position}</label></span><span class=\"equidistant float-right\"></span></div><div class=\"card-action\"><button class=\"color2 waves-effect waves-light btn\" click.trigger=\"start()\">Start</button></div></div></div></div></div></div></div></template>"; });
-<<<<<<< HEAD
-define('text!components/world-vision/world-vision-debug.html', ['module'], function(module) { module.exports = "<template><require from=\"../go-to-position/go-to-position\"></require><style>canvas{cursor:crosshair}</style><div class=\"col s6 container\"><div class=\"row\"><div class=\"side-padding\"><div class=\"card\"><div class=\"card-content center-align component\"><h4>World Vision</h4><div><div class=\"card-image\"><canvas id=\"${canvasId}\" width=\"640px\" height=\"400px\" style=\"background:url(${visionProperties.imagePath})\"></canvas></div><div class=\"card-content\"><span class=\"equidistant float-left\"><label>Mouse position</label><label>x :</label><label class=\"text-number\">${x_position}</label><label>y :</label><label class=\"text-number\">${y_position}</label></span><span class=\"equidistant float-right\"><label>Chosen position</label><label>x :</label><label class=\"text-number\">${chosen_x_position}</label><label>y :</label><label class=\"text-number\">${chosen_y_position}</label></span></div><div class=\"padding-main\"></div><div class=\"card-action\"><go-to-position x-position=\"${chosen_x_position}\" y-position=\"${chosen_y_position}\"></go-to-position></div></div></div></div></div></div></div></template>"; });
-=======
-define('text!components/world-vision/world-vision-debug.html', ['module'], function(module) { module.exports = "<template><require from=\"../go-to-position/go-to-position\"></require><style>canvas{cursor:crosshair}</style><div class=\"col s6 container\"><div class=\"row\"><div class=\"side-padding\"><div class=\"card\"><div class=\"card-content center-align\"><h4>World Vision</h4><div><div class=\"card-image\"><img id=\"${canvasId}\" width=\"640px\" height=\"400px\" src=\"${visionProperties.imagePath}\"></div><div class=\"card-content\"><span class=\"equidistant float-left\"><label>Mouse position</label><label>x :</label><label class=\"text-number\">${x_position}</label><label>y :</label><label class=\"text-number\">${y_position}</label></span><span class=\"equidistant float-right\"><label>Chosen position</label><label>x :</label><label class=\"text-number\">${chosen_x_position}</label><label>y :</label><label class=\"text-number\">${chosen_y_position}</label></span></div><div class=\"padding-main\"></div><div class=\"card-action\"><go-to-position x-position=\"${chosen_x_position}\" y-position=\"${chosen_y_position}\"></go-to-position></div></div></div></div></div></div></div></template>"; });
->>>>>>> Optimize rendering: using Img HTMLElement
+define('text!components/world-vision/world-vision-debug.html', ['module'], function(module) { module.exports = "<template><require from=\"../go-to-position/go-to-position\"></require><style>canvas{cursor:crosshair}</style><div class=\"col s6 container\"><div class=\"row\"><div class=\"side-padding\"><div class=\"card\"><div class=\"card-content center-align component\"><h4>World Vision</h4><div><div class=\"card-image\"><img id=\"${canvasId}\" width=\"640px\" height=\"400px\" src=\"${visionProperties.imagePath}\"></div><div class=\"card-content\"><span class=\"equidistant float-left\"><label>Mouse position</label><label>x :</label><label class=\"text-number\">${x_position}</label><label>y :</label><label class=\"text-number\">${y_position}</label></span><span class=\"equidistant float-right\"><label>Chosen position</label><label>x :</label><label class=\"text-number\">${chosen_x_position}</label><label>y :</label><label class=\"text-number\">${chosen_y_position}</label></span><div><label>Theta :</label><input value.bind=\"theta\" placeholder=\"theta\"></div></div><div class=\"padding-main\"></div><div class=\"card-action\"><go-to-position x-position=\"${chosen_x_position}\" y-position=\"${chosen_y_position}\" theta=\"${theta}\"></go-to-position></div></div></div></div></div></div></div></template>"; });
 //# sourceMappingURL=app-bundle.js.map
