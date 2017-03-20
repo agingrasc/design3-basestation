@@ -584,8 +584,8 @@ define('components/world-vision/world-vision-debug',['exports', 'aurelia-framewo
             var world_origin_y = parseFloat(this.world_information.origin.y);
             var world_image_ratio = parseFloat(this.world_information.ratio);
 
-            this.x_position = Math.floor((mousePos.x - world_origin_x) / world_image_ratio * 10);
-            this.y_position = Math.floor((mousePos.y - world_origin_y) / world_image_ratio * 10);
+            this.x_position = Math.floor((mousePos.x - world_origin_x) * world_image_ratio * 10);
+            this.y_position = Math.floor((mousePos.y - world_origin_y) * world_image_ratio * 10);
         };
 
         return WorldVisionDebug;
