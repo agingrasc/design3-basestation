@@ -2,6 +2,10 @@ export class Vision {
     constructor() {
         this.informations = undefined;
         this.imageView = undefined;
+        this.world_information = undefined;
+        this.origin = undefined;
+        this.ratio = undefined;
+        this.goto = undefined;
     }
 
     start() {
@@ -12,20 +16,41 @@ export class Vision {
         ws.onopen = function() {
             ws.send(value);
         };
+
         var self = this;
         ws.onmessage = function(evt) {
             var data = JSON.parse(evt.data);
-            self.imageView.imagePath = "data:image/png;base64," + data.vision_image;
-            self.informations.obstacles = data.vision_obstacles;
-            for (var i = 0; i < self.informations.obstacles.length; i++) {
-                var obstacle = self.informations.obstacles[i];
-                if (obstacle.vision_obstacle_tag == "OCPR") {
-                    self.informations.obstacles[i].vision_obstacle_tag = "Left";
-                } else if (obstacle.vision_obstacle_tag == "OCPL") {
-                    self.informations.obstacles[i].vision_obstacle_tag = "Right";
-                }
+
+
+            if (data.image.origin.x !== "") {
+                self.world_information.origin = data.image.origin;
+                self.world_information.ratio = data.image.ratio;
+                self.goto.width = data.world.base_table.dimension.width;
+                self.goto.length = data.world.base_table.dimension.height;
             }
-            self.informations.robot = data.vision_robot;
+
+            window.requestAnimationFrame(() => {
+                self.imageView.imagePath = "data:image/png;base64," + data.image.data;
+            });
+
+            self.informations.obstacles = data.world.obstacles;
+
+            // Update robot position
+            var robot = data.world.robot;
+            self.informations.robot = robot;
+            self.goto.robot = {
+                "position": {
+                    "x": robot.position.x,
+                    "y": robot.position.y,
+                    "theta": 0
+                }
+            };
+
+            // Update world obstacles
+            self.goto.obstacles = [];
+
+            // Update world dimension
+            self.world_information.world_dimension = data.image.sent_dimension;
         };
     }
 
@@ -36,6 +61,9 @@ export class Vision {
         if (this.informations === undefined) {
             return;
         }
+        if (this.goto === undefined) {
+            return;
+        }
         this.start();
     }
     registerImageView(imageView) {
@@ -43,9 +71,18 @@ export class Vision {
         this.checkReadyToStart();
     }
 
-
     registerInformations(informations) {
         this.informations = informations;
+        this.checkReadyToStart();
+    }
+
+    registerGotoPosition(world_information) {
+        this.world_information = world_information;
+    }
+
+    registerGoto(goto) {
+        console.log(goto);
+        this.goto = goto;
         this.checkReadyToStart();
     }
 }

@@ -1,14 +1,19 @@
 <template>
     <require from="../go-to-position/go-to-position"></require>
-        <div class="col s6 container">
-           <div class="row">
-                <div class="side-padding">
-                    <div class="card">
-                        <div class="card-content center-align">
-                            <h4>World Vision</h4>
+    <style>
+        canvas {
+            cursor: crosshair
+        }
+    </style>
+    <div class="col s6 container">
+       <div class="row">
+            <div class="side-padding">
+                <div class="card">
+                    <div class="card-content center-align component">
+                        <h4>World Vision</h4>
                         <div>
                             <div class="card-image">
-                                <canvas id="${canvasId}" width="640px" height="480px" style="background: url(${visionProperties.imagePath})"></canvas>
+                                <img id="${canvasId}" width="640px" height="400px" src="${visionProperties.imagePath}"></img>
                             </div>
                             <div class="card-content">
                                 <span class="equidistant float-left" >
@@ -25,14 +30,19 @@
                                     <label>y :</label>
                                     <label class="text-number">${chosen_y_position}</label>
                                 </span>
+                                <div>
+                                    <label>Theta :</label>
+                                    <input value.bind="theta" placeholder="theta">
+                                </div>
                             </div>
                             <div class="padding-main"></div>
                             <div class="card-action">
-                                <go-to-position x-position="${chosen_x_position}" y-position="${chosen_y_position}"></go-to-position>
+                                <go-to-position x-position="${chosen_x_position}" y-position="${chosen_y_position}" theta="${theta}"></go-to-position>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 </template>

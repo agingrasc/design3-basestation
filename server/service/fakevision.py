@@ -20,48 +20,92 @@ def build_fake_vision_info():
     image = base64.b64encode(cnt)
 
     data = {}
-    data[visionformat.VISION_IMAGE] = image.decode('utf-8')
+    data["image"] = {}
+    data["image"]["data"] = image.decode('utf-8')
 
-    obstacles = []
+    data["image"]["original_dimension"] = {}
+    data["image"]["original_dimension"]["width"] = "1280"
+    data["image"]["original_dimension"]["lenght"] = "800"
+
+    data["image"]["origin"] = {}
+    data["image"]["origin"]["x"] = "4"
+    data["image"]["origin"]["y"] = "34"
+
+    data["image"]["ratio"] = "3"
+
+    data["image"]["sent_dimension"] = {}
+    data["image"]["sent_dimension"]["width"] = "640"
+    data["image"]["sent_dimension"]["lenght"] = "400"
 
     obstacle1 = {}
-    obstacle1[visionformat.VISION_OBSTABLE_WIDTH] = "15"
-    obstacle1[visionformat.VISION_OBSTACLE_TAG] = "OCPR"
 
     obstacle1_position = {}
-    obstacle1_position[visionformat.VISION_X] = "25"
-    obstacle1_position[visionformat.VISION_Y] = "65"
+    obstacle1_position["x"] = "25"
+    obstacle1_position["y"] = "65"
 
-    obstacle1[visionformat.VISION_POSITION] = obstacle1_position
+    obstacle1_dimension = {}
+    obstacle1_dimension["width"] = "10"
+    obstacle1_dimension["lenght"] = "10"
+
+    obstacle1["dimension"] = obstacle1_dimension
+    obstacle1["position"] = obstacle1_position
+    obstacle1["tag"] = "LEFT"
 
     obstacle2 = {}
-    obstacle2[visionformat.VISION_OBSTABLE_WIDTH] = "15"
-    obstacle2[visionformat.VISION_OBSTACLE_TAG] = "OCPL"
 
     obstacle2_position = {}
-    obstacle2_position[visionformat.VISION_X] = "15"
-    obstacle2_position[visionformat.VISION_Y] = "25"
+    obstacle2_position["x"] = "25"
+    obstacle2_position["y"] = "65"
 
-    obstacle2[visionformat.VISION_POSITION] = obstacle2_position
+    obstacle2_dimension = {}
+    obstacle2_dimension["width"] = "10"
+    obstacle2_dimension["lenght"] = "10"
 
+    obstacle2["dimension"] = obstacle2_dimension
+    obstacle2["position"] = obstacle2_position
+    obstacle2["tag"] = "RIGHT"
+
+    obstacles = []
     obstacles.append(obstacle1)
     obstacles.append(obstacle2)
 
     robot = {}
+
     robot_position = {}
-    robot_position[visionformat.VISION_X] = "35"
-    robot_position[visionformat.VISION_Y] = "95"
+    robot_position["x"] = "25"
+    robot_position["y"] = "65"
 
-    robot[visionformat.VISION_POSITION] = robot_position
-    robot[visionformat.VISION_ROBOT_ANGLE] = "45"
+    robot_dimension = {}
+    robot_dimension["width"] = "10"
+    robot_dimension["lenght"] = "10"
 
-    data[visionformat.VISION_OBSTABLES] = obstacles
-    data[visionformat.VISION_ROBOT] = robot
-    data[visionformat.VISION_IMAGE] = image.decode('utf-8')
+    robot_orientation = {}
+    robot_orientation["value"] = "1.2"
+    robot_orientation["unit"] = "rad"
+
+    robot["dimension"] = robot_dimension
+    robot["position"] = robot_position
+    robot["orientation"] = robot_orientation
+
+    base_table = {}
+    base_table_dimension = {}
+
+    base_table_dimension["width"] = "90"
+    base_table_dimension["lenght"] = "100"
+
+    base_table["dimension"] = base_table_dimension
+
+    world = {}
+    world["obstacles"] = obstacles
+    world["robot"] = robot
+    world["unit"] = "cm"
+    world["base_table"] = base_table
+
+    data["world"] = world
 
     value = {}
-    value[visionformat.HEADERS] = visionformat.PUSH_VISION_DATA
-    value[visionformat.DATA] = data
+    value[visionformat.HEADERS] = "push_vision_data"
+    value["data"] = data
     CONNECTION.send(json.dumps(value))
 
 
