@@ -3,28 +3,12 @@ import sys
 from flask import Flask, jsonify, make_response
 from api.gotoposition import gotoposition
 
-from server.api.enddrawtask import end_draw_task
-from server.api.endgooutofdrawzonetask import end_go_out_of_drawzone_task
-from server.api.endgotodrawzonetask import end_go_to_drawzone_task
-from server.api.endgotoimagetask import end_go_to_image_task
-from server.api.endidentifyantennatask import end_identify_antenna_task
-from server.api.endinitialorientationtask import end_initial_orientation_task
-from server.api.endlightredledtask import end_light_red_led_task
-from server.api.endreceiveinformationtask import end_receive_information_task
-from server.api.endtakepicturetask import end_take_picture_task
+from server.api.starttasks import start_tasks
 
 app = Flask(__name__)
 
 app.register_blueprint(gotoposition)
-app.register_blueprint(end_initial_orientation_task)
-app.register_blueprint(end_receive_information_task)
-app.register_blueprint(end_take_picture_task)
-app.register_blueprint(end_go_to_image_task)
-app.register_blueprint(end_go_to_drawzone_task)
-app.register_blueprint(end_draw_task)
-app.register_blueprint(end_go_out_of_drawzone_task)
-app.register_blueprint(end_light_red_led_task)
-app.register_blueprint(end_identify_antenna_task)
+app.register_blueprint(start_tasks)
 
 PORT = 12345
 
