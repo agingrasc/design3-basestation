@@ -4,11 +4,13 @@ from flask import Flask, jsonify, make_response
 from api.gotoposition import gotoposition
 
 from server.api.starttasks import start_tasks
+from server.api.feedbacktask import feedback_task
 
 app = Flask(__name__)
 
 app.register_blueprint(gotoposition)
 app.register_blueprint(start_tasks)
+app.register_blueprint(feedback_task)
 
 PORT = 12345
 
