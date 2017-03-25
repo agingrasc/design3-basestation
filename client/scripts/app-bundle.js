@@ -627,6 +627,34 @@ define('components/world-vision/world-vision-debug',['exports', 'aurelia-framewo
             this.vision.registerGotoPosition(this.world_information);
         };
 
+        WorldVisionDebug.prototype.resetPathRendering = function resetPathRendering() {
+            fetch('http://0.0.0.0:5000/vision/reset-rendering', {
+                method: "POST",
+                headers: {
+                    'content-type': 'application/json'
+                },
+                mode: 'no-cors'
+            }).then(function (response) {
+                console.log(response);
+            }).catch(function (err) {
+                console.log(err);
+            });
+        };
+
+        WorldVisionDebug.prototype.resetDetection = function resetDetection() {
+            fetch('http://0.0.0.0:5000/vision/reset-detection', {
+                method: "POST",
+                headers: {
+                    'content-type': 'application/json'
+                },
+                mode: 'no-cors'
+            }).then(function (response) {
+                console.log(response);
+            }).catch(function (err) {
+                console.log(err);
+            });
+        };
+
         WorldVisionDebug.prototype.getMousePos = function getMousePos(canvas, evt) {
             var rect = canvas.getBoundingClientRect();
             return {
@@ -656,5 +684,5 @@ define('text!components/navbar/navbar.html', ['module'], function(module) { modu
 define('text!components/robot-controller/robot-controller.html', ['module'], function(module) { module.exports = "<template><div class=\"card\"><div class=\"card-content\"><h5>Robot Controller <span if.bind=\"messageReceived\">${message}</span></h5><div class=\"row\"><select value.bind=\"currentCommand\" style=\"display:block;width:80%;float:left\"><option repeat.for=\"option of options\" value.bind=\"option\">${option}</option></select><button class=\"green btn\" click.trigger=\"sendCommand()\" style=\"margin-left:15px\">Go</button></div></div></div></template>"; });
 define('text!components/stat/stat.html', ['module'], function(module) { module.exports = ""; });
 define('text!components/world-vision/world-vision-competition.html', ['module'], function(module) { module.exports = "<template><div class=\"container\"><div class=\"row\"><div class=\"col s12 m12\"><div class=\"card\"><div class=\"card-content center-align\"><h3>World Vision</h3><div><div class=\"card-image\"><canvas id=\"${canvasId}\" width=\"640px\" height=\"480px\" style=\"background:url(${imagePath})\"></canvas></div><div class=\"card-content\"><span class=\"equidistant float-left\"><label>Robot position</label><label>x :</label><label class=\"text-number\">${x_position}</label><label>y :</label><label class=\"text-number\">${y_position}</label></span><span class=\"equidistant float-right\"></span></div><div class=\"card-action\"><button class=\"color2 waves-effect waves-light btn\" click.trigger=\"start()\">Start</button></div></div></div></div></div></div></div></template>"; });
-define('text!components/world-vision/world-vision-debug.html', ['module'], function(module) { module.exports = "<template><require from=\"../go-to-position/go-to-position\"></require><require from=\"../robot-controller/robot-controller\"></require><div class=\"card\"><div class=\"card-content\"><div class=\"row\"><h5>World Vision</h5><img id=\"${canvasId}\" width=\"640px\" height=\"400px\" src=\"${visionProperties.imagePath}\" style=\"cursor:crosshair\"></div><div class=\"row\"><div class=\"col s6\"><p>Mouse position: <span class=\"text-number\">(${x_position}, ${y_position})</span></p></div><div class=\"col s6\"><p>Next destination --> <span class=\"text-number\">(${chosen_x_position}, ${chosen_y_position})</span></p><input value.bind=\"theta\" placeholder=\"theta\"><go-to-position x-position=\"${chosen_x_position}\" y-position=\"${chosen_y_position}\" theta=\"${theta}\"></go-to-position></div></div></div></div></template>"; });
+define('text!components/world-vision/world-vision-debug.html', ['module'], function(module) { module.exports = "<template><require from=\"../go-to-position/go-to-position\"></require><require from=\"../robot-controller/robot-controller\"></require><div class=\"card\"><div class=\"card-content\"><div class=\"row\"><h5>World Vision</h5><div class=\"center-align\"><img id=\"${canvasId}\" width=\"640px\" height=\"400px\" src=\"${visionProperties.imagePath}\" style=\"cursor:crosshair\"></div></div><div class=\"row\"><div class=\"col s6\"><p>Mouse position: <span class=\"text-number\">(${x_position}, ${y_position})</span></p><ul class=\"collection center-align\"><li class=\"collection-item\"><button class=\"blue btn\" click.trigger=\"resetPathRendering()\">Reset path rendering</button></li><li class=\"collection-item\"><button class=\"green btn\" click.trigger=\"resetDetection()\">Reset detection</button></li></ul></div><div class=\"col s6\"><p>Next destination --> <span class=\"text-number\">(${chosen_x_position}, ${chosen_y_position})</span></p><input value.bind=\"theta\" placeholder=\"theta\"><go-to-position x-position=\"${chosen_x_position}\" y-position=\"${chosen_y_position}\" theta=\"${theta}\"></go-to-position></div></div></div></div></template>"; });
 //# sourceMappingURL=app-bundle.js.map

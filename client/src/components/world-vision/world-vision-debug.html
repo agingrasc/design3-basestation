@@ -7,12 +7,22 @@
         <div class="card-content">
             <div class="row">
                 <h5>World Vision</h5>
-                <img id="${canvasId}" width="640px" height="400px" src="${visionProperties.imagePath}" style="cursor: crosshair"></img>
+                <div class="center-align">
+                    <img id="${canvasId}" width="640px" height="400px" src="${visionProperties.imagePath}" style="cursor: crosshair;"></img>
+                </div>
             </div>
 
             <div class="row">
                 <div class="col s6">
                     <p>Mouse position: <span class="text-number">(${x_position}, ${y_position})</span></p>
+                    <ul class="collection center-align">
+                        <li class="collection-item">
+                            <button class="blue btn" click.trigger="resetPathRendering()">Reset path rendering</button>
+                        </li>
+                        <li class="collection-item">
+                            <button class="green btn" click.trigger="resetDetection()">Reset detection</button>
+                        </li>
+                    </ul>
                 </div>
 
                 <div class="col s6">

@@ -44,6 +44,34 @@ export class WorldVisionDebug {
         this.vision.registerGotoPosition(this.world_information);
     }
 
+    resetPathRendering() {
+        fetch('http://0.0.0.0:5000/vision/reset-rendering', {
+            method: "POST",
+            headers: {
+                'content-type': 'application/json'
+            },
+            mode: 'no-cors'
+        }).then(function (response) {
+            console.log(response);
+        }).catch(function (err) {
+            console.log(err);
+        });
+    }
+
+    resetDetection() {
+        fetch('http://0.0.0.0:5000/vision/reset-detection', {
+            method: "POST",
+            headers: {
+                'content-type': 'application/json'
+            },
+            mode: 'no-cors'
+        }).then(function (response) {
+            console.log(response);
+        }).catch(function (err) {
+            console.log(err);
+        });
+    }
+
     getMousePos(canvas, evt) {
         let rect = canvas.getBoundingClientRect();
         return {
