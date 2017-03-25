@@ -1,6 +1,7 @@
 export class RobotController {
   constructor() {
     this.currentCommand = null;
+    this.messageReceived = false;
     this.options = [
       'competition',
       'initial-orientation',
@@ -17,7 +18,9 @@ export class RobotController {
 
   sendCommand() {
     const taskId = this.options.indexOf(this.currentCommand).toString();
-    const data = {"tast_id": taskId};
+    const data = {"task_id": taskId};
+
+    this.messageReceived = false;
 
     fetch("http://localhost:12345/start-tasks", {
         method: "POST",
@@ -25,8 +28,13 @@ export class RobotController {
             'content-type': 'application/json'
         },
         body: JSON.stringify(data)
-    }).then(function(res) {
-        console.log(res);
+    }).then((res) => {
+        return res.json();
+    }).then((data) => {
+      if (data.message) {
+        this.message = 'Command sent to robot';
+        this.messageReceived = true;
+      }
     });
 
   }

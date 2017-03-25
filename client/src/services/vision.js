@@ -18,6 +18,7 @@ export class Vision {
         };
 
         var self = this;
+
         ws.onmessage = function(evt) {
             var data = JSON.parse(evt.data);
 
@@ -35,8 +36,15 @@ export class Vision {
             self.informations.obstacles = data.world.obstacles;
 
             // Update robot position
-            var robot = data.world.robot;
-            self.informations.robot = robot;
+            let robot = data.world.robot;
+            self.informations.robot = {
+                "position": {
+                    "x": parseInt(Math.round(robot.position.x)),
+                    "y": parseInt(Math.round(robot.position.y))
+                },
+                "orientation": robot.orientation
+            };
+
             self.goto.robot = {
                 "position": {
                     "x": robot.position.x,

@@ -1,12 +1,25 @@
 <template>
 
     <div class="card">
-        <div class="card-content center-align">
-            <h4>Informations</h4>
-            <div class="padding-top">
-                <div class="card-content no-padding">
+        <div class="card-content">
+
+
+
+            <div class="row">
+                <div class="col s6">
+                    <h5>Monde</h5>
+                    <hr>
+                </div>
+                <div class="col s6">
+                    <h5>Robot</h5>
+                    <hr>
+                    <p>Position: <span class="text-number">(${informations.robot.position.x}, ${informations.robot.position.y})</span> </p>
+                    <p>Angle: <span class="text-number">${informations.robot.orientation}</span></p>
+                </div>
+
+                <div class="col s12">
                     <h5>Obstacles</h5>
-                    <div class="card-action"></div>
+                    <hr>
                     <div repeat.for="obstacle of informations.obstacles">
                         <div class="height-text">
                             <label class="float-left">Position x :</label>
@@ -24,32 +37,16 @@
                             <label class="float-left">Width :</label>
                             <label class="text-number float-right" float-right>${obstacle.dimension.width}</label>
                         </div>
-                        <div class="padding-main"></div>
-                    </div>
-                    <h5>Robot</h5>
-                    <div class="card-action"></div>
-                    <div class="height-text">
-                        <label class="float-left">x :</label>
-                        <label class="text-number float-right">${informations.robot.position.x}</label>
-                    </div>
-                    <div class="height-text">
-                        <label class="float-left">y :</label>
-                        <label class="text-number float-right">${informations.robot.position.y}</label>
-                    </div>
-                    <div class="height-text">
-                        <label class="float-left">Angle :</label>
-                        <label class="text-number float-right">${informations.robot.orientation.value}</label>
-                    </div>
-                    <div class="padding-main"></div>
-                    <h5>Timer</h5>
-                    <div class="card-action"></div>
-                    <div class="height-text">
-                        <label class="float-left">Timer :</label>
-                        <label class="text-number float-right">${timer.time}</label>
                     </div>
                 </div>
             </div>
+
+            <div class="row">
+                <p>Timer: <span class="text-number">${timer.time}</span></p>
+            </div>
         </div>
+
+
     </div>
 
 </template>
