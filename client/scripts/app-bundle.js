@@ -176,8 +176,8 @@ define('services/timer',["exports"], function (exports) {
         return Timer;
     }();
 });
-define('services/vision',["exports"], function (exports) {
-    "use strict";
+define('services/vision',['exports'], function (exports) {
+    'use strict';
 
     Object.defineProperty(exports, "__esModule", {
         value: true
@@ -202,34 +202,32 @@ define('services/vision',["exports"], function (exports) {
         }
 
         Vision.prototype.start = function start() {
-            var ws = new WebSocket("ws://localhost:3000");
-            var tmp = {};
-            tmp.headers = "register_vision_data";
-            var value = JSON.stringify(tmp);
-            ws.onopen = function () {
-                ws.send(value);
-            };
+            var _this = this;
 
-            var self = this;
+            var ws = new WebSocket('ws://localhost:3000');
+
+            ws.onopen = function () {
+                ws.send(JSON.stringify({ 'headers': 'register_vision_data' }));
+            };
 
             ws.onmessage = function (evt) {
                 var data = JSON.parse(evt.data);
 
                 if (data.image.origin.x !== "") {
-                    self.world_information.origin = data.image.origin;
-                    self.world_information.ratio = data.image.ratio;
-                    self.goto.width = data.world.base_table.dimension.width;
-                    self.goto.length = data.world.base_table.dimension.height;
+                    _this.world_information.origin = data.image.origin;
+                    _this.world_information.ratio = data.image.ratio;
+                    _this.goto.width = data.world.base_table.dimension.width;
+                    _this.goto.length = data.world.base_table.dimension.height;
                 }
 
                 window.requestAnimationFrame(function () {
-                    self.imageView.imagePath = "data:image/png;base64," + data.image.data;
+                    _this.imageView.imagePath = "data:image/png;base64," + data.image.data;
                 });
 
-                self.informations.obstacles = data.world.obstacles;
+                _this.informations.obstacles = data.world.obstacles;
 
                 var robot = data.world.robot;
-                self.informations.robot = {
+                _this.informations.robot = {
                     "position": {
                         "x": parseInt(Math.round(robot.position.x)),
                         "y": parseInt(Math.round(robot.position.y))
@@ -237,7 +235,7 @@ define('services/vision',["exports"], function (exports) {
                     "orientation": robot.orientation
                 };
 
-                self.goto.robot = {
+                _this.goto.robot = {
                     "position": {
                         "x": robot.position.x,
                         "y": robot.position.y,
@@ -245,9 +243,9 @@ define('services/vision',["exports"], function (exports) {
                     }
                 };
 
-                self.goto.obstacles = [];
+                _this.goto.obstacles = [];
 
-                self.world_information.world_dimension = data.image.sent_dimension;
+                _this.world_information.world_dimension = data.image.sent_dimension;
             };
         };
 
@@ -651,8 +649,8 @@ define('components/world-vision/world-vision-debug',['exports', 'aurelia-framewo
 });
 define('text!app.html', ['module'], function(module) { module.exports = "<template><div><require from=\"./components/navbar/navbar\"></require><navbar></navbar></div><router-view></router-view></template>"; });
 define('text!components/competition/competition.html', ['module'], function(module) { module.exports = "<template><require from=\"../world-vision/world-vision-competition\"></require><world-vision-competition></world-vision-competition></template>"; });
-define('text!components/go-to-position/go-to-position.html', ['module'], function(module) { module.exports = "<template><button class=\"color2 waves-effect waves-light btn\" click.trigger=\"execute()\">Go To Position</button></template>"; });
 define('text!components/debug/debug.html', ['module'], function(module) { module.exports = "<template><require from=\"../world-vision/world-vision-debug\"></require><require from=\"../informations/informations\"></require><require from=\"../robot-controller/robot-controller\"></require><div class=\"row\"><div class=\"col s12 m12 l6\"><world-vision-debug></world-vision-debug></div><div class=\"col s12 m12 l6\"><informations></informations><robot-controller></robot-controller></div></div></template>"; });
+define('text!components/go-to-position/go-to-position.html', ['module'], function(module) { module.exports = "<template><button class=\"color2 waves-effect waves-light btn\" click.trigger=\"execute()\">Go To Position</button></template>"; });
 define('text!components/informations/informations.html', ['module'], function(module) { module.exports = "<template><div class=\"card\"><div class=\"card-content\"><div class=\"row\"><div class=\"col s6\"><h5>Monde</h5><hr></div><div class=\"col s6\"><h5>Robot</h5><hr><p>Position: <span class=\"text-number\">(${informations.robot.position.x}, ${informations.robot.position.y})</span></p><p>Angle: <span class=\"text-number\">${informations.robot.orientation}</span></p></div><div class=\"col s12\"><h5>Obstacles</h5><hr><div repeat.for=\"obstacle of informations.obstacles\"><div class=\"height-text\"><label class=\"float-left\">Position x :</label><label class=\"text-number float-right\">${obstacle.position.x}</label></div><div class=\"height-text\"><label class=\"float-left\">Position y :</label><label class=\"text-number float-right\">${obstacle.position.y}</label></div><div class=\"height-text\"><label class=\"float-left\">Have to pass :</label><label class=\"text-number float-right\">${obstacle.tag}</label></div><div class=\"height-text\"><label class=\"float-left\">Width :</label><label class=\"text-number float-right\" float-right>${obstacle.dimension.width}</label></div></div></div></div><div class=\"row\"><p>Timer: <span class=\"text-number\">${timer.time}</span></p></div></div></div></template>"; });
 define('text!components/navbar/navbar.html', ['module'], function(module) { module.exports = "<template><nav><div class=\"nav-wrapper color1\"><img width=\"55px\" height=\"55px\" src=\"./img/robot.png\"><a href=\"#\" class=\"brand-logo center\">Leonard</a><ul id=\"nav-mobile\" class=\"right hide-on-med-and-down\"><li><a href=\"#/competition\">Competition</a></li><li><a href=\"#/debug\">Debug</a></li></ul></div></nav></template>"; });
 define('text!components/robot-controller/robot-controller.html', ['module'], function(module) { module.exports = "<template><div class=\"card\"><div class=\"card-content\"><h5>Robot Controller <span if.bind=\"messageReceived\">${message}</span></h5><div class=\"row\"><select value.bind=\"currentCommand\" style=\"display:block;width:80%;float:left\"><option repeat.for=\"option of options\" value.bind=\"option\">${option}</option></select><button class=\"green btn\" click.trigger=\"sendCommand()\" style=\"margin-left:15px\">Go</button></div></div></div></template>"; });

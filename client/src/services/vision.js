@@ -9,35 +9,31 @@ export class Vision {
     }
 
     start() {
-        var ws = new WebSocket("ws://localhost:3000");
-        var tmp = {};
-        tmp.headers = "register_vision_data";
-        var value = JSON.stringify(tmp);
-        ws.onopen = function() {
-            ws.send(value);
+        let ws = new WebSocket('ws://localhost:3000');
+
+        ws.onopen = () => {
+            ws.send(JSON.stringify({'headers': 'register_vision_data'}));
         };
 
-        var self = this;
-
-        ws.onmessage = function(evt) {
-            var data = JSON.parse(evt.data);
+        ws.onmessage = (evt) => {
+            let data = JSON.parse(evt.data);
 
             if (data.image.origin.x !== "") {
-                self.world_information.origin = data.image.origin;
-                self.world_information.ratio = data.image.ratio;
-                self.goto.width = data.world.base_table.dimension.width;
-                self.goto.length = data.world.base_table.dimension.height;
+                this.world_information.origin = data.image.origin;
+                this.world_information.ratio = data.image.ratio;
+                this.goto.width = data.world.base_table.dimension.width;
+                this.goto.length = data.world.base_table.dimension.height;
             }
 
             window.requestAnimationFrame(() => {
-                self.imageView.imagePath = "data:image/png;base64," + data.image.data;
+                this.imageView.imagePath = "data:image/png;base64," + data.image.data;
             });
 
-            self.informations.obstacles = data.world.obstacles;
+            this.informations.obstacles = data.world.obstacles;
 
             // Update robot position
             let robot = data.world.robot;
-            self.informations.robot = {
+            this.informations.robot = {
                 "position": {
                     "x": parseInt(Math.round(robot.position.x)),
                     "y": parseInt(Math.round(robot.position.y))
@@ -45,7 +41,7 @@ export class Vision {
                 "orientation": robot.orientation
             };
 
-            self.goto.robot = {
+            this.goto.robot = {
                 "position": {
                     "x": robot.position.x,
                     "y": robot.position.y,
@@ -54,10 +50,10 @@ export class Vision {
             };
 
             // Update world obstacles
-            self.goto.obstacles = [];
+            this.goto.obstacles = [];
 
             // Update world dimension
-            self.world_information.world_dimension = data.image.sent_dimension;
+            this.world_information.world_dimension = data.image.sent_dimension;
         };
     }
 
