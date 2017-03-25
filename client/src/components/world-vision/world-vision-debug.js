@@ -24,6 +24,7 @@ export class WorldVisionDebug {
         this.chosen_y_position = 0;
 
         this.world_information = {};
+        this.theta = 0;
     }
 
     attached() {

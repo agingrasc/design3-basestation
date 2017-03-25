@@ -38,12 +38,12 @@ export class GoToPosition {
         this.path = "/go-to-position/";
 
         var payload = this.info;
+
         payload.destination = {
             "x": this.xPosition,
             "y": this.yPosition,
             "theta": this.theta
         };
-
         console.log(payload);
 
         var data = JSON.stringify(payload);

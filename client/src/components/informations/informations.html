@@ -1,59 +1,55 @@
 <template>
-    <div class="col s2 container">
-        <div class="row">
-            <div class="no-right-padding">
-                <div class="card">
-                    <div class="card-content center-align component">
-                        <h4>Informations</h4>
-                        <div class="padding-top">
-                            <div class="card-content no-padding">
-                                <h5>Obstacles</h5>
-                                <div class="card-action"></div>
-                                <div repeat.for="obstacle of informations.obstacles">
-                                    <div class="height-text">
-                                        <label class="float-left">Position x :</label>
-                                        <label class="text-number float-right">${obstacle.position.x}</label>
-                                    </div>
-                                    <div class="height-text">
-                                        <label class="float-left">Position y :</label>
-                                        <label class="text-number float-right">${obstacle.position.y}</label>
-                                    </div>
-                                    <div class="height-text">
-                                        <label class="float-left">Have to pass :</label>
-                                        <label class="text-number float-right">${obstacle.tag}</label>
-                                    </div>
-                                    <div class="height-text">
-                                        <label class="float-left">Width :</label>
-                                        <label class="text-number float-right" float-right>${obstacle.dimension.width}</label>
-                                    </div>
-                                    <div class="padding-main"></div>
-                                </div>
-                                <h5>Robot</h5>
-                                <div class="card-action"></div>
-                                <div class="height-text">
-                                    <label class="float-left">x :</label>
-                                    <label class="text-number float-right">${informations.robot.position.x}</label>
-                                </div>
-                                <div class="height-text">
-                                    <label class="float-left">y :</label>
-                                    <label class="text-number float-right">${informations.robot.position.y}</label>
-                                </div>
-                                <div class="height-text">
-                                    <label class="float-left">Angle :</label>
-                                    <label class="text-number float-right">${informations.robot.orientation.value}</label>
-                                </div>
-                                <div class="padding-main"></div>
-                                <h5>Timer</h5>
-                                <div class="card-action"></div>
-                                <div class="height-text">
-                                    <label class="float-left">Timer :</label>
-                                    <label class="text-number float-right">${timer.time}</label>
-                                </div>
-                            </div>
+
+    <div class="card">
+        <div class="card-content center-align">
+            <h4>Informations</h4>
+            <div class="padding-top">
+                <div class="card-content no-padding">
+                    <h5>Obstacles</h5>
+                    <div class="card-action"></div>
+                    <div repeat.for="obstacle of informations.obstacles">
+                        <div class="height-text">
+                            <label class="float-left">Position x :</label>
+                            <label class="text-number float-right">${obstacle.position.x}</label>
                         </div>
+                        <div class="height-text">
+                            <label class="float-left">Position y :</label>
+                            <label class="text-number float-right">${obstacle.position.y}</label>
+                        </div>
+                        <div class="height-text">
+                            <label class="float-left">Have to pass :</label>
+                            <label class="text-number float-right">${obstacle.tag}</label>
+                        </div>
+                        <div class="height-text">
+                            <label class="float-left">Width :</label>
+                            <label class="text-number float-right" float-right>${obstacle.dimension.width}</label>
+                        </div>
+                        <div class="padding-main"></div>
+                    </div>
+                    <h5>Robot</h5>
+                    <div class="card-action"></div>
+                    <div class="height-text">
+                        <label class="float-left">x :</label>
+                        <label class="text-number float-right">${informations.robot.position.x}</label>
+                    </div>
+                    <div class="height-text">
+                        <label class="float-left">y :</label>
+                        <label class="text-number float-right">${informations.robot.position.y}</label>
+                    </div>
+                    <div class="height-text">
+                        <label class="float-left">Angle :</label>
+                        <label class="text-number float-right">${informations.robot.orientation.value}</label>
+                    </div>
+                    <div class="padding-main"></div>
+                    <h5>Timer</h5>
+                    <div class="card-action"></div>
+                    <div class="height-text">
+                        <label class="float-left">Timer :</label>
+                        <label class="text-number float-right">${timer.time}</label>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
 </template>

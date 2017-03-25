@@ -21,7 +21,6 @@ export class Vision {
         ws.onmessage = function(evt) {
             var data = JSON.parse(evt.data);
 
-
             if (data.image.origin.x !== "") {
                 self.world_information.origin = data.image.origin;
                 self.world_information.ratio = data.image.ratio;
@@ -42,7 +41,7 @@ export class Vision {
                 "position": {
                     "x": robot.position.x,
                     "y": robot.position.y,
-                    "theta": 0
+                    "theta": robot.theta
                 }
             };
 
