@@ -3,8 +3,8 @@ import sys
 from flask import Flask, jsonify, make_response
 from api.gotoposition import gotoposition
 
-from server.api.starttasks import start_tasks
-from server.api.feedbacktask import feedback_task
+from api.starttasks import start_tasks
+from api.feedbacktask import feedback_task
 
 app = Flask(__name__)
 

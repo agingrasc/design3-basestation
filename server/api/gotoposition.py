@@ -18,4 +18,5 @@ def goto_position():
 
     req.post(url=ROBOT_API_URL, json=data)
     send_response = make_response(jsonify(data), 200)
+    send_response.headers['Access-Control-Allow-Origin'] = "*"
     return send_response

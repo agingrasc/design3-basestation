@@ -1,7 +1,7 @@
 import requests as req
 from flask import jsonify, make_response, request, Blueprint
 
-ROBOT_API_URL = "http://192.168.0.27:8080/go-to-position"
+ROBOT_API_URL = "http://192.168.0.27:8080"
 
 start_tasks = Blueprint('start-tasks', __name__)
 
@@ -9,8 +9,8 @@ start_tasks = Blueprint('start-tasks', __name__)
 def start_tasks_():
     data = request.json
 
-    print("starting task " + data["task_id"])
+    print(data)
 
-    req.post(url=ROBOT_API_URL, json=data)
-    send_response = make_response(jsonify(), 200)
+    req.post(url=ROBOT_API_URL + '/start-ai', json=data)
+    send_response = make_response(jsonify({"message": "ok"}))
     return send_response
