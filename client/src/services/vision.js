@@ -31,12 +31,20 @@ export class Vision {
 
             this.informations.obstacles = data.world.obstacles;
 
+            let world = data.world;
+
+            this.informations.worldDimensions = {
+                "width": Math.round(parseFloat(world.base_table.dimension.width)),
+                "length": Math.round(parseFloat(world.base_table.dimension.height)),
+                "unit": world.unit
+            };
+
             // Update robot position
             let robot = data.world.robot;
             this.informations.robot = {
                 "position": {
-                    "x": parseInt(Math.round(robot.position.x)),
-                    "y": parseInt(Math.round(robot.position.y))
+                    "x": Math.round(parseFloat(robot.position.x)),
+                    "y": Math.round(parseFloat(robot.position.y))
                 },
                 "orientation": robot.orientation
             };

@@ -226,11 +226,19 @@ define('services/vision',['exports'], function (exports) {
 
                 _this.informations.obstacles = data.world.obstacles;
 
+                var world = data.world;
+
+                _this.informations.worldDimensions = {
+                    "width": Math.round(parseFloat(world.base_table.dimension.width)),
+                    "length": Math.round(parseFloat(world.base_table.dimension.height)),
+                    "unit": world.unit
+                };
+
                 var robot = data.world.robot;
                 _this.informations.robot = {
                     "position": {
-                        "x": parseInt(Math.round(robot.position.x)),
-                        "y": parseInt(Math.round(robot.position.y))
+                        "x": Math.round(parseFloat(robot.position.x)),
+                        "y": Math.round(parseFloat(robot.position.y))
                     },
                     "orientation": robot.orientation
                 };
@@ -679,7 +687,7 @@ define('text!app.html', ['module'], function(module) { module.exports = "<templa
 define('text!components/competition/competition.html', ['module'], function(module) { module.exports = "<template><require from=\"../world-vision/world-vision-competition\"></require><world-vision-competition></world-vision-competition></template>"; });
 define('text!components/debug/debug.html', ['module'], function(module) { module.exports = "<template><require from=\"../world-vision/world-vision-debug\"></require><require from=\"../informations/informations\"></require><require from=\"../robot-controller/robot-controller\"></require><div class=\"row\"><div class=\"col s12 m12 l6\"><world-vision-debug></world-vision-debug></div><div class=\"col s12 m12 l6\"><informations></informations><robot-controller></robot-controller></div></div></template>"; });
 define('text!components/go-to-position/go-to-position.html', ['module'], function(module) { module.exports = "<template><button class=\"color2 waves-effect waves-light btn\" click.trigger=\"execute()\">Go To Position</button></template>"; });
-define('text!components/informations/informations.html', ['module'], function(module) { module.exports = "<template><div class=\"card\"><div class=\"card-content\"><div class=\"row\"><div class=\"col s6\"><h5>Monde</h5><hr></div><div class=\"col s6\"><h5>Robot</h5><hr><p>Position: <span class=\"text-number\">(${informations.robot.position.x}, ${informations.robot.position.y})</span></p><p>Angle: <span class=\"text-number\">${informations.robot.orientation}</span></p></div><div class=\"col s12\"><h5>Obstacles</h5><hr><div repeat.for=\"obstacle of informations.obstacles\"><div class=\"height-text\"><label class=\"float-left\">Position x :</label><label class=\"text-number float-right\">${obstacle.position.x}</label></div><div class=\"height-text\"><label class=\"float-left\">Position y :</label><label class=\"text-number float-right\">${obstacle.position.y}</label></div><div class=\"height-text\"><label class=\"float-left\">Have to pass :</label><label class=\"text-number float-right\">${obstacle.tag}</label></div><div class=\"height-text\"><label class=\"float-left\">Width :</label><label class=\"text-number float-right\" float-right>${obstacle.dimension.width}</label></div></div></div></div><div class=\"row\"><p>Timer: <span class=\"text-number\">${timer.time}</span></p></div></div></div></template>"; });
+define('text!components/informations/informations.html', ['module'], function(module) { module.exports = "<template><div class=\"card\"><div class=\"card-content\"><div class=\"row\"><div class=\"col s6\"><h5>Monde</h5><hr><p>Dimension: <span class=\"text-number\">${informations.worldDimensions.width} x ${informations.worldDimensions.length} (${informations.worldDimensions.unit})</span></p></div><div class=\"col s6\"><h5>Robot</h5><hr><p>Position: <span class=\"text-number\">(${informations.robot.position.x}, ${informations.robot.position.y})</span></p><p>Angle: <span class=\"text-number\">${informations.robot.orientation}</span></p></div><div class=\"col s12\"><h5>Obstacles</h5><hr><div repeat.for=\"obstacle of informations.obstacles\"><div class=\"height-text\"><label class=\"float-left\">Position x :</label><label class=\"text-number float-right\">${obstacle.position.x}</label></div><div class=\"height-text\"><label class=\"float-left\">Position y :</label><label class=\"text-number float-right\">${obstacle.position.y}</label></div><div class=\"height-text\"><label class=\"float-left\">Have to pass :</label><label class=\"text-number float-right\">${obstacle.tag}</label></div><div class=\"height-text\"><label class=\"float-left\">Width :</label><label class=\"text-number float-right\" float-right>${obstacle.dimension.width}</label></div></div></div></div><div class=\"row\"><p>Timer: <span class=\"text-number\">${timer.time}</span></p></div></div></div></template>"; });
 define('text!components/navbar/navbar.html', ['module'], function(module) { module.exports = "<template><nav><div class=\"nav-wrapper color1\"><img width=\"55px\" height=\"55px\" src=\"./img/robot.png\"><a href=\"#\" class=\"brand-logo center\">Leonard</a><ul id=\"nav-mobile\" class=\"right hide-on-med-and-down\"><li><a href=\"#/competition\">Competition</a></li><li><a href=\"#/debug\">Debug</a></li></ul></div></nav></template>"; });
 define('text!components/robot-controller/robot-controller.html', ['module'], function(module) { module.exports = "<template><div class=\"card\"><div class=\"card-content\"><h5>Robot Controller <span if.bind=\"messageReceived\">${message}</span></h5><div class=\"row\"><select value.bind=\"currentCommand\" style=\"display:block;width:80%;float:left\"><option repeat.for=\"option of options\" value.bind=\"option\">${option}</option></select><button class=\"green btn\" click.trigger=\"sendCommand()\" style=\"margin-left:15px\">Go</button></div></div></div></template>"; });
 define('text!components/stat/stat.html', ['module'], function(module) { module.exports = ""; });
