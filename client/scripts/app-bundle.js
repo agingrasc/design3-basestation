@@ -475,6 +475,45 @@ define('components/navbar/navbar',["exports"], function (exports) {
     _classCallCheck(this, Navbar);
   };
 });
+define('components/robot-controller/robot-controller',['exports'], function (exports) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var RobotController = exports.RobotController = function () {
+    function RobotController() {
+      _classCallCheck(this, RobotController);
+
+      this.currentCommand = null;
+      this.options = ['competition', 'initial-orientation', 'identify-antenna', 'receive-information', 'go-to-image', 'take-picture', 'go-to-draw-zone', 'draw', 'go-out-of-draw-zone', 'light-red-led'];
+    }
+
+    RobotController.prototype.sendCommand = function sendCommand() {
+      var taskId = this.options.indexOf(this.currentCommand).toString();
+      var data = { "tast_id": taskId };
+
+      fetch("http://localhost:12345/start-tasks", {
+        method: "POST",
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      }).then(function (res) {
+        console.log(res);
+      });
+    };
+
+    return RobotController;
+  }();
+});
 define('components/stat/stat',[], function () {
   "use strict";
 });
@@ -597,7 +636,8 @@ define('text!components/debug/debug.html', ['module'], function(module) { module
 define('text!components/go-to-position/go-to-position.html', ['module'], function(module) { module.exports = "<template><button class=\"color2 waves-effect waves-light btn\" click.trigger=\"execute()\">Go To Position</button></template>"; });
 define('text!components/informations/informations.html', ['module'], function(module) { module.exports = "<template><div class=\"col s2 container\"><div class=\"row\"><div class=\"no-right-padding\"><div class=\"card\"><div class=\"card-content center-align component\"><h4>Informations</h4><div class=\"padding-top\"><div class=\"card-content no-padding\"><h5>Obstacles</h5><div class=\"card-action\"></div><div repeat.for=\"obstacle of informations.obstacles\"><div class=\"height-text\"><label class=\"float-left\">Position x :</label><label class=\"text-number float-right\">${obstacle.position.x}</label></div><div class=\"height-text\"><label class=\"float-left\">Position y :</label><label class=\"text-number float-right\">${obstacle.position.y}</label></div><div class=\"height-text\"><label class=\"float-left\">Have to pass :</label><label class=\"text-number float-right\">${obstacle.tag}</label></div><div class=\"height-text\"><label class=\"float-left\">Width :</label><label class=\"text-number float-right\" float-right>${obstacle.dimension.width}</label></div><div class=\"padding-main\"></div></div><h5>Robot</h5><div class=\"card-action\"></div><div class=\"height-text\"><label class=\"float-left\">x :</label><label class=\"text-number float-right\">${informations.robot.position.x}</label></div><div class=\"height-text\"><label class=\"float-left\">y :</label><label class=\"text-number float-right\">${informations.robot.position.y}</label></div><div class=\"height-text\"><label class=\"float-left\">Angle :</label><label class=\"text-number float-right\">${informations.robot.orientation.value}</label></div><div class=\"padding-main\"></div><h5>Timer</h5><div class=\"card-action\"></div><div class=\"height-text\"><label class=\"float-left\">Timer :</label><label class=\"text-number float-right\">${timer.time}</label></div></div></div></div></div></div></div></div></template>"; });
 define('text!components/navbar/navbar.html', ['module'], function(module) { module.exports = "<template><nav><div class=\"nav-wrapper color1\"><img width=\"55px\" height=\"55px\" src=\"./img/robot.png\"><a href=\"#\" class=\"brand-logo center\">Leonard</a><ul id=\"nav-mobile\" class=\"right hide-on-med-and-down\"><li><a href=\"#/competition\">Competition</a></li><li><a href=\"#/debug\">Debug</a></li></ul></div></nav></template>"; });
+define('text!components/robot-controller/robot-controller.html', ['module'], function(module) { module.exports = "<template><div class=\"card\"><div class=\"card-content\"><select value.bind=\"currentCommand\" style=\"display:block;width:150px\"><option repeat.for=\"option of options\" value.bind=\"option\">${option}</option></select><button class=\"green btn\" click.trigger=\"sendCommand()\">Go</button></div></div></template>"; });
 define('text!components/stat/stat.html', ['module'], function(module) { module.exports = ""; });
 define('text!components/world-vision/world-vision-competition.html', ['module'], function(module) { module.exports = "<template><div class=\"container\"><div class=\"row\"><div class=\"col s12 m12\"><div class=\"card\"><div class=\"card-content center-align\"><h3>World Vision</h3><div><div class=\"card-image\"><canvas id=\"${canvasId}\" width=\"640px\" height=\"480px\" style=\"background:url(${imagePath})\"></canvas></div><div class=\"card-content\"><span class=\"equidistant float-left\"><label>Robot position</label><label>x :</label><label class=\"text-number\">${x_position}</label><label>y :</label><label class=\"text-number\">${y_position}</label></span><span class=\"equidistant float-right\"></span></div><div class=\"card-action\"><button class=\"color2 waves-effect waves-light btn\" click.trigger=\"start()\">Start</button></div></div></div></div></div></div></div></template>"; });
-define('text!components/world-vision/world-vision-debug.html', ['module'], function(module) { module.exports = "<template><require from=\"../go-to-position/go-to-position\"></require><style>canvas{cursor:crosshair}</style><div class=\"col s6 container\"><div class=\"row\"><div class=\"side-padding\"><div class=\"card\"><div class=\"card-content center-align component\"><h4>World Vision</h4><div><div class=\"card-image\"><img id=\"${canvasId}\" width=\"640px\" height=\"400px\" src=\"${visionProperties.imagePath}\"></div><div class=\"card-content\"><span class=\"equidistant float-left\"><label>Mouse position</label><label>x :</label><label class=\"text-number\">${x_position}</label><label>y :</label><label class=\"text-number\">${y_position}</label></span><span class=\"equidistant float-right\"><label>Chosen position</label><label>x :</label><label class=\"text-number\">${chosen_x_position}</label><label>y :</label><label class=\"text-number\">${chosen_y_position}</label></span><div><label>Theta :</label><input value.bind=\"theta\" placeholder=\"theta\"></div></div><div class=\"padding-main\"></div><div class=\"card-action\"><go-to-position x-position=\"${chosen_x_position}\" y-position=\"${chosen_y_position}\" theta=\"${theta}\"></go-to-position></div></div></div></div></div></div></div></template>"; });
+define('text!components/world-vision/world-vision-debug.html', ['module'], function(module) { module.exports = "<template><require from=\"../go-to-position/go-to-position\"></require><require from=\"../robot-controller/robot-controller\"></require><style>canvas{cursor:crosshair}</style><div class=\"col s6 container\"><div class=\"row\"><div class=\"side-padding\"><div class=\"card\"><div class=\"card-content center-align component\"><h4>World Vision</h4><div><div class=\"card-image\"><img id=\"${canvasId}\" width=\"640px\" height=\"400px\" src=\"${visionProperties.imagePath}\"></div><div class=\"card-content\"><span class=\"equidistant float-left\"><label>Mouse position</label><label>x :</label><label class=\"text-number\">${x_position}</label><label>y :</label><label class=\"text-number\">${y_position}</label></span><span class=\"equidistant float-right\"><label>Chosen position</label><label>x :</label><label class=\"text-number\">${chosen_x_position}</label><label>y :</label><label class=\"text-number\">${chosen_y_position}</label></span><div><label>Theta :</label><input value.bind=\"theta\" placeholder=\"theta\"></div></div><div class=\"padding-main\"></div><div class=\"card-action\"><go-to-position x-position=\"${chosen_x_position}\" y-position=\"${chosen_y_position}\" theta=\"${theta}\"></go-to-position></div></div></div></div></div></div></div><div class=\"col s6\"><robot-controller></robot-controller></div></template>"; });
 //# sourceMappingURL=app-bundle.js.map

@@ -1,0 +1,10 @@
+<template>
+  <div class="card">
+    <div class="card-content">
+      <select value.bind="currentCommand" style="display: block; width: 150px">
+        <option repeat.for="option of options" value.bind="option">${option}</option>
+      </select>
+      <button class='green btn' click.trigger="sendCommand()">Go</button>
+    </div>
+  </div>
+</template>

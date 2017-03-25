@@ -1,5 +1,6 @@
 <template>
     <require from="../go-to-position/go-to-position"></require>
+    <require from="../robot-controller/robot-controller"></require>
     <style>
         canvas {
             cursor: crosshair
@@ -44,5 +45,8 @@
                 </div>
             </div>
         </div>
+    </div>
+    <div class="col s6">
+        <robot-controller></robot-controller>
     </div>
 </template>
