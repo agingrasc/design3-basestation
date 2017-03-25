@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 import sys
 from flask import Flask, jsonify, make_response
-from api.gotoposition import gotoposition
 
+from api.gotoposition import gotoposition
 from api.starttasks import start_tasks
 from api.feedbacktask import feedback_task
 
