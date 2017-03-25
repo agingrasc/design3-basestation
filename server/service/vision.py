@@ -50,6 +50,7 @@ class VisionWebSocketHandler(websocket.WebSocketHandler):
 def update_robot_position(message_data):
     ROBOT_POSITION['x'] = message_data["world"]["robot"]["position"]['x']
     ROBOT_POSITION['y'] = message_data["world"]["robot"]["position"]['y']
+    ROBOT_POSITION['theta'] = message_data["world"]["robot"]['orientation']
 
 
 def update_global_data(message_data):

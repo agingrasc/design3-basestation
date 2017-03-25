@@ -14,6 +14,7 @@ def goto_position():
     data = request.json
 
     data['destination']['theta'] = str(np.deg2rad(float(data['destination']['theta'])))
+    print(data)
 
     req.post(url=ROBOT_API_URL, json=data)
     send_response = make_response(jsonify(data), 200)
