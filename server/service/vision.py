@@ -33,9 +33,10 @@ class VisionWebSocketHandler(websocket.WebSocketHandler):
         if visionformat.REGISTER_VISION_DATA == message[visionformat.HEADERS]:
             register_vision_data(self)
         if message[visionformat.HEADERS] == "pull_robot_position":
-            print("Asking robot position")
             print(ROBOT_POSITION)
             self.write_message(ROBOT_POSITION)
+        if message['headers'] == 'feedback_receive':
+            print(message)
 
     def on_close(self):
         if any(self == connection for connection in REGISTERS_TO_VISION_DATA):
