@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 import sys
+
+import requests
 from flask import Flask, jsonify, make_response
 
 from api.gotoposition import gotoposition
@@ -14,6 +16,7 @@ app.register_blueprint(feedback_task)
 
 PORT = 12345
 
+
 @app.after_request
 def after_request(data):
     response = make_response(data)
@@ -24,12 +27,27 @@ def after_request(data):
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE'
     return response
 
+
 def bad_request(error):
     return make_response(jsonify({'error': 'Bad Request'}), 400)
+
+
+@app.route('/obstacles', methods=["GET"])
+def get_obstacles():
+    obstacles_response = requests.get('http://0.0.0.0:5000/obstacles')
+    return make_response(jsonify(obstacles_response.json()))
+
+
+@app.route('/world-dimensions', methods=["GET"])
+def get_world_dimensions():
+    world_dimensions_response = requests.get('http://0.0.0.0:5000/world-dimensions')
+    return make_response(jsonify(world_dimensions_response.json()))
+
 
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'error': 'Not Found'}), 404)
+
 
 if __name__ == '__main__':
     url = sys.argv[1]
