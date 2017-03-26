@@ -18,12 +18,12 @@ export class RobotController {
 
   sendCommand() {
     const taskId = this.options.indexOf(this.currentCommand).toString();
-    const data = {"task_id": taskId};
+    const data = {'task_id': taskId};
 
     this.messageReceived = false;
 
     fetch("http://localhost:12345/start-tasks", {
-        method: "POST",
+        method: 'POST',
         headers: {
             'content-type': 'application/json'
         },
@@ -32,8 +32,12 @@ export class RobotController {
         return res.json();
     }).then((data) => {
       if (data.message) {
-        this.message = 'Command sent to robot';
+        this.message = 'command sent to robot';
         this.messageReceived = true;
+      }
+
+      if (data.image) {
+        this.segmentedImage = data.image;
       }
     });
 

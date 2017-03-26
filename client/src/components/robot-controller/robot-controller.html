@@ -1,7 +1,7 @@
 <template>
   <div class="card">
     <div class="card-content">
-      <h5>Robot Controller <span if.bind="messageReceived">${message}</span></h5>
+      <h5>Robot Controller <span if.bind="messageReceived" class="chip blue">${message}</span></h5>
 
       <div class="row">
         <select value.bind="currentCommand" style="display: block; width: 80%; float: left;">
@@ -10,6 +10,7 @@
         <button class='green btn' click.trigger="sendCommand()" style="margin-left: 15px;">Go</button>
       </div>
 
+      <img src="data:image/png;base64,${segmentedImage}">
     </div>
   </div>
 </template>

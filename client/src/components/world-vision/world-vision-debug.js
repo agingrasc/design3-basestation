@@ -66,7 +66,9 @@ export class WorldVisionDebug {
             },
             mode: 'no-cors'
         }).then(function (response) {
-            console.log(response);
+            return response.json();
+        }).then(function(message) {
+            console.log(message);
         }).catch(function (err) {
             console.log(err);
         });

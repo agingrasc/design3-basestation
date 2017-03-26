@@ -7,6 +7,7 @@ from flask import Flask, jsonify, make_response
 from api.gotoposition import gotoposition
 from api.starttasks import start_tasks
 from api.feedbacktask import feedback_task
+from flask import request
 
 app = Flask(__name__)
 
@@ -36,6 +37,13 @@ def bad_request(error):
 def get_obstacles():
     obstacles_response = requests.get('http://0.0.0.0:5000/obstacles')
     return make_response(jsonify(obstacles_response.json()))
+
+
+@app.route('/path', methods=["POST"])
+def create_path():
+    data = request.json
+    requests.post('http://0.0.0.0:5000/path', json=data)
+    return make_response(jsonify({"message": "ok"}))
 
 
 @app.route('/world-dimensions', methods=["GET"])

@@ -26,9 +26,20 @@
                 </div>
 
                 <div class="col s6">
-                    <p>Next destination --> <span class="text-number">(${chosen_x_position}, ${chosen_y_position})</span></p>
-                    <input value.bind="theta" placeholder="theta">
-                    <go-to-position x-position="${chosen_x_position}" y-position="${chosen_y_position}" theta="${theta}"></go-to-position>
+                    <div class="row">
+                        <p>Next destination --> <span class="text-number">(${chosen_x_position}, ${chosen_y_position})</span></p>
+                        <input value.bind="theta" placeholder="theta">
+                    </div>
+
+                    <ul class="collection center-align">
+                        <li class="collection-item">
+                            <go-to-position x-position="${chosen_x_position}" y-position="${chosen_y_position}" theta="${theta}" pathfinder="true"></go-to-position>
+                        </li>
+
+                        <li class="collection-item">
+                            <go-to-position x-position="${chosen_x_position}" y-position="${chosen_y_position}" theta="${theta}"></go-to-position>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>

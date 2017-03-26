@@ -8,10 +8,12 @@
                     <hr>
                     <p>Dimension: <span class="text-number">${informations.worldDimensions.width} x ${informations.worldDimensions.length} (${informations.worldDimensions.unit})</span></p>
                 </div>
+
                 <div class="col s6">
                     <h5>Robot</h5>
                     <hr>
-                    <p>Position: <span class="text-number">(${informations.robot.position.x}, ${informations.robot.position.y})</span> </p>
+                    <p>Position x: <span class="text-number">${informations.robot.position.x}</span> </p>
+                    <p>Position y: <span class="text-number">${informations.robot.position.y}</span> </p>
                     <p>Angle: <span class="text-number">${informations.robot.orientation}</span></p>
                 </div>
 
@@ -19,22 +21,8 @@
                     <h5>Obstacles</h5>
                     <hr>
                     <div repeat.for="obstacle of informations.obstacles">
-                        <div class="height-text">
-                            <label class="float-left">Position x :</label>
-                            <label class="text-number float-right">${obstacle.position.x}</label>
-                        </div>
-                        <div class="height-text">
-                            <label class="float-left">Position y :</label>
-                            <label class="text-number float-right">${obstacle.position.y}</label>
-                        </div>
-                        <div class="height-text">
-                            <label class="float-left">Have to pass :</label>
-                            <label class="text-number float-right">${obstacle.tag}</label>
-                        </div>
-                        <div class="height-text">
-                            <label class="float-left">Width :</label>
-                            <label class="text-number float-right" float-right>${obstacle.dimension.width}</label>
-                        </div>
+                        <p>Position:  <span class="text-number">(${obstacle.position.x}, ${obstacle.position.y})</span></p>
+                        <p>Tag: <span class="text-number">${obstacle.tag}</span></p>
                     </div>
                 </div>
             </div>

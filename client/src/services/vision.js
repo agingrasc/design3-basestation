@@ -12,7 +12,8 @@ export class Vision {
         let ws = new WebSocket('ws://localhost:3000');
 
         ws.onopen = () => {
-            ws.send(JSON.stringify({'headers': 'register_vision_data'}));
+            let robotPositionRegisterMessage = JSON.stringify({'headers': 'register_vision_data'});
+            ws.send(robotPositionRegisterMessage);
         };
 
         ws.onmessage = (evt) => {
@@ -26,7 +27,7 @@ export class Vision {
             }
 
             window.requestAnimationFrame(() => {
-                this.imageView.imagePath = "data:image/png;base64," + data.image.data;
+                this.imageView.imagePath = 'data:image/png;base64,' + data.image.data;
             });
 
             this.informations.obstacles = data.world.obstacles;
@@ -34,26 +35,26 @@ export class Vision {
             let world = data.world;
 
             this.informations.worldDimensions = {
-                "width": Math.round(parseFloat(world.base_table.dimension.width)),
-                "length": Math.round(parseFloat(world.base_table.dimension.height)),
-                "unit": world.unit
+                'width': Math.round(parseFloat(world.base_table.dimension.width)),
+                'length': Math.round(parseFloat(world.base_table.dimension.height)),
+                'unit': world.unit
             };
 
             // Update robot position
             let robot = data.world.robot;
             this.informations.robot = {
-                "position": {
-                    "x": Math.round(parseFloat(robot.position.x)),
-                    "y": Math.round(parseFloat(robot.position.y))
+                'position': {
+                    'x': robot.position.x,
+                    'y': robot.position.y
                 },
-                "orientation": robot.orientation
+                'orientation': robot.orientation
             };
 
             this.goto.robot = {
-                "position": {
-                    "x": robot.position.x,
-                    "y": robot.position.y,
-                    "theta": robot.theta
+                'position': {
+                    'x': robot.position.x,
+                    'y': robot.position.y,
+                    'theta': robot.theta
                 }
             };
 
