@@ -2,7 +2,6 @@
     <require from="../go-to-position/go-to-position"></require>
     <require from="../robot-controller/robot-controller"></require>
 
-
     <div class="card">
         <div class="card-content">
             <div class="row">
@@ -15,14 +14,8 @@
             <div class="row">
                 <div class="col s6">
                     <p>Mouse position: <span class="text-number">(${x_position}, ${y_position})</span></p>
-                    <ul class="collection center-align">
-                        <li class="collection-item">
-                            <button class="blue btn" click.trigger="resetPathRendering()">Reset path rendering</button>
-                        </li>
-                        <li class="collection-item">
-                            <button class="green btn" click.trigger="resetDetection()">Reset detection</button>
-                        </li>
-                    </ul>
+
+                    <button class="indigo btn" click.trigger="resetPathRendering()">Reset path rendering</button>
                 </div>
 
                 <div class="col s6">
@@ -44,6 +37,5 @@
             </div>
         </div>
     </div>
-
 
 </template>

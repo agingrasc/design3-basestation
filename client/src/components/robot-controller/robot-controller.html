@@ -4,13 +4,22 @@
       <h5>Robot Controller <span if.bind="messageReceived" class="chip blue">${message}</span></h5>
 
       <div class="row">
-        <select value.bind="currentCommand" style="display: block; width: 80%; float: left;">
+        <select value.bind="currentCommand" change.trigger="onChange()" style="display: block; width: 80%; float: left;">
           <option repeat.for="option of options" value.bind="option">${option}</option>
         </select>
-        <button class='green btn' click.trigger="sendCommand()" style="margin-left: 15px;">Go</button>
+        <button class='cyan btn' click.trigger="sendCommand()" style="margin-left: 15px;">Go</button>
       </div>
 
-      <img src="data:image/png;base64,${segmentedImage}">
+      <div class="row" if.bind="takePicture">
+        <input class="with-gap" type="checkbox" id="fakeSegmentation" checked.bind="fakeSegmentation"/>
+        <label for="fakeSegmentation">Fake Segmentation</label>
+      </div>
+
+      <div if.bind="showImage">
+        <img if.bind="segmentedImage" src="data:image/png;base64,${segmentedImage}" width="640px" height="640px">
+        <img if.bind="!segmentedImage" src="img/default-placeholder.png" alt="" width="640px" height="640px">
+        <img if.bind="segmentedImage" src="data:image/png;base64,${thresholdedImage}" width="640px" height="640px">
+      </div>
     </div>
   </div>
 </template>

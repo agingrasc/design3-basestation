@@ -27,7 +27,7 @@ export class Vision {
             }
 
             window.requestAnimationFrame(() => {
-                this.imageView.imagePath = 'data:image/png;base64,' + data.image.data;
+                this.imageView.imagePath = 'data:image/jpeg;base64,' + data.image.data;
             });
 
             this.informations.obstacles = data.world.obstacles;

@@ -58,21 +58,7 @@ export class WorldVisionDebug {
         });
     }
 
-    resetDetection() {
-        fetch('http://0.0.0.0:5000/vision/reset-detection', {
-            method: "POST",
-            headers: {
-                'content-type': 'application/json'
-            },
-            mode: 'no-cors'
-        }).then(function (response) {
-            return response.json();
-        }).then(function(message) {
-            console.log(message);
-        }).catch(function (err) {
-            console.log(err);
-        });
-    }
+
 
     getMousePos(canvas, evt) {
         let rect = canvas.getBoundingClientRect();

@@ -21,18 +21,17 @@
                     <h5>Obstacles</h5>
                     <hr>
                     <div repeat.for="obstacle of informations.obstacles">
-                        <p>Position:  <span class="text-number">(${obstacle.position.x}, ${obstacle.position.y})</span></p>
-                        <p>Tag: <span class="text-number">${obstacle.tag}</span></p>
+                        <div class="col s6">
+                            <p>Position: <span class="text-number">(${obstacle.position.x}, ${obstacle.position.y})</span></p>
+                            <p>Tag: <span class="text-number">${obstacle.tag}</span></p>
+                        </div>
                     </div>
                 </div>
             </div>
-
             <div class="row">
-                <p>Timer: <span class="text-number">${timer.time}</span></p>
+                <button class="green btn" click.trigger="resetDetection()">Reset detection</button>
             </div>
         </div>
-
-
     </div>
 
 </template>
