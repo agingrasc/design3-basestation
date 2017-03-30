@@ -29,7 +29,7 @@ def after_request(data):
     return response
 
 
-def bad_request(error):
+def bad_request():
     return make_response(jsonify({'error': 'Bad Request'}), 400)
 
 
@@ -53,7 +53,7 @@ def get_world_dimensions():
 
 
 @app.errorhandler(404)
-def not_found(error):
+def not_found():
     return make_response(jsonify({'error': 'Not Found'}), 404)
 
 
