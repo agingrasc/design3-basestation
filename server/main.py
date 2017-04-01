@@ -1,19 +1,18 @@
 #!/usr/bin/env python
 import sys
 
-import requests
 from flask import Flask, jsonify, make_response
-
 from api.gotoposition import gotoposition
 from api.starttasks import start_tasks
 from api.feedbacktask import feedback_task
-from flask import request
+from api.visiongateway import vision_gateway
 
 app = Flask(__name__)
 
 app.register_blueprint(gotoposition)
 app.register_blueprint(start_tasks)
 app.register_blueprint(feedback_task)
+app.register_blueprint(vision_gateway)
 
 PORT = 12345
 
@@ -31,25 +30,6 @@ def after_request(data):
 
 def bad_request():
     return make_response(jsonify({'error': 'Bad Request'}), 400)
-
-
-@app.route('/obstacles', methods=["GET"])
-def get_obstacles():
-    obstacles_response = requests.get('http://0.0.0.0:5000/obstacles')
-    return make_response(jsonify(obstacles_response.json()))
-
-
-@app.route('/path', methods=["POST"])
-def create_path():
-    data = request.json
-    requests.post('http://0.0.0.0:5000/path', json=data)
-    return make_response(jsonify({"message": "ok"}))
-
-
-@app.route('/world-dimensions', methods=["GET"])
-def get_world_dimensions():
-    world_dimensions_response = requests.get('http://0.0.0.0:5000/world-dimensions')
-    return make_response(jsonify(world_dimensions_response.json()))
 
 
 @app.errorhandler(404)
