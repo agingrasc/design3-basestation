@@ -22,6 +22,8 @@ TASKS_INFORMATION["data"][visionformat.TASK_GO_TO_IMAGE] = "False"
 TASKS_INFORMATION["data"][visionformat.TASK_IDENTEFIE_ANTENNA] = "False"
 TASKS_INFORMATION["data"][visionformat.TASK_RECEIVE_INFORMATION] = "False"
 TASKS_INFORMATION["data"][visionformat.TASK_TAKE_PICTURE] = "False"
+TASKS_INFORMATION["data"][visionformat.TASK_INITIAL_ORIENTATION] = "False"
+TASKS_INFORMATION["data"][visionformat.TASK_LIGHT_RED_LED] = "False"
 
 
 class VisionWebSocketHandler(websocket.WebSocketHandler):
