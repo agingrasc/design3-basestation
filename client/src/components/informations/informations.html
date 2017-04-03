@@ -27,6 +27,21 @@
                         </div>
                     </div>
                 </div>
+                <div class="col s12">
+                    <h5>Tâches</h5>
+                    <hr>
+                    <div class="col s6">
+                        <p>Identifie antenna:<span class="text-number">${task_information.data.data.identifie_antenna}</span></p>
+                        <p>Receive informations:<span class="text-number">${task_information.data.data.receive_informations}</span></p>
+                        <p>Go to image:<span class="text-number">${task_information.data.data.go_to_image}</span></p>
+                        <p>Take picture:<span class="text-number">${task_information.data.data.take_picture}</span></p>
+                    </div>
+                    <div class="col s6">
+                        <p>Go to drawing zone:<span class="text-number">${task_information.data.data.go_to_drawing_zone}</span></p>
+                        <p>Draw image:<span class="text-number">${task_information.data.data.draw_image}</span></p>
+                        <p>Go out of drawing zone:<span class="text-number">${task_information.data.data.go_out_of_drawing_zone}</span></p>
+                    </div>
+                </div>
             </div>
             <div class="row">
                 <button class="green btn" click.trigger="resetDetection()">Reset detection</button>

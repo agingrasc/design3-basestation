@@ -11,17 +11,24 @@ import {
     Timer
 } from '../../services/timer';
 
-@inject(Vision, Timer)
+import {
+    Task
+} from '../../services/task';
+
+@inject(Vision, Timer, Task)
 export class Informations {
-    constructor(vision, timer) {
+    constructor(vision, timer, task) {
         this.timer = timer;
         this.vision = vision;
         this.informations = {};
         this.informations.obstacles = [];
+        this.task = task;
+        this.task_information = {}
     }
 
     attached() {
         this.vision.registerInformations(this.informations);
+        this.task.registerInformations(this.task_information);
     }
 
     resetDetection() {
@@ -31,11 +38,11 @@ export class Informations {
                 'content-type': 'application/json'
             },
             mode: 'no-cors'
-        }).then(function (response) {
+        }).then(function(response) {
             return response.json();
         }).then(function(message) {
             console.log(message);
-        }).catch(function (err) {
+        }).catch(function(err) {
             console.log(err);
         });
     }

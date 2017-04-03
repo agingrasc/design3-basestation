@@ -9,8 +9,19 @@ from tornado import web
 GLOBAL = {}
 GLOBAL[visionformat.PULL_VISION_DATA] = ""
 REGISTERS_TO_VISION_DATA = []
+REGISTERS_TO_TASK_DATA = []
 
 ROBOT_POSITION = {}
+
+TASKS_INFORMATION = {}
+TASKS_INFORMATION["data"] = {}
+TASKS_INFORMATION["data"][visionformat.TASK_DRAW_IMAGE] = "False"
+TASKS_INFORMATION["data"][visionformat.TASK_GO_OUT_OF_DRAWING_ZONE] = "False"
+TASKS_INFORMATION["data"][visionformat.TASK_GO_TO_DRAWING_ZONE] = "False"
+TASKS_INFORMATION["data"][visionformat.TASK_GO_TO_IMAGE] = "False"
+TASKS_INFORMATION["data"][visionformat.TASK_IDENTEFIE_ANTENNA] = "False"
+TASKS_INFORMATION["data"][visionformat.TASK_RECEIVE_INFORMATION] = "False"
+TASKS_INFORMATION["data"][visionformat.TASK_TAKE_PICTURE] = "False"
 
 
 class VisionWebSocketHandler(websocket.WebSocketHandler):
@@ -35,8 +46,11 @@ class VisionWebSocketHandler(websocket.WebSocketHandler):
         if message[visionformat.HEADERS] == "pull_robot_position":
             print(ROBOT_POSITION)
             self.write_message(ROBOT_POSITION)
-        if message['headers'] == 'feedback_receive':
-            print(message)
+        if message[visionformat.HEADERS] == "push_tasks_information":
+            print("push_tasks_information")
+            push_tasks_information(self, message)
+        if message[visionformat.HEADERS] == "register_task_data":
+            register_task_data(self)
 
     def on_close(self):
         if any(self == connection for connection in REGISTERS_TO_VISION_DATA):
@@ -78,6 +92,20 @@ def pull_vision_data(connection):
 def register_vision_data(connection):
     REGISTERS_TO_VISION_DATA.append(connection)
     connection.write_message(GLOBAL[visionformat.PULL_VISION_DATA])
+
+
+def register_task_data(connection):
+    REGISTERS_TO_TASK_DATA.append(connection)
+    connection.write_message(TASKS_INFORMATION)
+
+
+def push_tasks_information(connection, message):
+    message_data = message[visionformat.DATA]
+    TASKS_INFORMATION["data"][message_data["task_name"]] = "True"
+    print(message_data["task_name"])
+    connection.write_message("Ok")
+    for connection in REGISTERS_TO_TASK_DATA:
+        connection.write_message(TASKS_INFORMATION)
 
 
 APPLICATION = web.Application([
