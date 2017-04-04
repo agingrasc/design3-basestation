@@ -53,7 +53,6 @@ class VisionWebSocketHandler(websocket.WebSocketHandler):
             print(ROBOT_POSITION)
             self.write_message(ROBOT_POSITION)
         if message[visionformat.HEADERS] == "push_tasks_information":
-            print("push_tasks_information")
             push_tasks_information(self, message)
         if message[visionformat.HEADERS] == "register_task_data":
             register_task_data(self)
@@ -67,6 +66,10 @@ class VisionWebSocketHandler(websocket.WebSocketHandler):
     def on_close(self):
         if any(self == connection for connection in REGISTERS_TO_VISION_DATA):
             REGISTERS_TO_VISION_DATA.remove(self)
+
+        if any(self == connection for connection in REGISTERS_TO_TASK_DATA):
+            REGISTERS_TO_TASK_DATA.remove(self)
+
         print("Connection closed: {}\n".format(datetime.now()))
 
     def check_origin(self, origin):
@@ -114,7 +117,6 @@ def register_task_data(connection):
 def push_tasks_information(connection, message):
     message_data = message[visionformat.DATA]
     TASKS_INFORMATION["data"][message_data["task_name"]] = "True"
-    print(message_data["task_name"])
     connection.write_message("Ok")
     for connection in REGISTERS_TO_TASK_DATA:
         connection.write_message(TASKS_INFORMATION)
