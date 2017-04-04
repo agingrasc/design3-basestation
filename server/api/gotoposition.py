@@ -2,6 +2,8 @@ import numpy as np
 import requests as req
 from flask import jsonify, make_response, request, Blueprint
 
+from api.starttasks import send_own_url
+
 ROBOT_API_BASE_URL = "http://192.168.0.27:8080{}"
 
 gotoposition = Blueprint('goto_position', __name__)
@@ -22,6 +24,7 @@ def relay_to_robot(endpoint, payload):
 
 @gotoposition.route("/go-to-position", methods=['POST'])
 def goto_position():
+    send_own_url()
     payload = validate_payload(request.json)
     robot_confirm = relay_to_robot("/go-to-position", payload).json()
     send_response = make_response(jsonify(payload), 200)
@@ -30,6 +33,7 @@ def goto_position():
 
 @gotoposition.route('/go-to-pathfinder', methods=["POST"])
 def go_to_pathfinder():
+    send_own_url()
     payload = validate_payload(request.json)
     robot_confirm = relay_to_robot("/go-to-pathfinder", payload).json()
     send_response = make_response(jsonify(payload), 200)
