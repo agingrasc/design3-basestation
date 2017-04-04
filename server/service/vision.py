@@ -14,22 +14,26 @@ REGISTERS_TO_TASK_DATA = []
 ROBOT_POSITION = {}
 
 TASKS_INFORMATION = {}
-TASKS_INFORMATION["data"] = {}
-TASKS_INFORMATION["data"][visionformat.TASK_DRAW_IMAGE] = "False"
-TASKS_INFORMATION["data"][visionformat.TASK_GO_OUT_OF_DRAWING_ZONE] = "False"
-TASKS_INFORMATION["data"][visionformat.TASK_GO_TO_DRAWING_ZONE] = "False"
-TASKS_INFORMATION["data"][visionformat.TASK_GO_TO_IMAGE] = "False"
-TASKS_INFORMATION["data"][visionformat.TASK_IDENTEFIE_ANTENNA] = "False"
-TASKS_INFORMATION["data"][visionformat.TASK_RECEIVE_INFORMATION] = "False"
-TASKS_INFORMATION["data"][visionformat.TASK_TAKE_PICTURE] = "False"
-TASKS_INFORMATION["data"][visionformat.TASK_INITIAL_ORIENTATION] = "False"
-TASKS_INFORMATION["data"][visionformat.TASK_LIGHT_RED_LED] = "False"
+
+
+def initialize_task_info():
+    TASKS_INFORMATION["data"] = {}
+    TASKS_INFORMATION["data"][visionformat.TASK_DRAW_IMAGE] = "False"
+    TASKS_INFORMATION["data"][visionformat.TASK_GO_OUT_OF_DRAWING_ZONE] = "False"
+    TASKS_INFORMATION["data"][visionformat.TASK_GO_TO_DRAWING_ZONE] = "False"
+    TASKS_INFORMATION["data"][visionformat.TASK_GO_TO_IMAGE] = "False"
+    TASKS_INFORMATION["data"][visionformat.TASK_IDENTEFIE_ANTENNA] = "False"
+    TASKS_INFORMATION["data"][visionformat.TASK_RECEIVE_INFORMATION] = "False"
+    TASKS_INFORMATION["data"][visionformat.TASK_TAKE_PICTURE] = "False"
+    TASKS_INFORMATION["data"][visionformat.TASK_INITIAL_ORIENTATION] = "False"
+    TASKS_INFORMATION["data"][visionformat.TASK_LIGHT_RED_LED] = "False"
 
 
 class VisionWebSocketHandler(websocket.WebSocketHandler):
     def initialize(self):
         self.vision_data = ""
         self.connections = []
+        initialize_task_info()
         print("{} initialized: {}\n".format(type(self).__name__, datetime.now()))
 
     def open(self):
@@ -53,6 +57,12 @@ class VisionWebSocketHandler(websocket.WebSocketHandler):
             push_tasks_information(self, message)
         if message[visionformat.HEADERS] == "register_task_data":
             register_task_data(self)
+        if message[visionformat.HEADERS] == "new_round":
+            initialize_task_info()
+            TASKS_INFORMATION["data"][visionformat.TASK_IDENTEFIE_ANTENNA] = "True"
+            TASKS_INFORMATION["data"][visionformat.TASK_INITIAL_ORIENTATION] = "True"
+            for connection in REGISTERS_TO_TASK_DATA:
+                connection.write_message(TASKS_INFORMATION)
 
     def on_close(self):
         if any(self == connection for connection in REGISTERS_TO_VISION_DATA):
