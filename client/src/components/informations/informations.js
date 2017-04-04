@@ -23,7 +23,7 @@ export class Informations {
         this.informations = {};
         this.informations.obstacles = [];
         this.task = task;
-        this.task_information = {}
+        this.task_information = [];
     }
 
     attached() {
@@ -45,5 +45,9 @@ export class Informations {
         }).catch(function(err) {
             console.log(err);
         });
+    }
+
+    colorFor(task) {
+        return 'red-text';
     }
 }

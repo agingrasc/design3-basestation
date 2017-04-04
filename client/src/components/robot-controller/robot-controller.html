@@ -21,10 +21,17 @@
       </div>
 
       <div class="row" if.bind="takePicture">
-        <input class="with-gap" type="checkbox" id="fakeSegmentation" checked.bind="fakeSegmentation"/>
-        <label for="fakeSegmentation">Fake Segmentation</label>
-        <select value.bind="currentScaling" style="display: block; width: 80%; float: left;">
+        <div>
+          <input class="with-gap" type="checkbox" id="fakeSegmentation" checked.bind="fakeSegmentation" />
+          <label for="fakeSegmentation">Fake Segmentation</label>
+        </div>
+
+        <select value.bind="currentScaling" style="display: block; width: 50%; float: left;">
           <option repeat.for="scaling of scalings" model.bind="scaling">${scaling.name}</option>
+        </select>
+
+        <select value.bind="currentOrientation" style="display: block; width: 50%; float: left;">
+          <option repeat.for="orientation of orientations" model.bind="orientation">${orientation.name}</option>
         </select>
       </div>
 

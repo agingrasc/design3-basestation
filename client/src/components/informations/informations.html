@@ -30,18 +30,10 @@
                 <div class="col s12">
                     <h5>Tâches</h5>
                     <hr>
-                    <div class="col s6">
-                        <p>Intitial orientation:<span class="text-number">${task_information.data.data.intitial_orientation}</span></p>
-                        <p>Identifie antenna:<span class="text-number">${task_information.data.data.identifie_antenna}</span></p>
-                        <p>Receive informations:<span class="text-number">${task_information.data.data.receive_informations}</span></p>
-                        <p>Go to image:<span class="text-number">${task_information.data.data.go_to_image}</span></p>
-                        <p>Take picture:<span class="text-number">${task_information.data.data.take_picture}</span></p>
-                    </div>
-                    <div class="col s6">
-                        <p>Go to drawing zone:<span class="text-number">${task_information.data.data.go_to_drawing_zone}</span></p>
-                        <p>Draw image:<span class="text-number">${task_information.data.data.draw_image}</span></p>
-                        <p>Go out of drawing zone:<span class="text-number">${task_information.data.data.go_out_of_drawing_zone}</span></p>
-                        <p>Light red led:<span class="text-number">${task_information.data.data.light_red_led}</span></p>
+                    <div class="col s12">
+                        <div repeat.for="task of task_information">
+                            <p>${task.name}: <span class=${task.color}>${task.done}</span></p>
+                        </div>
                     </div>
                 </div>
             </div>

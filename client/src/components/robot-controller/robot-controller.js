@@ -12,6 +12,7 @@ export class RobotController {
     this.timer = timer;
     this.currentCommand = null;
     this.currentScaling = null;
+    this.currentOrientation = null;
     this.messageReceived = false;
     this.showImage = true;
     this.fakeSegmentation = false;
@@ -37,6 +38,13 @@ export class RobotController {
       { 'value': '1', 'name': '4' },
       { 'value': '0.5', 'name': '2' }
     ];
+
+    this.orientations = [
+      { 'value': '0', 'name': 'SUD' },
+      { 'value': '180', 'name': 'NORD'},
+      { 'value': '270', 'name': 'EST' },
+      { 'value': '90', 'name': 'WEST'}
+    ];
   }
 
   sendCommand() {
@@ -45,6 +53,7 @@ export class RobotController {
 
     if (this.currentScaling) {
       data.scaling = this.currentScaling.value;
+      data.orientation = this.currentOrientation.value;
     }
 
     if (isTakePicture(taskId) && this.fakeSegmentation) {
