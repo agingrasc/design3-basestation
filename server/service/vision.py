@@ -6,69 +6,87 @@ from tornado import ioloop
 from tornado import websocket
 from tornado import web
 
-GLOBAL = {}
-GLOBAL[visionformat.PULL_VISION_DATA] = ""
-REGISTERS_TO_VISION_DATA = []
-REGISTERS_TO_TASK_DATA = []
+REGISTERED_TO_VISION_DATA = []
+REGISTERED_TO_TASK_DATA = []
 
 ROBOT_POSITION = {}
 
-TASKS_INFORMATION = {}
+GLOBAL = {
+    visionformat.PULL_VISION_DATA: ""
+}
 
 
 def initialize_task_info():
-    TASKS_INFORMATION["data"] = {}
-    TASKS_INFORMATION["data"][visionformat.TASK_DRAW_IMAGE] = "False"
-    TASKS_INFORMATION["data"][visionformat.TASK_GO_OUT_OF_DRAWING_ZONE] = "False"
-    TASKS_INFORMATION["data"][visionformat.TASK_GO_TO_DRAWING_ZONE] = "False"
-    TASKS_INFORMATION["data"][visionformat.TASK_GO_TO_IMAGE] = "False"
-    TASKS_INFORMATION["data"][visionformat.TASK_IDENTEFIE_ANTENNA] = "False"
-    TASKS_INFORMATION["data"][visionformat.TASK_RECEIVE_INFORMATION] = "False"
-    TASKS_INFORMATION["data"][visionformat.TASK_TAKE_PICTURE] = "False"
-    TASKS_INFORMATION["data"][visionformat.TASK_INITIAL_ORIENTATION] = "False"
-    TASKS_INFORMATION["data"][visionformat.TASK_LIGHT_RED_LED] = "False"
+    return {
+        "data": {
+            visionformat.TASK_DRAW_IMAGE: "False",
+            visionformat.TASK_GO_OUT_OF_DRAWING_ZONE: "False",
+            visionformat.TASK_GO_TO_DRAWING_ZONE: "False",
+            visionformat.TASK_GO_TO_IMAGE: "False",
+            visionformat.TASK_IDENTEFIE_ANTENNA: "False",
+            visionformat.TASK_RECEIVE_INFORMATION: "False",
+            visionformat.TASK_TAKE_PICTURE: "False",
+            visionformat.TASK_INITIAL_ORIENTATION: "False",
+            visionformat.TASK_LIGHT_RED_LED: "False"
+        }
+    }
+
+
+tasks_state = initialize_task_info()
 
 
 class VisionWebSocketHandler(websocket.WebSocketHandler):
-    def initialize(self):
-        self.vision_data = ""
-        self.connections = []
-        initialize_task_info()
+    def __init__(self, application, request, **kwargs):
+        super().__init__(application, request, **kwargs)
+        self._global_state = None
+        self._robot_position = None
+
+    def initialize(self, global_state, robot_position):
+        self._global_state = global_state
+        self._robot_position = robot_position
         print("{} initialized: {}\n".format(type(self).__name__, datetime.now()))
 
     def open(self):
-        print("New connection opened: {}\n".format(datetime.now()))
+        print("New connection opened: {}".format(datetime.now()))
 
     def on_message(self, message_data):
         message = json.loads(message_data)
-        print("{} message receive: {}".format(message[visionformat.HEADERS].upper(), datetime.now()))
+        message_type = message["headers"]
 
-        if visionformat.PUSH_VISION_DATA == message[visionformat.HEADERS]:
+        print("{} -- {}".format(message_type.upper(), datetime.now()))
+
+        if message_type == "register_vision_data":
+            register_to(REGISTERED_TO_VISION_DATA, self)
+
+        if message_type == "register_task_data":
+            register_to(REGISTERED_TO_TASK_DATA, self)
+
+        if message_type == "push_vision_data":
             push_vision_data(self, message)
-        if visionformat.PULL_VISION_DATA == message[visionformat.HEADERS]:
-            pull_vision_data(self)
-        if visionformat.REGISTER_VISION_DATA == message[visionformat.HEADERS]:
-            register_vision_data(self)
-        if message[visionformat.HEADERS] == "pull_robot_position":
-            print(ROBOT_POSITION)
-            self.write_message(ROBOT_POSITION)
-        if message[visionformat.HEADERS] == "push_tasks_information":
+
+        if message_type == "pull_vision_data":
+            self.write_message(self._global_state["pull_vision_data"])
+
+        if message_type == "pull_robot_position":
+            self.write_message(self._robot_position)
+
+        if message_type == "push_tasks_information":
             push_tasks_information(self, message)
-        if message[visionformat.HEADERS] == "register_task_data":
-            register_task_data(self)
-        if message[visionformat.HEADERS] == "new_round":
+
+        if message_type == "new_round":
             initialize_task_info()
-            TASKS_INFORMATION["data"][visionformat.TASK_IDENTEFIE_ANTENNA] = "True"
-            TASKS_INFORMATION["data"][visionformat.TASK_INITIAL_ORIENTATION] = "True"
-            for connection in REGISTERS_TO_TASK_DATA:
-                connection.write_message(TASKS_INFORMATION)
+
+            tasks_state["data"][visionformat.TASK_IDENTEFIE_ANTENNA] = "True"
+            tasks_state["data"][visionformat.TASK_INITIAL_ORIENTATION] = "True"
+
+            notify_all(REGISTERED_TO_TASK_DATA, tasks_state)
 
     def on_close(self):
-        if any(self == connection for connection in REGISTERS_TO_VISION_DATA):
-            REGISTERS_TO_VISION_DATA.remove(self)
+        if self in REGISTERED_TO_VISION_DATA:
+            REGISTERED_TO_VISION_DATA.remove(self)
 
-        if any(self == connection for connection in REGISTERS_TO_TASK_DATA):
-            REGISTERS_TO_TASK_DATA.remove(self)
+        if self in REGISTERED_TO_TASK_DATA:
+            REGISTERED_TO_TASK_DATA.remove(self)
 
         print("Connection closed: {}\n".format(datetime.now()))
 
@@ -77,19 +95,19 @@ class VisionWebSocketHandler(websocket.WebSocketHandler):
         return True
 
 
+def update_global_data(message_data):
+    GLOBAL[visionformat.PULL_VISION_DATA] = message_data
+
+
 def update_robot_position(message_data):
     ROBOT_POSITION['x'] = message_data["world"]["robot"]["position"]['x']
     ROBOT_POSITION['y'] = message_data["world"]["robot"]["position"]['y']
     ROBOT_POSITION['theta'] = message_data["world"]["robot"]['orientation']
 
 
-def update_global_data(message_data):
-    GLOBAL[visionformat.PULL_VISION_DATA] = message_data
-
-
-def send_data_to_registered():
-    for connection in REGISTERS_TO_VISION_DATA:
-        connection.write_message(GLOBAL[visionformat.PULL_VISION_DATA])
+def pull_vision_data(connection):
+    message = GLOBAL[visionformat.PULL_VISION_DATA]
+    connection.write_message(message)
 
 
 def push_vision_data(connection, message):
@@ -97,35 +115,33 @@ def push_vision_data(connection, message):
     update_global_data(message_data)
     update_robot_position(message_data)
     connection.write_message("Ok")
-    send_data_to_registered()
-
-
-def pull_vision_data(connection):
-    connection.write_message(GLOBAL[visionformat.PULL_VISION_DATA])
-
-
-def register_vision_data(connection):
-    REGISTERS_TO_VISION_DATA.append(connection)
-    connection.write_message(GLOBAL[visionformat.PULL_VISION_DATA])
-
-
-def register_task_data(connection):
-    REGISTERS_TO_TASK_DATA.append(connection)
-    connection.write_message(TASKS_INFORMATION)
+    notify_all(REGISTERED_TO_VISION_DATA, GLOBAL[visionformat.PULL_VISION_DATA])
 
 
 def push_tasks_information(connection, message):
-    message_data = message[visionformat.DATA]
-    TASKS_INFORMATION["data"][message_data["task_name"]] = "True"
+    message_data = message["data"]
+
+    tasks_state["data"][message_data["task_name"]] = "True"
+
     connection.write_message("Ok")
-    for connection in REGISTERS_TO_TASK_DATA:
-        connection.write_message(TASKS_INFORMATION)
+
+    notify_all(REGISTERED_TO_TASK_DATA, tasks_state)
 
 
-APPLICATION = web.Application([
-    (r"/", VisionWebSocketHandler),
+def notify_all(observers, message):
+    for connection in observers:
+        connection.write_message(message)
+
+
+def register_to(registered, connection):
+    if connection not in registered:
+        registered.append(connection)
+
+
+application = web.Application([
+    web.url(r"/", VisionWebSocketHandler, kwargs={'global_state': GLOBAL, 'robot_position': ROBOT_POSITION})
 ])
 
 if __name__ == "__main__":
-    APPLICATION.listen(3000)
+    application.listen(3000)
     ioloop.IOLoop.instance().start()

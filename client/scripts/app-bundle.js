@@ -192,6 +192,7 @@ define('services/task',['exports'], function (exports) {
     }();
 
     function stringToBoolean(stringBoolean) {
+        console.log(stringBoolean);
         if (stringBoolean === 'True') {
             return true;
         } else {
