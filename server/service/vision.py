@@ -1,39 +1,48 @@
 #!/usr/bin/env python
 from datetime import datetime
 import json
-import visionformat
+
 from tornado import ioloop
 from tornado import websocket
 from tornado import web
 
+from service import visionformat
+
 REGISTERED_TO_VISION_DATA = []
 REGISTERED_TO_TASK_DATA = []
 REGISTERED_TO_IMAGE_SEGMENTATION = []
+REGISTERED_TO_ROBOT_ONLINE = []
 
 ROBOT_POSITION = {}
 
-GLOBAL = {
-    visionformat.PULL_VISION_DATA: ""
+WORLD_STATE = {
+    "pull_vision_data": "",
+    "robot_online": False
 }
 
 
 def initialize_task_info():
     return {
         "data": {
-            visionformat.TASK_DRAW_IMAGE: "False",
-            visionformat.TASK_GO_OUT_OF_DRAWING_ZONE: "False",
-            visionformat.TASK_GO_TO_DRAWING_ZONE: "False",
-            visionformat.TASK_GO_TO_IMAGE: "False",
+            visionformat.TASK_INITIAL_ORIENTATION: "False",
             visionformat.TASK_IDENTEFIE_ANTENNA: "False",
             visionformat.TASK_RECEIVE_INFORMATION: "False",
+            visionformat.TASK_GO_TO_IMAGE: "False",
             visionformat.TASK_TAKE_PICTURE: "False",
-            visionformat.TASK_INITIAL_ORIENTATION: "False",
+            visionformat.TASK_GO_TO_DRAWING_ZONE: "False",
+            visionformat.TASK_DRAW_IMAGE: "False",
+            visionformat.TASK_GO_OUT_OF_DRAWING_ZONE: "False",
             visionformat.TASK_LIGHT_RED_LED: "False"
         }
     }
 
 
 tasks_state = initialize_task_info()
+
+
+def reset_tasks():
+    for key in tasks_state["data"].keys():
+        tasks_state["data"][key] = "False"
 
 
 class VisionWebSocketHandler(websocket.WebSocketHandler):
@@ -59,9 +68,17 @@ class VisionWebSocketHandler(websocket.WebSocketHandler):
 
         if message_type == "register_task_data":
             register_to(REGISTERED_TO_TASK_DATA, self)
+            notify_all(REGISTERED_TO_TASK_DATA, tasks_state)
 
         if message_type == "register_image_segmentation":
             register_to(REGISTERED_TO_IMAGE_SEGMENTATION, self)
+
+        if message_type == "register_robot_online":
+            register_to(REGISTERED_TO_ROBOT_ONLINE, self)
+            if WORLD_STATE["robot_online"]:
+                notify_all(REGISTERED_TO_ROBOT_ONLINE, {"data": "robot_online"})
+            else:
+                notify_all(REGISTERED_TO_ROBOT_ONLINE, {"data": "robot_offline"})
 
         if message_type == "push_vision_data":
             push_vision_data(self, message)
@@ -79,24 +96,28 @@ class VisionWebSocketHandler(websocket.WebSocketHandler):
             notify_all(REGISTERED_TO_IMAGE_SEGMENTATION, message_data)
 
         if message_type == "new_round":
-            initialize_task_info()
+            reset_tasks()
 
             tasks_state["data"][visionformat.TASK_IDENTEFIE_ANTENNA] = "True"
             tasks_state["data"][visionformat.TASK_INITIAL_ORIENTATION] = "True"
 
             notify_all(REGISTERED_TO_TASK_DATA, tasks_state)
 
+        if message_type == "robot_online":
+            WORLD_STATE["robot_online"] = True
+            notify_all(REGISTERED_TO_ROBOT_ONLINE, json.dumps({"data": "robot_online"}))
+
+        if message_type == "robot_offline":
+            WORLD_STATE["robot_online"] = False
+            notify_all(REGISTERED_TO_ROBOT_ONLINE, json.dumps({"data": "robot_offline"}))
+
+        if message_type == "reset_tasks":
+            reset_tasks()
+            notify_all(REGISTERED_TO_TASK_DATA, tasks_state)
+
     def on_close(self):
-        if self in REGISTERED_TO_VISION_DATA:
-            REGISTERED_TO_VISION_DATA.remove(self)
-
-        if self in REGISTERED_TO_TASK_DATA:
-            REGISTERED_TO_TASK_DATA.remove(self)
-
-        if self in REGISTERED_TO_IMAGE_SEGMENTATION:
-            REGISTERED_TO_IMAGE_SEGMENTATION.remove(self)
-
-        print("Connection closed: {}\n".format(datetime.now()))
+        unregister(self)
+        print("Connection closed: {}".format(datetime.now()))
 
     def check_origin(self, origin):
         print(origin)
@@ -104,7 +125,7 @@ class VisionWebSocketHandler(websocket.WebSocketHandler):
 
 
 def update_global_data(message_data):
-    GLOBAL[visionformat.PULL_VISION_DATA] = message_data
+    WORLD_STATE[visionformat.PULL_VISION_DATA] = message_data
 
 
 def update_robot_position(message_data):
@@ -114,7 +135,7 @@ def update_robot_position(message_data):
 
 
 def pull_vision_data(connection):
-    message = GLOBAL[visionformat.PULL_VISION_DATA]
+    message = WORLD_STATE["pull_vision_data"]
     connection.write_message(message)
 
 
@@ -123,7 +144,7 @@ def push_vision_data(connection, message):
     update_global_data(message_data)
     update_robot_position(message_data)
     connection.write_message("Ok")
-    notify_all(REGISTERED_TO_VISION_DATA, GLOBAL[visionformat.PULL_VISION_DATA])
+    notify_all(REGISTERED_TO_VISION_DATA, WORLD_STATE[visionformat.PULL_VISION_DATA])
 
 
 def push_tasks_information(connection, message):
@@ -146,8 +167,22 @@ def register_to(registered, connection):
         registered.append(connection)
 
 
+def unregister(connection):
+    if connection in REGISTERED_TO_VISION_DATA:
+        REGISTERED_TO_VISION_DATA.remove(connection)
+
+    if connection in REGISTERED_TO_TASK_DATA:
+        REGISTERED_TO_TASK_DATA.remove(connection)
+
+    if connection in REGISTERED_TO_IMAGE_SEGMENTATION:
+        REGISTERED_TO_IMAGE_SEGMENTATION.remove(connection)
+
+    if connection in REGISTERED_TO_ROBOT_ONLINE:
+        REGISTERED_TO_ROBOT_ONLINE.remove(connection)
+
+
 application = web.Application([
-    web.url(r"/", VisionWebSocketHandler, kwargs={'global_state': GLOBAL, 'robot_position': ROBOT_POSITION})
+    web.url(r"/", VisionWebSocketHandler, kwargs={'global_state': WORLD_STATE, 'robot_position': ROBOT_POSITION})
 ])
 
 if __name__ == "__main__":

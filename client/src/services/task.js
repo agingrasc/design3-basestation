@@ -17,12 +17,12 @@ export class Task {
             this.tasks.splice(0, this.tasks.length);
 
             for (let taskName in data.data) {
-                let task = data.data[taskName];
+                let taskStatus = data.data[taskName];
 
                 this.tasks.push({
                     'name': snakeToCamel(taskName),
-                    'done': stringToBoolean(data.data[taskName]),
-                    'color': colorFrom(stringToBoolean(data.data[taskName]))
+                    'done': stringToBoolean(taskStatus),
+                    'color': colorFrom(stringToBoolean(taskStatus))
                 });
             }
         };
@@ -44,9 +44,9 @@ function stringToBoolean(stringBoolean) {
 
 function colorFrom(status) {
     if (status) {
-        return 'green-text';
+        return 'green';
     } else {
-        return 'red-text';
+        return 'red';
     }
 }
 

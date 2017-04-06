@@ -1,9 +1,15 @@
 #!/usr/bin/env python
 import sys
+from threading import Thread
+from time import sleep
 
-from flask import Flask, jsonify, make_response
+import requests
+from flask import Flask, jsonify, make_response, json
+from requests import Timeout, ConnectionError
+from websocket import create_connection
+
 from api.gotoposition import gotoposition
-from api.starttasks import start_tasks
+from api.starttasks import start_tasks, BASE_STATION_URL
 from api.feedbacktask import feedback_task
 from api.visiongateway import vision_gateway
 
@@ -37,7 +43,24 @@ def not_found():
     return make_response(jsonify({'error': 'Not Found'}), 404)
 
 
+def send_heartbeat(robot_url, connection):
+    while True:
+        sleep(2)
+
+        try:
+            response = requests.get(url=robot_url, timeout=0.5).json()
+            connection.send(json.dumps({"headers": "robot_online"}))
+        except Exception as e:
+            connection.send(json.dumps({"headers": "robot_offline"}))
+
+
 if __name__ == '__main__':
     url = sys.argv[1]
-    ROBOT_API_URL = url
+    ROBOT_IP_ADRESS = url
+
+    # connection = create_connection("ws://0.0.0.0:3000/")
+
+    # heartbeat_thread = Thread(target=send_heartbeat, args=["http://" + ROBOT_IP_ADRESS + ":8080/hello", connection])
+    # heartbeat_thread.start()
+
     app.run(port=PORT, host='0.0.0.0')

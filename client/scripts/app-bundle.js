@@ -119,8 +119,8 @@ define('http/base-station-request',['exports'], function (exports) {
                 body: JSON.stringify(data)
             }).then(function (res) {
                 return res.json();
-            }).then(function (data) {
-                console.log(JSON.stringify(data));
+            }).then(function (responseData) {
+                console.log(JSON.stringify(responseData));
             });
         };
 
@@ -172,12 +172,12 @@ define('services/task',['exports'], function (exports) {
                 _this.tasks.splice(0, _this.tasks.length);
 
                 for (var taskName in data.data) {
-                    var task = data.data[taskName];
+                    var taskStatus = data.data[taskName];
 
                     _this.tasks.push({
                         'name': snakeToCamel(taskName),
-                        'done': stringToBoolean(data.data[taskName]),
-                        'color': colorFrom(stringToBoolean(data.data[taskName]))
+                        'done': stringToBoolean(taskStatus),
+                        'color': colorFrom(stringToBoolean(taskStatus))
                     });
                 }
             };
@@ -201,9 +201,9 @@ define('services/task',['exports'], function (exports) {
 
     function colorFrom(status) {
         if (status) {
-            return 'green-text';
+            return 'green';
         } else {
-            return 'red-text';
+            return 'red';
         }
     }
 
@@ -213,8 +213,8 @@ define('services/task',['exports'], function (exports) {
         }).slice(1);
     }
 });
-define('services/timer',["exports"], function (exports) {
-    "use strict";
+define('services/timer',['exports'], function (exports) {
+    'use strict';
 
     Object.defineProperty(exports, "__esModule", {
         value: true
@@ -247,7 +247,7 @@ define('services/timer',["exports"], function (exports) {
                 var seconds = Math.floor(time / 1000 % 60);
                 var minutes = Math.floor(time / (1000 * 60) % 60);
                 var hours = Math.floor(time / (1000 * 60 * 60) % 24);
-                self.time = ("0" + minutes).slice(-2) + ":" + ("0" + seconds).slice(-2);
+                self.time = ('0' + minutes).slice(-2) + ':' + ('0' + seconds).slice(-2);
             }
         };
 
@@ -291,17 +291,17 @@ define('services/vision',['exports'], function (exports) {
         Vision.prototype.start = function start() {
             var _this = this;
 
-            var ws = new WebSocket('ws://localhost:3000');
+            this.ws = new WebSocket('ws://localhost:3000');
 
-            ws.onopen = function () {
+            this.ws.onopen = function () {
                 var robotPositionRegisterMessage = JSON.stringify({ 'headers': 'register_vision_data' });
-                ws.send(robotPositionRegisterMessage);
+                _this.ws.send(robotPositionRegisterMessage);
             };
 
-            ws.onmessage = function (evt) {
+            this.ws.onmessage = function (evt) {
                 var data = JSON.parse(evt.data);
 
-                if (data.image.origin.x !== "") {
+                if (data.image.origin.x !== '') {
                     _this.world_information.origin = data.image.origin;
                     _this.world_information.ratio = data.image.ratio;
                     _this.goto.width = data.world.base_table.dimension.width;
@@ -315,7 +315,6 @@ define('services/vision',['exports'], function (exports) {
                 _this.informations.obstacles = data.world.obstacles;
 
                 var world = data.world;
-
                 _this.informations.worldDimensions = {
                     'width': Math.round(parseFloat(world.base_table.dimension.width)),
                     'length': Math.round(parseFloat(world.base_table.dimension.height)),
@@ -368,12 +367,11 @@ define('services/vision',['exports'], function (exports) {
             this.checkReadyToStart();
         };
 
-        Vision.prototype.registerGotoPosition = function registerGotoPosition(world_information) {
-            this.world_information = world_information;
+        Vision.prototype.registerGotoPosition = function registerGotoPosition(worldInformation) {
+            this.world_information = worldInformation;
         };
 
         Vision.prototype.registerGoto = function registerGoto(goto) {
-            console.log(goto);
             this.goto = goto;
             this.checkReadyToStart();
         };
@@ -511,8 +509,6 @@ define('components/go-to-position/go-to-position',['exports', 'aurelia-framework
                 }
             };
 
-            console.log(body);
-
             this.httpClient.post(body, this.endpoint);
         };
 
@@ -574,7 +570,7 @@ define('components/informations/informations',['exports', 'aurelia-framework', '
 
         Informations.prototype.resetDetection = function resetDetection() {
             fetch('http://0.0.0.0:5000/vision/reset-detection', {
-                method: "POST",
+                method: 'POST',
                 headers: {
                     'content-type': 'application/json'
                 },
@@ -638,12 +634,15 @@ define('components/robot-controller/robot-controller',['exports', 'aurelia-frame
       this.currentCommand = null;
       this.currentScaling = null;
       this.currentOrientation = null;
+
       this.messageReceived = false;
       this.showImage = true;
       this.fakeSegmentation = false;
       this.takePicture = false;
       this.showSegmentsCoordinates = false;
-      this.segmentsCoordinates = [];
+      this.robotOnline = false;
+      this.taskSent = false;
+      this.taskDone = false;
 
       this.options = ['0 - Competition', '1 - Initial Orientation', '2 - Identify Antenna', '3 - Receive Information', '4 - Go to Image', '5 - Take Picture', '6 - Go to Drawing Area', '7 - Draw Figure', '8 - Go Out of Drawing Area', '9 - Light Red Led', '10 - Toggle Pencil'];
 
@@ -654,17 +653,21 @@ define('components/robot-controller/robot-controller',['exports', 'aurelia-frame
       this.ws = new WebSocket('ws://localhost:3000');
 
       this.ws.onopen = function () {
-        var robotPositionRegisterMessage = JSON.stringify({ 'headers': 'register_image_segmentation' });
-        _this.ws.send(robotPositionRegisterMessage);
+        _this.ws.send(JSON.stringify({ 'headers': 'register_image_segmentation' }));
+        _this.ws.send(JSON.stringify({ 'headers': 'register_robot_online' }));
       };
 
       this.ws.onmessage = function (event) {
         var data = JSON.parse(event.data);
 
-        console.log(data);
-
-        _this.segmentedImage = data.data.image;
-        _this.thresholdedImage = data.data.thresholded_image;
+        if (data.data === 'robot_online') {
+          _this.robotOnline = true;
+        } else if (data.data === 'robot_offline') {
+          _this.robotOnline = false;
+        } else if (data.data.image) {
+          _this.segmentedImage = data.data.image;
+          _this.thresholdedImage = data.data.thresholded_image;
+        }
       };
     }
 
@@ -681,9 +684,13 @@ define('components/robot-controller/robot-controller',['exports', 'aurelia-frame
 
       if (isTakePicture(taskId) && this.fakeSegmentation) {
         data.fake_segmentation = true;
+      } else if (isTaskCompetition(taskId)) {
+        this.taskSent = true;
+        this.taskDone = false;
+      } else if (isLightRedLedTask(taskId)) {
+        this.taskDone = true;
+        this.taskSent = false;
       }
-
-      this.messageReceived = false;
 
       fetch('http://localhost:12345/start-tasks', {
         method: 'POST',
@@ -693,18 +700,17 @@ define('components/robot-controller/robot-controller',['exports', 'aurelia-frame
         body: JSON.stringify(data)
       }).then(function (res) {
         return res.json();
-      }).then(function (data) {
-        if (data.message) {
-          _this2.message = 'command sent to robot';
-          _this2.messageReceived = true;
+      }).then(function (responseData) {
+        if (responseData.message) {
+          _this2.startTimer();
         }
 
-        if (data.image) {
-          _this2.segmentsCoordinates = data.segments.map(function (coord) {
+        if (responseData.image) {
+          _this2.segmentsCoordinates = responseData.segments.map(function (coord) {
             return coordToString(coord);
           });
-          _this2.segmentedImage = data.image;
-          _this2.thresholdedImage = data.thresholded_image;
+          _this2.segmentedImage = responseData.image;
+          _this2.thresholdedImage = responseData.thresholded_image;
         }
       });
     };
@@ -745,8 +751,16 @@ define('components/robot-controller/robot-controller',['exports', 'aurelia-frame
     return taskId === 5 || taskId === '5';
   }
 
+  function isTaskCompetition(taskId) {
+    return taskId === 0 || taskId === '0';
+  }
+
   function isDrawPicture(taskId) {
     return taskId === 7 || taskId === '7';
+  }
+
+  function isLightRedLedTask(taskId) {
+    return taskId === 9 || taskId === '9';
   }
 
   function coordToString(coord) {
@@ -814,7 +828,6 @@ define('components/world-vision/world-vision-debug',['exports', 'aurelia-framewo
             _classCallCheck(this, WorldVisionDebug);
 
             this.vision = vision;
-            this.monPixel = "800";
 
             this.canvasId = 'monCanvas';
 
@@ -873,12 +886,12 @@ define('components/world-vision/world-vision-debug',['exports', 'aurelia-framewo
         };
 
         WorldVisionDebug.prototype.adjustPositions = function adjustPositions(mousePos) {
-            var world_origin_x = parseFloat(this.world_information.origin.x);
-            var world_origin_y = parseFloat(this.world_information.origin.y);
-            var world_image_ratio = parseFloat(this.world_information.ratio);
+            var worldOriginX = parseFloat(this.world_information.origin.x);
+            var worldOriginY = parseFloat(this.world_information.origin.y);
+            var worldOriginRatio = parseFloat(this.world_information.ratio);
 
-            this.x_position = Math.floor((mousePos.x - world_origin_x) * world_image_ratio * 10);
-            this.y_position = Math.floor((mousePos.y - world_origin_y) * world_image_ratio * 10);
+            this.x_position = Math.floor((mousePos.x - worldOriginX) * worldOriginRatio * 10);
+            this.y_position = Math.floor((mousePos.y - worldOriginY) * worldOriginRatio * 10);
         };
 
         return WorldVisionDebug;
@@ -888,9 +901,9 @@ define('text!app.html', ['module'], function(module) { module.exports = "<templa
 define('text!components/competition/competition.html', ['module'], function(module) { module.exports = "<template><require from=\"../world-vision/world-vision-competition\"></require><world-vision-competition></world-vision-competition></template>"; });
 define('text!components/debug/debug.html', ['module'], function(module) { module.exports = "<template><require from=\"../world-vision/world-vision-debug\"></require><require from=\"../informations/informations\"></require><require from=\"../robot-controller/robot-controller\"></require><div class=\"row\"><div class=\"col s12 m12 l6\"><world-vision-debug></world-vision-debug></div><div class=\"col s12 m12 l6\"><informations></informations><robot-controller></robot-controller></div></div></template>"; });
 define('text!components/go-to-position/go-to-position.html', ['module'], function(module) { module.exports = "<template><button class=\"btn blue\" click.trigger=\"execute()\">${buttonName}</button></template>"; });
-define('text!components/informations/informations.html', ['module'], function(module) { module.exports = "<template><div class=\"card\"><div class=\"card-content\"><div class=\"row\"><div class=\"col s6\"><h5>Monde</h5><hr><p>Dimension: <span class=\"text-number\">${informations.worldDimensions.width} x ${informations.worldDimensions.length} (${informations.worldDimensions.unit})</span></p></div><div class=\"col s6\"><h5>Robot</h5><hr><p>Position x: <span class=\"text-number\">${informations.robot.position.x}</span></p><p>Position y: <span class=\"text-number\">${informations.robot.position.y}</span></p><p>Angle: <span class=\"text-number\">${informations.robot.orientation}</span></p></div><div class=\"col s12\"><h5>Obstacles</h5><hr><div repeat.for=\"obstacle of informations.obstacles\"><div class=\"col s6\"><p>Position: <span class=\"text-number\">(${obstacle.position.x}, ${obstacle.position.y})</span></p><p>Tag: <span class=\"text-number\">${obstacle.tag}</span></p></div></div></div><div class=\"col s12\"><h5>Tâches</h5><hr><div class=\"col s12\"><div repeat.for=\"task of task_information\"><p>${task.name}: <span class=\"${task.color}\">${task.done}</span></p></div></div></div></div><div class=\"row\"><button class=\"green btn\" click.trigger=\"resetDetection()\">Reset detection</button></div></div></div></template>"; });
+define('text!components/informations/informations.html', ['module'], function(module) { module.exports = "<template><div class=\"card\"><div class=\"card-content\"><div class=\"row\"><div class=\"col s6\"><h5>Monde</h5><hr><p>Dimension: <span class=\"text-number\">${informations.worldDimensions.width} x ${informations.worldDimensions.length} (${informations.worldDimensions.unit})</span></p><button class=\"btn blue\" click.trigger=\"resetDetection()\">Reset detection</button></div><div class=\"col s6\"><h5>Robot</h5><hr><p>Position x: <span class=\"text-number\">${informations.robot.position.x}</span></p><p>Position y: <span class=\"text-number\">${informations.robot.position.y}</span></p><p>Angle: <span class=\"text-number\">${informations.robot.orientation}</span></p></div><div class=\"col s12\"><h5>Obstacles</h5><hr><div repeat.for=\"obstacle of informations.obstacles\"><div class=\"col s6\"><p>Position: <span class=\"text-number\">(${obstacle.position.x}, ${obstacle.position.y})</span></p><p>Tag: <span class=\"text-number\">${obstacle.tag}</span></p></div></div></div><div class=\"col s12\"><h5>Tâches</h5><hr><div class=\"col s12\"><div repeat.for=\"task of task_information\"><div class=\"chip white-text ${task.color}\" style=\"float:left\">${$index} - ${task.name}</div></div></div></div></div></div></div></template>"; });
 define('text!components/navbar/navbar.html', ['module'], function(module) { module.exports = "<template><nav><div class=\"nav-wrapper color1\"><img width=\"55px\" height=\"55px\" src=\"./img/robot.png\"><a href=\"#\" class=\"brand-logo center\">Leonard</a><ul id=\"nav-mobile\" class=\"right hide-on-med-and-down\"><li><a href=\"#/competition\">Competition</a></li><li><a href=\"#/debug\">Debug</a></li></ul></div></nav></template>"; });
-define('text!components/robot-controller/robot-controller.html', ['module'], function(module) { module.exports = "<template><div class=\"card\"><div class=\"card-content\"><h5>Robot Controller <span if.bind=\"messageReceived\" class=\"chip blue\">${message}</span></h5><div class=\"row\"><div class=\"col s2\"><h5 style=\"background-color:rgba(0,0,0,.1);padding:6px;border-radius:2px;margin:0;text-align:center\">${timer.time}</h5></div><div class=\"col s8\"><button class=\"green btn\" click.trigger=\"startTimer()\">Start</button> <button class=\"red btn\" click.trigger=\"stopTimer()\">Stop</button> <button class=\"blue btn\" click.trigger=\"resetTimer()\">Reset</button></div></div><div class=\"row\"><select value.bind=\"currentCommand\" change.trigger=\"onChange()\" style=\"display:block;width:80%;float:left\"><option repeat.for=\"option of options\" value.bind=\"option\">${option}</option></select><button class=\"cyan btn\" click.trigger=\"sendCommand()\" style=\"margin-left:15px\">Go</button></div><div class=\"row\" if.bind=\"takePicture\"><div><input class=\"with-gap\" type=\"checkbox\" id=\"fakeSegmentation\" checked.bind=\"fakeSegmentation\"><label for=\"fakeSegmentation\">Fake Segmentation</label></div><select value.bind=\"currentScaling\" style=\"display:block;width:50%;float:left\"><option repeat.for=\"scaling of scalings\" model.bind=\"scaling\">${scaling.name}</option></select><select value.bind=\"currentOrientation\" style=\"display:block;width:50%;float:left\"><option repeat.for=\"orientation of orientations\" model.bind=\"orientation\">${orientation.name}</option></select></div><div if.bind=\"showImage\"><img if.bind=\"segmentedImage\" src=\"data:image/png;base64,${segmentedImage}\" width=\"640px\" height=\"640px\"> <img if.bind=\"!segmentedImage\" src=\"img/default-placeholder.png\" alt=\"\" width=\"640px\" height=\"640px\"> <img if.bind=\"segmentedImage\" src=\"data:image/png;base64,${thresholdedImage}\" style=\"width:100%\"></div><div if.bind=\"showSegmentsCoordinates\"><p><span repeat.for=\"coordinate of segmentsCoordinates\">[${coordinate}]--></span></p></div></div></div></template>"; });
+define('text!components/robot-controller/robot-controller.html', ['module'], function(module) { module.exports = "<template><div class=\"card\"><div class=\"card-content\"><h5>Robot Controller <span if.bind=\"robotOnline\" class=\"chip green\">ROBOT ONLINE</span> <span if.bind=\"!robotOnline\" class=\"chip red\">ROBOT OFFLINE</span></h5><h5><span if.bind=\"taskSent\" class=\"chip blue\">CYCLE STARTED</span> <span if.bind=\"taskDone\" class=\"chip green\">CYCLE COMPLETE</span></h5><div class=\"row\"><div class=\"col s2\"><h5 style=\"background-color:rgba(0,0,0,.1);padding:6px;border-radius:2px;margin:0;text-align:center\">${timer.time}</h5></div><div class=\"col s8\"><button class=\"blue btn\" click.trigger=\"resetTimer()\">Reset</button></div></div><div class=\"row\"><select value.bind=\"currentCommand\" change.trigger=\"onChange()\" style=\"display:block;width:80%;float:left\"><option repeat.for=\"option of options\" value.bind=\"option\">${option}</option></select><button class=\"cyan btn\" click.trigger=\"sendCommand()\" style=\"margin-left:15px\">Go</button></div><div class=\"row\" if.bind=\"takePicture\"><div><input class=\"with-gap\" type=\"checkbox\" id=\"fakeSegmentation\" checked.bind=\"fakeSegmentation\"><label for=\"fakeSegmentation\">Fake Segmentation</label></div><select value.bind=\"currentScaling\" style=\"display:block;width:50%;float:left\"><option repeat.for=\"scaling of scalings\" model.bind=\"scaling\">${scaling.name}</option></select><select value.bind=\"currentOrientation\" style=\"display:block;width:50%;float:left\"><option repeat.for=\"orientation of orientations\" model.bind=\"orientation\">${orientation.name}</option></select></div><div if.bind=\"showImage\"><img if.bind=\"segmentedImage\" src=\"data:image/png;base64,${segmentedImage}\" width=\"640px\" height=\"640px\"> <img if.bind=\"!segmentedImage\" src=\"img/default-placeholder.png\" alt=\"\" width=\"640px\" height=\"640px\"> <img if.bind=\"segmentedImage\" src=\"data:image/png;base64,${thresholdedImage}\" style=\"width:100%\"></div></div></div></template>"; });
 define('text!components/stat/stat.html', ['module'], function(module) { module.exports = ""; });
 define('text!components/world-vision/world-vision-competition.html', ['module'], function(module) { module.exports = "<template><div class=\"container\"><div class=\"row\"><div class=\"col s12 m12\"><div class=\"card\"><div class=\"card-content center-align\"><h3>World Vision</h3><div><div class=\"card-image\"><canvas id=\"${canvasId}\" width=\"640px\" height=\"480px\" style=\"background:url(${imagePath})\"></canvas></div><div class=\"card-content\"><span class=\"equidistant float-left\"><label>Robot position</label><label>x :</label><label class=\"text-number\">${x_position}</label><label>y :</label><label class=\"text-number\">${y_position}</label></span><span class=\"equidistant float-right\"></span></div><div class=\"card-action\"><button class=\"color2 waves-effect waves-light btn\" click.trigger=\"start()\">Start</button></div></div></div></div></div></div></div></template>"; });
 define('text!components/world-vision/world-vision-debug.html', ['module'], function(module) { module.exports = "<template><require from=\"../go-to-position/go-to-position\"></require><require from=\"../robot-controller/robot-controller\"></require><div class=\"card\"><div class=\"card-content\"><div class=\"row\"><h5>World Vision</h5><div class=\"center-align\"><img id=\"${canvasId}\" width=\"640px\" height=\"400px\" src=\"${visionProperties.imagePath}\" style=\"cursor:crosshair\"></div></div><div class=\"row\"><div class=\"col s6\"><p>Mouse position: <span class=\"text-number\">(${x_position}, ${y_position})</span></p><button class=\"indigo btn\" click.trigger=\"resetPathRendering()\">Reset path rendering</button></div><div class=\"col s6\"><div class=\"row\"><p>Next destination --> <span class=\"text-number\">(${chosen_x_position}, ${chosen_y_position})</span></p><input value.bind=\"theta\" placeholder=\"theta\"></div><ul class=\"collection center-align\"><li class=\"collection-item\"><go-to-position x-position=\"${chosen_x_position}\" y-position=\"${chosen_y_position}\" theta=\"${theta}\" pathfinder=\"true\"></go-to-position></li><li class=\"collection-item\"><go-to-position x-position=\"${chosen_x_position}\" y-position=\"${chosen_y_position}\" theta=\"${theta}\"></go-to-position></li></ul></div></div></div></div></template>"; });

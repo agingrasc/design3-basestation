@@ -1,10 +1,6 @@
-import {
-    inject
-} from 'aurelia-framework';
+import { inject } from 'aurelia-framework';
 
-import {
-    Timer
-} from '../../services/timer';
+import { Timer } from '../../services/timer';
 
 @inject(Timer)
 export class RobotController {
@@ -13,25 +9,28 @@ export class RobotController {
     this.currentCommand = null;
     this.currentScaling = null;
     this.currentOrientation = null;
+
     this.messageReceived = false;
     this.showImage = true;
     this.fakeSegmentation = false;
     this.takePicture = false;
     this.showSegmentsCoordinates = false;
-    this.segmentsCoordinates = [];
+    this.robotOnline = false;
+    this.taskSent = false;
+    this.taskDone = false;
 
     this.options = [
-      '0 - Competition',
-      '1 - Initial Orientation',
-      '2 - Identify Antenna',
-      '3 - Receive Information',
-      '4 - Go to Image',
-      '5 - Take Picture',
-      '6 - Go to Drawing Area',
-      '7 - Draw Figure',
-      '8 - Go Out of Drawing Area',
-      '9 - Light Red Led',
-      '10 - Toggle Pencil'
+        '0 - Competition',
+        '1 - Initial Orientation',
+        '2 - Identify Antenna',
+        '3 - Receive Information',
+        '4 - Go to Image',
+        '5 - Take Picture',
+        '6 - Go to Drawing Area',
+        '7 - Draw Figure',
+        '8 - Go Out of Drawing Area',
+        '9 - Light Red Led',
+        '10 - Toggle Pencil'
     ];
 
     this.scalings = [
@@ -49,23 +48,27 @@ export class RobotController {
     this.ws = new WebSocket('ws://localhost:3000');
 
     this.ws.onopen = () => {
-        let robotPositionRegisterMessage = JSON.stringify({'headers': 'register_image_segmentation'});
-        this.ws.send(robotPositionRegisterMessage);
+        this.ws.send(JSON.stringify({'headers': 'register_image_segmentation'}));
+        this.ws.send(JSON.stringify({'headers': 'register_robot_online'}));
     };
 
     this.ws.onmessage = (event) => {
       let data = JSON.parse(event.data);
 
-      console.log(data);
-
-      this.segmentedImage = data.data.image;
-      this.thresholdedImage = data.data.thresholded_image;
+      if (data.data === 'robot_online') {
+        this.robotOnline = true;
+      } else if (data.data === 'robot_offline') {
+        this.robotOnline = false;
+      } else if (data.data.image) {
+        this.segmentedImage = data.data.image;
+        this.thresholdedImage = data.data.thresholded_image;
+      }
     };
   }
 
   sendCommand() {
     const taskId = this.options.indexOf(this.currentCommand).toString();
-    const data = {'task_id': taskId };
+    const data = { 'task_id': taskId };
 
     if (this.currentScaling) {
       data.scaling = this.currentScaling.value;
@@ -74,9 +77,13 @@ export class RobotController {
 
     if (isTakePicture(taskId) && this.fakeSegmentation) {
       data.fake_segmentation = true;
+    } else if (isTaskCompetition(taskId)) {
+      this.taskSent = true;
+      this.taskDone = false;
+    } else if (isLightRedLedTask(taskId)) {
+      this.taskDone = true;
+      this.taskSent = false;
     }
-
-    this.messageReceived = false;
 
     fetch('http://localhost:12345/start-tasks', {
         method: 'POST',
@@ -86,16 +93,15 @@ export class RobotController {
         body: JSON.stringify(data)
     })
     .then((res) => res.json())
-    .then((data) => {
-      if (data.message) {
-        this.message = 'command sent to robot';
-        this.messageReceived = true;
+    .then((responseData) => {
+      if (responseData.message) {
+        this.startTimer();
       }
 
-      if (data.image) {
-        this.segmentsCoordinates = data.segments.map((coord) => coordToString(coord));
-        this.segmentedImage = data.image;
-        this.thresholdedImage = data.thresholded_image;
+      if (responseData.image) {
+        this.segmentsCoordinates = responseData.segments.map((coord) => coordToString(coord));
+        this.segmentedImage = responseData.image;
+        this.thresholdedImage = responseData.thresholded_image;
       }
     });
   }
@@ -134,9 +140,16 @@ function isTakePicture(taskId) {
   return taskId === 5 || taskId === '5';
 }
 
+function isTaskCompetition(taskId) {
+  return taskId === 0 || taskId === '0';
+}
 
 function isDrawPicture(taskId) {
   return taskId === 7 || taskId === '7';
+}
+
+function isLightRedLedTask(taskId) {
+  return taskId === 9 || taskId === '9';
 }
 
 function coordToString(coord) {

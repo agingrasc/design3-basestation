@@ -17,7 +17,7 @@ export class Timer {
             var seconds = Math.floor((time / 1000) % 60);
             var minutes = Math.floor(((time / (1000 * 60)) % 60));
             var hours = Math.floor(((time / (1000 * 60 * 60)) % 24));
-            self.time = ("0" + minutes).slice(-2) + ":" + ("0" + seconds).slice(-2);
+            self.time = ('0' + minutes).slice(-2) + ':' + ('0' + seconds).slice(-2);
         }
     }
 

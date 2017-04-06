@@ -1,19 +1,8 @@
-import {
-    inject
-}
-from 'aurelia-framework';
+import { inject } from 'aurelia-framework';
 
-import {
-    Vision
-} from '../../services/vision';
-
-import {
-    Timer
-} from '../../services/timer';
-
-import {
-    Task
-} from '../../services/task';
+import { Vision } from '../../services/vision';
+import { Timer } from '../../services/timer';
+import { Task } from '../../services/task';
 
 @inject(Vision, Timer, Task)
 export class Informations {
@@ -33,7 +22,7 @@ export class Informations {
 
     resetDetection() {
         fetch('http://0.0.0.0:5000/vision/reset-detection', {
-            method: "POST",
+            method: 'POST',
             headers: {
                 'content-type': 'application/json'
             },

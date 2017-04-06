@@ -48,8 +48,6 @@ export class GoToPosition {
             }
         };
 
-        console.log(body);
-
         this.httpClient.post(body, this.endpoint);
     }
 }
