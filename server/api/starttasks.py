@@ -1,9 +1,13 @@
+import json
+
 import requests as req
 
 from flask import jsonify
 from flask import make_response
 from flask import request
 from flask import Blueprint
+
+from websocket import create_connection
 
 ROBOT_API_URL = "http://192.168.0.27:8080"
 ROBOT_VIDEO_SERVICE_URL = "http://192.168.0.27:4040/take-picture"
@@ -47,10 +51,13 @@ def take_picture():
     data = request.json
     robot_response = req.post(url=ROBOT_VIDEO_SERVICE_URL).json()
     robot_response['scaling'] = data['data']['scaling']
+    robot_response['orientation'] = data['data']['orientation']
     body = robot_response
     green_led_response = req.post(url=ROBOT_API_URL + '/light-green-led').json()
     image_service_response = req.post(url=build_vision_service_url(is_fake_segmentation(data)), json=body).json()
     robot_confirm = req.post(url=ROBOT_API_URL + "/set-image-segments", json=image_service_response).json()
+    connection = create_connection("ws://localhost:3000")
+    connection.send(json.dumps({"headers": "push_image_segmentation", "data": image_service_response}))
     return make_response(jsonify(image_service_response))
 
 

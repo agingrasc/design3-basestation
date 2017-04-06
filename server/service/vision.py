@@ -8,6 +8,7 @@ from tornado import web
 
 REGISTERED_TO_VISION_DATA = []
 REGISTERED_TO_TASK_DATA = []
+REGISTERED_TO_IMAGE_SEGMENTATION = []
 
 ROBOT_POSITION = {}
 
@@ -38,8 +39,6 @@ tasks_state = initialize_task_info()
 class VisionWebSocketHandler(websocket.WebSocketHandler):
     def __init__(self, application, request, **kwargs):
         super().__init__(application, request, **kwargs)
-        self._global_state = None
-        self._robot_position = None
 
     def initialize(self, global_state, robot_position):
         self._global_state = global_state
@@ -61,6 +60,9 @@ class VisionWebSocketHandler(websocket.WebSocketHandler):
         if message_type == "register_task_data":
             register_to(REGISTERED_TO_TASK_DATA, self)
 
+        if message_type == "register_image_segmentation":
+            register_to(REGISTERED_TO_IMAGE_SEGMENTATION, self)
+
         if message_type == "push_vision_data":
             push_vision_data(self, message)
 
@@ -72,6 +74,9 @@ class VisionWebSocketHandler(websocket.WebSocketHandler):
 
         if message_type == "push_tasks_information":
             push_tasks_information(self, message)
+
+        if message_type == "push_image_segmentation":
+            notify_all(REGISTERED_TO_IMAGE_SEGMENTATION, message_data)
 
         if message_type == "new_round":
             initialize_task_info()
@@ -87,6 +92,9 @@ class VisionWebSocketHandler(websocket.WebSocketHandler):
 
         if self in REGISTERED_TO_TASK_DATA:
             REGISTERED_TO_TASK_DATA.remove(self)
+
+        if self in REGISTERED_TO_IMAGE_SEGMENTATION:
+            REGISTERED_TO_IMAGE_SEGMENTATION.remove(self)
 
         print("Connection closed: {}\n".format(datetime.now()))
 

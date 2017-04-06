@@ -40,11 +40,27 @@ export class RobotController {
     ];
 
     this.orientations = [
-      { 'value': '0', 'name': 'SUD' },
-      { 'value': '180', 'name': 'NORD'},
-      { 'value': '270', 'name': 'EST' },
-      { 'value': '90', 'name': 'WEST'}
+      { 'value': 'SOUTH', 'name': 'SUD' },
+      { 'value': 'NORTH', 'name': 'NORD'},
+      { 'value': 'EAST', 'name': 'EST' },
+      { 'value': 'WEST', 'name': 'WEST'}
     ];
+
+    this.ws = new WebSocket('ws://localhost:3000');
+
+    this.ws.onopen = () => {
+        let robotPositionRegisterMessage = JSON.stringify({'headers': 'register_image_segmentation'});
+        this.ws.send(robotPositionRegisterMessage);
+    };
+
+    this.ws.onmessage = (event) => {
+      let data = JSON.parse(event.data);
+
+      console.log(data);
+
+      this.segmentedImage = data.data.image;
+      this.thresholdedImage = data.data.thresholded_image;
+    };
   }
 
   sendCommand() {

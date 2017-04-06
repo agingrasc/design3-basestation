@@ -630,6 +630,8 @@ define('components/robot-controller/robot-controller',['exports', 'aurelia-frame
 
   var RobotController = exports.RobotController = (_dec = (0, _aureliaFramework.inject)(_timer.Timer), _dec(_class = function () {
     function RobotController(timer) {
+      var _this = this;
+
       _classCallCheck(this, RobotController);
 
       this.timer = timer;
@@ -647,11 +649,27 @@ define('components/robot-controller/robot-controller',['exports', 'aurelia-frame
 
       this.scalings = [{ 'value': '1', 'name': '4' }, { 'value': '0.5', 'name': '2' }];
 
-      this.orientations = [{ 'value': '0', 'name': 'SUD' }, { 'value': '180', 'name': 'NORD' }, { 'value': '270', 'name': 'EST' }, { 'value': '90', 'name': 'WEST' }];
+      this.orientations = [{ 'value': 'SOUTH', 'name': 'SUD' }, { 'value': 'NORTH', 'name': 'NORD' }, { 'value': 'EAST', 'name': 'EST' }, { 'value': 'WEST', 'name': 'WEST' }];
+
+      this.ws = new WebSocket('ws://localhost:3000');
+
+      this.ws.onopen = function () {
+        var robotPositionRegisterMessage = JSON.stringify({ 'headers': 'register_image_segmentation' });
+        _this.ws.send(robotPositionRegisterMessage);
+      };
+
+      this.ws.onmessage = function (event) {
+        var data = JSON.parse(event.data);
+
+        console.log(data);
+
+        _this.segmentedImage = data.data.image;
+        _this.thresholdedImage = data.data.thresholded_image;
+      };
     }
 
     RobotController.prototype.sendCommand = function sendCommand() {
-      var _this = this;
+      var _this2 = this;
 
       var taskId = this.options.indexOf(this.currentCommand).toString();
       var data = { 'task_id': taskId };
@@ -677,16 +695,16 @@ define('components/robot-controller/robot-controller',['exports', 'aurelia-frame
         return res.json();
       }).then(function (data) {
         if (data.message) {
-          _this.message = 'command sent to robot';
-          _this.messageReceived = true;
+          _this2.message = 'command sent to robot';
+          _this2.messageReceived = true;
         }
 
         if (data.image) {
-          _this.segmentsCoordinates = data.segments.map(function (coord) {
+          _this2.segmentsCoordinates = data.segments.map(function (coord) {
             return coordToString(coord);
           });
-          _this.segmentedImage = data.image;
-          _this.thresholdedImage = data.thresholded_image;
+          _this2.segmentedImage = data.image;
+          _this2.thresholdedImage = data.thresholded_image;
         }
       });
     };
