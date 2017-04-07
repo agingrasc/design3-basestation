@@ -58,9 +58,9 @@ if __name__ == '__main__':
     url = sys.argv[1]
     ROBOT_IP_ADRESS = url
 
-    # connection = create_connection("ws://0.0.0.0:3000/")
+    connection = create_connection("ws://0.0.0.0:3000/")
 
-    # heartbeat_thread = Thread(target=send_heartbeat, args=["http://" + ROBOT_IP_ADRESS + ":8080/hello", connection])
-    # heartbeat_thread.start()
+    heartbeat_thread = Thread(target=send_heartbeat, args=["http://" + ROBOT_IP_ADRESS + ":8080/hello", connection])
+    heartbeat_thread.start()
 
     app.run(port=PORT, host='0.0.0.0')
