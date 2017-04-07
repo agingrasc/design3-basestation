@@ -95,6 +95,10 @@ class VisionWebSocketHandler(websocket.WebSocketHandler):
         if message_type == "push_image_segmentation":
             notify_all(REGISTERED_TO_IMAGE_SEGMENTATION, message_data)
 
+        if message_type == "reset_tasks":
+            reset_tasks()
+            notify_all(REGISTERED_TO_TASK_DATA, tasks_state)
+
         if message_type == "new_round":
             reset_tasks()
 
@@ -114,6 +118,12 @@ class VisionWebSocketHandler(websocket.WebSocketHandler):
         if message_type == "reset_tasks":
             reset_tasks()
             notify_all(REGISTERED_TO_TASK_DATA, tasks_state)
+
+        if message_type == "cycle_started":
+            print(message_data)
+
+        if message_type == "cycle_ended":
+            print(message_data)
 
     def on_close(self):
         unregister(self)
