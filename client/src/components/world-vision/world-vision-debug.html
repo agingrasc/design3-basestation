@@ -1,48 +1,41 @@
 <template>
     <require from="../go-to-position/go-to-position"></require>
-    <style>
-        canvas {
-            cursor: crosshair
-        }
-    </style>
-    <div class="col s6 container">
-       <div class="row">
-            <div class="side-padding">
-                <div class="card">
-                    <div class="card-content center-align component">
-                        <h4>World Vision</h4>
-                        <div>
-                            <div class="card-image">
-                                <img id="${canvasId}" width="640px" height="400px" src="${visionProperties.imagePath}"></img>
-                            </div>
-                            <div class="card-content">
-                                <span class="equidistant float-left" >
-                                    <label>Mouse position</label>
-                                    <label>x :</label>
-                                    <label class="text-number">${x_position}</label>
-                                    <label>y :</label>
-                                    <label class="text-number">${y_position}</label>
-                                </span>
-                                <span class="equidistant float-right" >
-                                    <label>Chosen position</label>
-                                    <label>x :</label>
-                                    <label class="text-number">${chosen_x_position}</label>
-                                    <label>y :</label>
-                                    <label class="text-number">${chosen_y_position}</label>
-                                </span>
-                                <div>
-                                    <label>Theta :</label>
-                                    <input value.bind="theta" placeholder="theta">
-                                </div>
-                            </div>
-                            <div class="padding-main"></div>
-                            <div class="card-action">
-                                <go-to-position x-position="${chosen_x_position}" y-position="${chosen_y_position}" theta="${theta}"></go-to-position>
-                            </div>
-                        </div>
+    <require from="../robot-controller/robot-controller"></require>
+
+    <div class="card">
+        <div class="card-content">
+            <div class="row">
+                <h5>World Vision</h5>
+                <div class="center-align">
+                    <img id="${canvasId}" width="640px" height="400px" src="${visionProperties.imagePath}" style="cursor: crosshair;"></img>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col s6">
+                    <p>Mouse position: <span class="text-number">(${x_position}, ${y_position})</span></p>
+
+                    <button class="indigo btn" click.trigger="resetPathRendering()">Reset path rendering</button>
+                </div>
+
+                <div class="col s6">
+                    <div class="row">
+                        <p>Next destination --> <span class="text-number">(${chosen_x_position}, ${chosen_y_position})</span></p>
+                        <input value.bind="theta" placeholder="theta">
                     </div>
+
+                    <ul class="collection center-align">
+                        <li class="collection-item">
+                            <go-to-position x-position="${chosen_x_position}" y-position="${chosen_y_position}" theta="${theta}" pathfinder="true"></go-to-position>
+                        </li>
+
+                        <li class="collection-item">
+                            <go-to-position x-position="${chosen_x_position}" y-position="${chosen_y_position}" theta="${theta}"></go-to-position>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
+
 </template>

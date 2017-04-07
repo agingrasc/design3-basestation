@@ -1,0 +1,54 @@
+<template>
+  <div class="card">
+    <div class="card-content">
+
+      <h5>Robot Controller
+        <span if.bind="robotOnline" class="chip green">ROBOT ONLINE</span>
+        <span if.bind="!robotOnline" class="chip red">ROBOT OFFLINE</span>
+      </h5>
+
+      <h5>
+        <span if.bind="taskSent" class="chip blue">CYCLE STARTED</span>
+        <span if.bind="taskDone" class="chip green">CYCLE COMPLETE</span>
+      </h5>
+
+      <div class="row">
+        <div class="col s2">
+          <h5 style="background-color: rgba(0, 0, 0, 0.1); padding: 6px; border-radius: 2px; margin: 0; text-align: center;">${timer.time}</h5>
+        </div>
+        <div class="col s8">
+          <button class="blue btn" click.trigger="resetTimer()">Reset</button>
+        </div>
+      </div>
+
+      <div class="row">
+        <select value.bind="currentCommand" change.trigger="onChange()" style="display: block; width: 80%; float: left;">
+          <option repeat.for="option of options" value.bind="option">${option}</option>
+        </select>
+        <button class='cyan btn' click.trigger="sendCommand()" style="margin-left: 15px;">Go</button>
+      </div>
+
+      <div class="row" if.bind="takePicture">
+        <div>
+          <input class="with-gap" type="checkbox" id="fakeSegmentation" checked.bind="fakeSegmentation" />
+          <label for="fakeSegmentation">Fake Segmentation</label>
+        </div>
+
+        <select value.bind="currentScaling" style="display: block; width: 50%; float: left;">
+          <option repeat.for="scaling of scalings" model.bind="scaling">${scaling.name}</option>
+        </select>
+
+        <select value.bind="currentOrientation" style="display: block; width: 50%; float: left;">
+          <option repeat.for="orientation of orientations" model.bind="orientation">${orientation.name}</option>
+        </select>
+      </div>
+
+      <div if.bind="showImage">
+        <img if.bind="segmentedImage" src="data:image/png;base64,${segmentedImage}" width="640px" height="640px">
+        <img if.bind="!segmentedImage" src="img/default-placeholder.png" alt="" width="640px" height="640px">
+        <img if.bind="segmentedImage" src="data:image/png;base64,${thresholdedImage}" style="width: 100%;">
+      </div>
+
+    </div>
+  </div>
+</template>

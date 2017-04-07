@@ -1,20 +1,40 @@
-import datetime
-
 import numpy as np
 import requests as req
 from flask import jsonify, make_response, request, Blueprint
 
-ROBOT_API_URL = "http://192.168.0.27:8080/go-to-position"
+from api.starttasks import send_own_url
+
+ROBOT_API_BASE_URL = "http://192.168.0.27:8080{}"
 
 gotoposition = Blueprint('goto_position', __name__)
 
 
-@gotoposition.route("/go-to-position/", methods=['POST'])
+def validate_payload(data):
+    data['destination']['theta'] = string_deg_to_rad(data['destination']['theta'])
+    return data
+
+
+def string_deg_to_rad(string_deg_angle):
+    return str(np.deg2rad(float(string_deg_angle)))
+
+
+def relay_to_robot(endpoint, payload):
+    return req.post(url=ROBOT_API_BASE_URL.format(endpoint), json=payload)
+
+
+@gotoposition.route("/go-to-position", methods=['POST'])
 def goto_position():
-    data = request.json
+    send_own_url()
+    payload = validate_payload(request.json)
+    robot_confirm = relay_to_robot("/go-to-position", payload).json()
+    send_response = make_response(jsonify(payload), 200)
+    return send_response
 
-    data['destination']['theta'] = str(np.deg2rad(float(data['destination']['theta'])))
 
-    req.post(url=ROBOT_API_URL, json=data)
-    send_response = make_response(jsonify(data), 200)
+@gotoposition.route('/go-to-pathfinder', methods=["POST"])
+def go_to_pathfinder():
+    send_own_url()
+    payload = validate_payload(request.json)
+    robot_confirm = relay_to_robot("/go-to-pathfinder", payload).json()
+    send_response = make_response(jsonify(payload), 200)
     return send_response

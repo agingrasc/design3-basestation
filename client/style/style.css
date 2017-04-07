@@ -32,12 +32,6 @@
     border-bottom-width: 5px;
 }
 
-.container {
-    padding: 0px;
-    bottom: 0px;
-    height: 1000px;
-}
-
 label {
     color: #252839;
     font-weight: bold;
@@ -90,7 +84,7 @@ h3 {
     height: 100%;
 }
 
-.component {
-    height: 820px;
-    overflow: auto;
+
+.chip {
+    color: rgba(255, 255, 255, 0.9);
 }

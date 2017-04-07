@@ -9,48 +9,59 @@ export class Vision {
     }
 
     start() {
-        var ws = new WebSocket("ws://localhost:3000");
-        var tmp = {};
-        tmp.headers = "register_vision_data";
-        var value = JSON.stringify(tmp);
-        ws.onopen = function() {
-            ws.send(value);
+        this.ws = new WebSocket('ws://localhost:3000');
+
+        this.ws.onopen = () => {
+            let robotPositionRegisterMessage = JSON.stringify({'headers': 'register_vision_data'});
+            this.ws.send(robotPositionRegisterMessage);
         };
 
-        var self = this;
-        ws.onmessage = function(evt) {
-            var data = JSON.parse(evt.data);
+        this.ws.onmessage = (evt) => {
+            let data = JSON.parse(evt.data);
 
-
-            if (data.image.origin.x !== "") {
-                self.world_information.origin = data.image.origin;
-                self.world_information.ratio = data.image.ratio;
-                self.goto.width = data.world.base_table.dimension.width;
-                self.goto.length = data.world.base_table.dimension.height;
+            if (data.image.origin.x !== '') {
+                this.world_information.origin = data.image.origin;
+                this.world_information.ratio = data.image.ratio;
+                this.goto.width = data.world.base_table.dimension.width;
+                this.goto.length = data.world.base_table.dimension.height;
             }
 
             window.requestAnimationFrame(() => {
-                self.imageView.imagePath = "data:image/png;base64," + data.image.data;
+                this.imageView.imagePath = 'data:image/jpeg;base64,' + data.image.data;
             });
 
-            self.informations.obstacles = data.world.obstacles;
+            this.informations.obstacles = data.world.obstacles;
+
+            let world = data.world;
+            this.informations.worldDimensions = {
+                'width': Math.round(parseFloat(world.base_table.dimension.width)),
+                'length': Math.round(parseFloat(world.base_table.dimension.height)),
+                'unit': world.unit
+            };
 
             // Update robot position
-            var robot = data.world.robot;
-            self.informations.robot = robot;
-            self.goto.robot = {
-                "position": {
-                    "x": robot.position.x,
-                    "y": robot.position.y,
-                    "theta": 0
+            let robot = data.world.robot;
+            this.informations.robot = {
+                'position': {
+                    'x': robot.position.x,
+                    'y': robot.position.y
+                },
+                'orientation': robot.orientation
+            };
+
+            this.goto.robot = {
+                'position': {
+                    'x': robot.position.x,
+                    'y': robot.position.y,
+                    'theta': robot.theta
                 }
             };
 
             // Update world obstacles
-            self.goto.obstacles = [];
+            this.goto.obstacles = [];
 
             // Update world dimension
-            self.world_information.world_dimension = data.image.sent_dimension;
+            this.world_information.world_dimension = data.image.sent_dimension;
         };
     }
 
@@ -66,6 +77,7 @@ export class Vision {
         }
         this.start();
     }
+
     registerImageView(imageView) {
         this.imageView = imageView;
         this.checkReadyToStart();
@@ -76,12 +88,11 @@ export class Vision {
         this.checkReadyToStart();
     }
 
-    registerGotoPosition(world_information) {
-        this.world_information = world_information;
+    registerGotoPosition(worldInformation) {
+        this.world_information = worldInformation;
     }
 
     registerGoto(goto) {
-        console.log(goto);
         this.goto = goto;
         this.checkReadyToStart();
     }
