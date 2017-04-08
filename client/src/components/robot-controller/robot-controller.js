@@ -108,7 +108,7 @@ export class RobotController {
     .then((res) => res.json())
     .then((responseData) => {
       if (responseData.message) {
-        this.taskService.startTask();
+        this.startTask();
       }
 
       if (responseData.image) {
@@ -135,14 +135,15 @@ export class RobotController {
     }
   }
 
+  startTask() {
+    this.timer.start();
+    this.taskSent = false;
+  }
+
   resetTask() {
     this.taskService.resetTasks(() => {
       this.taskDone = false;
     });
-  }
-
-  startTimer() {
-    this.timer.start();
   }
 
   stopTimer() {
@@ -151,7 +152,6 @@ export class RobotController {
 
   pauseTimer() {
     this.timer.pause();
-    this.resetTask();
     this.taskDone = false;
     this.taskSent = false;
   }

@@ -45,6 +45,10 @@ export class Task {
         this.timer.start();
     }
 
+    resetTasks() {
+        this.ws.send(JSON.stringify({ "headers": "reset_tasks" }));
+    }
+
     registerInformations(data) {
         this.tasks = data;
     }
@@ -54,11 +58,6 @@ export class Task {
         this.start();
     }
 
-    resetTasks(then) {
-        this.timer.reset();
-        this.ws.send(JSON.stringify({ 'headers': 'reset_tasks' }));
-        then();
-    }
 }
 
 function stringToBoolean(stringBoolean) {

@@ -100,10 +100,13 @@ class VisionWebSocketHandler(websocket.WebSocketHandler):
             notify_all(REGISTERED_TO_TASK_DATA, tasks_state)
 
         if message_type == "new_round":
+            old_antenna_state = tasks_state["data"][visionformat.TASK_IDENTEFIE_ANTENNA]
+            old_orientation_state = tasks_state["data"][visionformat.TASK_INITIAL_ORIENTATION]
+            
             reset_tasks()
 
-            tasks_state["data"][visionformat.TASK_IDENTEFIE_ANTENNA] = "True"
-            tasks_state["data"][visionformat.TASK_INITIAL_ORIENTATION] = "True"
+            tasks_state["data"][visionformat.TASK_IDENTEFIE_ANTENNA] = old_antenna_state
+            tasks_state["data"][visionformat.TASK_INITIAL_ORIENTATION] = old_orientation_state
 
             notify_all(REGISTERED_TO_TASK_DATA, tasks_state)
 
@@ -153,17 +156,12 @@ def push_vision_data(connection, message):
     message_data = message[visionformat.DATA]
     update_global_data(message_data)
     update_robot_position(message_data)
-    connection.write_message("Ok")
     notify_all(REGISTERED_TO_VISION_DATA, WORLD_STATE[visionformat.PULL_VISION_DATA])
 
 
 def push_tasks_information(connection, message):
     message_data = message["data"]
-
     tasks_state["data"][message_data["task_name"]] = "True"
-
-    connection.write_message("Ok")
-
     notify_all(REGISTERED_TO_TASK_DATA, tasks_state)
 
 
