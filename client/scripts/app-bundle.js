@@ -136,12 +136,13 @@ define('resources/index',["exports"], function (exports) {
     exports.configure = configure;
     function configure(config) {}
 });
-define('services/task',['exports'], function (exports) {
+define('services/task',['exports', 'aurelia-framework', './timer'], function (exports, _aureliaFramework, _timer) {
     'use strict';
 
     Object.defineProperty(exports, "__esModule", {
         value: true
     });
+    exports.Task = undefined;
 
     function _classCallCheck(instance, Constructor) {
         if (!(instance instanceof Constructor)) {
@@ -149,10 +150,13 @@ define('services/task',['exports'], function (exports) {
         }
     }
 
-    var Task = exports.Task = function () {
-        function Task() {
+    var _dec, _class;
+
+    var Task = exports.Task = (_dec = (0, _aureliaFramework.inject)(_timer.Timer), _dec(_class = function () {
+        function Task(timer) {
             _classCallCheck(this, Task);
 
+            this.timer = timer;
             this.data = undefined;
             this.tasks = [];
         }
@@ -160,36 +164,56 @@ define('services/task',['exports'], function (exports) {
         Task.prototype.start = function start() {
             var _this = this;
 
-            var ws = new WebSocket('ws://localhost:3000');
+            this.ws = new WebSocket('ws://localhost:3000');
 
-            ws.onopen = function () {
+            this.ws.onopen = function () {
                 var taskRegisterMessage = JSON.stringify({ 'headers': 'register_task_data' });
-                ws.send(taskRegisterMessage);
+                _this.ws.send(taskRegisterMessage);
             };
 
-            ws.onmessage = function (evt) {
+            this.ws.onmessage = function (evt) {
                 var data = JSON.parse(evt.data);
                 _this.tasks.splice(0, _this.tasks.length);
 
                 for (var taskName in data.data) {
-                    var taskStatus = data.data[taskName];
+                    var taskStatus = stringToBoolean(data.data[taskName]);
+
+                    if (taskName === 'light_red_led') {
+                        if (taskStatus) {
+                            _this.onCycleEnd();
+                            _this.timer.pause();
+                        }
+                    }
 
                     _this.tasks.push({
                         'name': snakeToCamel(taskName),
-                        'done': stringToBoolean(taskStatus),
-                        'color': colorFrom(stringToBoolean(taskStatus))
+                        'done': taskStatus,
+                        'color': colorFrom(taskStatus)
                     });
                 }
             };
         };
 
+        Task.prototype.startTask = function startTask() {
+            this.timer.start();
+        };
+
+        Task.prototype.resetTasks = function resetTasks() {
+            this.ws.send(JSON.stringify({ "headers": "reset_tasks" }));
+        };
+
         Task.prototype.registerInformations = function registerInformations(data) {
             this.tasks = data;
+        };
+
+        Task.prototype.registerCycleEnd = function registerCycleEnd(onCycleEnd) {
+            this.onCycleEnd = onCycleEnd;
             this.start();
         };
 
         return Task;
-    }();
+    }()) || _class);
+
 
     function stringToBoolean(stringBoolean) {
         if (stringBoolean === 'True') {
@@ -209,7 +233,7 @@ define('services/task',['exports'], function (exports) {
 
     function snakeToCamel(s) {
         return s.charAt(0).toUpperCase() + s.replace(/(\_\w)/g, function (m) {
-            return " " + m[1].toUpperCase();
+            return ' ' + m[1].toUpperCase();
         }).slice(1);
     }
 });
@@ -230,34 +254,49 @@ define('services/timer',['exports'], function (exports) {
         function Timer() {
             _classCallCheck(this, Timer);
 
-            this.begin = 0;
+            this.lastTime = 0;
+            this.isPause = false;
+            this.isStarted = false;
+            this.totalTime = 0;
             this.time = '00:00';
-            this.started = false;
         }
 
         Timer.prototype.start = function start() {
-            this.currentLap = setInterval(myTimer, 1000);
-            var self = this;
-            var d = new Date();
-            this.begin = d.valueOf();
+            this.lastTime = new Date().valueOf();
 
-            function myTimer() {
-                var d = new Date();
-                var time = d.valueOf() - self.begin;
-                var seconds = Math.floor(time / 1000 % 60);
-                var minutes = Math.floor(time / (1000 * 60) % 60);
-                var hours = Math.floor(time / (1000 * 60 * 60) % 24);
-                self.time = ('0' + minutes).slice(-2) + ':' + ('0' + seconds).slice(-2);
+            if (!this.isStarted) {
+                this.currentLap = setInterval(this.updateTime.bind(this), 1000);
+                this.isStarted = true;
             }
+        };
+
+        Timer.prototype.updateTime = function updateTime() {
+            var timeDelta = new Date().valueOf() - this.lastTime;
+
+            this.totalTime = this.totalTime + timeDelta;
+
+            var seconds = Math.floor(this.totalTime / 1000 % 60);
+            var minutes = Math.floor(this.totalTime / (1000 * 60) % 60);
+
+            this.lastTime = new Date().valueOf();
+
+            this.time = ('0' + minutes).slice(-2) + ':' + ('0' + seconds).slice(-2);
         };
 
         Timer.prototype.stop = function stop() {
             clearInterval(this.currentLap);
+
+            this.isStarted = false;
         };
 
         Timer.prototype.reset = function reset() {
             this.stop();
+            this.totalTime = 0;
             this.time = '00:00';
+        };
+
+        Timer.prototype.pause = function pause() {
+            this.stop();
         };
 
         return Timer;
@@ -608,7 +647,7 @@ define('components/navbar/navbar',["exports"], function (exports) {
     _classCallCheck(this, Navbar);
   };
 });
-define('components/robot-controller/robot-controller',['exports', 'aurelia-framework', '../../services/timer'], function (exports, _aureliaFramework, _timer) {
+define('components/robot-controller/robot-controller',['exports', 'aurelia-framework', '../../services/timer', '../../services/task'], function (exports, _aureliaFramework, _timer, _task) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
@@ -624,13 +663,15 @@ define('components/robot-controller/robot-controller',['exports', 'aurelia-frame
 
   var _dec, _class;
 
-  var RobotController = exports.RobotController = (_dec = (0, _aureliaFramework.inject)(_timer.Timer), _dec(_class = function () {
-    function RobotController(timer) {
+  var RobotController = exports.RobotController = (_dec = (0, _aureliaFramework.inject)(_timer.Timer, _task.Task), _dec(_class = function () {
+    function RobotController(timer, task) {
       var _this = this;
 
       _classCallCheck(this, RobotController);
 
       this.timer = timer;
+      this.taskService = task;
+
       this.currentCommand = null;
       this.currentScaling = null;
       this.currentOrientation = null;
@@ -644,7 +685,7 @@ define('components/robot-controller/robot-controller',['exports', 'aurelia-frame
       this.taskSent = false;
       this.taskDone = false;
 
-      this.options = ['0 - Competition', '1 - Initial Orientation', '2 - Identify Antenna', '3 - Receive Information', '4 - Go to Image', '5 - Take Picture', '6 - Go to Drawing Area', '7 - Draw Figure', '8 - Go Out of Drawing Area', '9 - Light Red Led', '10 - Toggle Pencil'];
+      this.options = ['0 - Competition', '1 - Initial Orientation', '2 - Identify Antenna', '3 - Receive Information', '4 - Go to Image', '5 - Take Picture', '6 - Go to Drawing Area', '7 - Draw Figure', '8 - Go Out of Drawing Area', '9 - Light Red Led', '10 - Toggle Pencil', '11 - Null', '12 - Images Routine'];
 
       this.scalings = [{ 'value': '1', 'name': '4' }, { 'value': '0.5', 'name': '2' }];
 
@@ -670,6 +711,14 @@ define('components/robot-controller/robot-controller',['exports', 'aurelia-frame
         }
       };
     }
+
+    RobotController.prototype.attached = function attached() {
+      this.taskService.registerCycleEnd(this.setTaskDone.bind(this));
+    };
+
+    RobotController.prototype.setTaskDone = function setTaskDone() {
+      this.taskDone = true;
+    };
 
     RobotController.prototype.sendCommand = function sendCommand() {
       var _this2 = this;
@@ -702,7 +751,7 @@ define('components/robot-controller/robot-controller',['exports', 'aurelia-frame
         return res.json();
       }).then(function (responseData) {
         if (responseData.message) {
-          _this2.startTimer();
+          _this2.startTask();
         }
 
         if (responseData.image) {
@@ -731,16 +780,27 @@ define('components/robot-controller/robot-controller',['exports', 'aurelia-frame
       }
     };
 
-    RobotController.prototype.startTimer = function startTimer() {
+    RobotController.prototype.startTask = function startTask() {
       this.timer.start();
+      this.taskSent = false;
     };
 
-    RobotController.prototype.resetTimer = function resetTimer() {
-      this.timer.reset();
+    RobotController.prototype.resetTask = function resetTask() {
+      var _this3 = this;
+
+      this.taskService.resetTasks(function () {
+        _this3.taskDone = false;
+      });
     };
 
     RobotController.prototype.stopTimer = function stopTimer() {
       this.timer.stop();
+    };
+
+    RobotController.prototype.pauseTimer = function pauseTimer() {
+      this.timer.pause();
+      this.taskDone = false;
+      this.taskSent = false;
     };
 
     return RobotController;
@@ -898,12 +958,12 @@ define('components/world-vision/world-vision-debug',['exports', 'aurelia-framewo
     }()) || _class);
 });
 define('text!app.html', ['module'], function(module) { module.exports = "<template><div><require from=\"./components/navbar/navbar\"></require><navbar></navbar></div><router-view></router-view></template>"; });
-define('text!components/competition/competition.html', ['module'], function(module) { module.exports = "<template><require from=\"../world-vision/world-vision-competition\"></require><world-vision-competition></world-vision-competition></template>"; });
 define('text!components/debug/debug.html', ['module'], function(module) { module.exports = "<template><require from=\"../world-vision/world-vision-debug\"></require><require from=\"../informations/informations\"></require><require from=\"../robot-controller/robot-controller\"></require><div class=\"row\"><div class=\"col s12 m12 l6\"><world-vision-debug></world-vision-debug></div><div class=\"col s12 m12 l6\"><informations></informations><robot-controller></robot-controller></div></div></template>"; });
+define('text!components/competition/competition.html', ['module'], function(module) { module.exports = "<template><require from=\"../world-vision/world-vision-competition\"></require><world-vision-competition></world-vision-competition></template>"; });
 define('text!components/go-to-position/go-to-position.html', ['module'], function(module) { module.exports = "<template><button class=\"btn blue\" click.trigger=\"execute()\">${buttonName}</button></template>"; });
 define('text!components/informations/informations.html', ['module'], function(module) { module.exports = "<template><div class=\"card\"><div class=\"card-content\"><div class=\"row\"><div class=\"col s6\"><h5>Monde</h5><hr><p>Dimension: <span class=\"text-number\">${informations.worldDimensions.width} x ${informations.worldDimensions.length} (${informations.worldDimensions.unit})</span></p><button class=\"btn blue\" click.trigger=\"resetDetection()\">Reset detection</button></div><div class=\"col s6\"><h5>Robot</h5><hr><p>Position x: <span class=\"text-number\">${informations.robot.position.x}</span></p><p>Position y: <span class=\"text-number\">${informations.robot.position.y}</span></p><p>Angle: <span class=\"text-number\">${informations.robot.orientation}</span></p></div><div class=\"col s12\"><h5>Obstacles</h5><hr><div repeat.for=\"obstacle of informations.obstacles\"><div class=\"col s6\"><p>Position: <span class=\"text-number\">(${obstacle.position.x}, ${obstacle.position.y})</span></p><p>Tag: <span class=\"text-number\">${obstacle.tag}</span></p></div></div></div><div class=\"col s12\"><h5>Tâches</h5><hr><div class=\"col s12\"><div repeat.for=\"task of task_information\"><div class=\"chip white-text ${task.color}\" style=\"float:left\">${$index} - ${task.name}</div></div></div></div></div></div></div></template>"; });
 define('text!components/navbar/navbar.html', ['module'], function(module) { module.exports = "<template><nav><div class=\"nav-wrapper color1\"><img width=\"55px\" height=\"55px\" src=\"./img/robot.png\"><a href=\"#\" class=\"brand-logo center\">Leonard</a><ul id=\"nav-mobile\" class=\"right hide-on-med-and-down\"><li><a href=\"#/competition\">Competition</a></li><li><a href=\"#/debug\">Debug</a></li></ul></div></nav></template>"; });
-define('text!components/robot-controller/robot-controller.html', ['module'], function(module) { module.exports = "<template><div class=\"card\"><div class=\"card-content\"><h5>Robot Controller <span if.bind=\"robotOnline\" class=\"chip green\">ROBOT ONLINE</span> <span if.bind=\"!robotOnline\" class=\"chip red\">ROBOT OFFLINE</span></h5><h5><span if.bind=\"taskSent\" class=\"chip blue\">CYCLE STARTED</span> <span if.bind=\"taskDone\" class=\"chip green\">CYCLE COMPLETE</span></h5><div class=\"row\"><div class=\"col s2\"><h5 style=\"background-color:rgba(0,0,0,.1);padding:6px;border-radius:2px;margin:0;text-align:center\">${timer.time}</h5></div><div class=\"col s8\"><button class=\"blue btn\" click.trigger=\"resetTimer()\">Reset</button></div></div><div class=\"row\"><select value.bind=\"currentCommand\" change.trigger=\"onChange()\" style=\"display:block;width:80%;float:left\"><option repeat.for=\"option of options\" value.bind=\"option\">${option}</option></select><button class=\"cyan btn\" click.trigger=\"sendCommand()\" style=\"margin-left:15px\">Go</button></div><div class=\"row\" if.bind=\"takePicture\"><div><input class=\"with-gap\" type=\"checkbox\" id=\"fakeSegmentation\" checked.bind=\"fakeSegmentation\"><label for=\"fakeSegmentation\">Fake Segmentation</label></div><select value.bind=\"currentScaling\" style=\"display:block;width:50%;float:left\"><option repeat.for=\"scaling of scalings\" model.bind=\"scaling\">${scaling.name}</option></select><select value.bind=\"currentOrientation\" style=\"display:block;width:50%;float:left\"><option repeat.for=\"orientation of orientations\" model.bind=\"orientation\">${orientation.name}</option></select></div><div if.bind=\"showImage\"><img if.bind=\"segmentedImage\" src=\"data:image/png;base64,${segmentedImage}\" width=\"640px\" height=\"640px\"> <img if.bind=\"!segmentedImage\" src=\"img/default-placeholder.png\" alt=\"\" width=\"640px\" height=\"640px\"> <img if.bind=\"segmentedImage\" src=\"data:image/png;base64,${thresholdedImage}\" style=\"width:100%\"></div></div></div></template>"; });
+define('text!components/robot-controller/robot-controller.html', ['module'], function(module) { module.exports = "<template><div class=\"card\"><div class=\"card-content\"><h5>Robot Controller <span if.bind=\"robotOnline\" class=\"chip green\">ROBOT ONLINE</span> <span if.bind=\"!robotOnline\" class=\"chip red\">ROBOT OFFLINE</span></h5><h5><span if.bind=\"taskSent\" class=\"chip blue\">CYCLE STARTED</span> <span if.bind=\"taskDone\" class=\"chip green\">CYCLE COMPLETE</span></h5><div class=\"row\"><div class=\"col s2\"><h5 style=\"background-color:rgba(0,0,0,.1);padding:6px;border-radius:2px;margin:0;text-align:center\">${timer.time}</h5></div><div class=\"col s8\"><button class=\"blue btn\" click.trigger=\"resetTask()\">Reset</button></div></div><div class=\"row\"><select value.bind=\"currentCommand\" change.trigger=\"onChange()\" style=\"display:block;width:80%;float:left\"><option repeat.for=\"option of options\" value.bind=\"option\">${option}</option></select><button class=\"cyan btn\" click.trigger=\"sendCommand()\" style=\"margin-left:15px\">Go</button></div><div class=\"row\" if.bind=\"takePicture\"><div><input class=\"with-gap\" type=\"checkbox\" id=\"fakeSegmentation\" checked.bind=\"fakeSegmentation\"><label for=\"fakeSegmentation\">Fake Segmentation</label></div><select value.bind=\"currentScaling\" style=\"display:block;width:50%;float:left\"><option repeat.for=\"scaling of scalings\" model.bind=\"scaling\">${scaling.name}</option></select><select value.bind=\"currentOrientation\" style=\"display:block;width:50%;float:left\"><option repeat.for=\"orientation of orientations\" model.bind=\"orientation\">${orientation.name}</option></select></div><div if.bind=\"showImage\"><img if.bind=\"segmentedImage\" src=\"data:image/png;base64,${segmentedImage}\" width=\"640px\" height=\"640px\"> <img if.bind=\"!segmentedImage\" src=\"img/default-placeholder.png\" alt=\"\" width=\"640px\" height=\"640px\"> <img if.bind=\"segmentedImage\" src=\"data:image/png;base64,${thresholdedImage}\" style=\"width:100%\"></div></div></div></template>"; });
 define('text!components/stat/stat.html', ['module'], function(module) { module.exports = ""; });
 define('text!components/world-vision/world-vision-competition.html', ['module'], function(module) { module.exports = "<template><div class=\"container\"><div class=\"row\"><div class=\"col s12 m12\"><div class=\"card\"><div class=\"card-content center-align\"><h3>World Vision</h3><div><div class=\"card-image\"><canvas id=\"${canvasId}\" width=\"640px\" height=\"480px\" style=\"background:url(${imagePath})\"></canvas></div><div class=\"card-content\"><span class=\"equidistant float-left\"><label>Robot position</label><label>x :</label><label class=\"text-number\">${x_position}</label><label>y :</label><label class=\"text-number\">${y_position}</label></span><span class=\"equidistant float-right\"></span></div><div class=\"card-action\"><button class=\"color2 waves-effect waves-light btn\" click.trigger=\"start()\">Start</button></div></div></div></div></div></div></div></template>"; });
 define('text!components/world-vision/world-vision-debug.html', ['module'], function(module) { module.exports = "<template><require from=\"../go-to-position/go-to-position\"></require><require from=\"../robot-controller/robot-controller\"></require><div class=\"card\"><div class=\"card-content\"><div class=\"row\"><h5>World Vision</h5><div class=\"center-align\"><img id=\"${canvasId}\" width=\"640px\" height=\"400px\" src=\"${visionProperties.imagePath}\" style=\"cursor:crosshair\"></div></div><div class=\"row\"><div class=\"col s6\"><p>Mouse position: <span class=\"text-number\">(${x_position}, ${y_position})</span></p><button class=\"indigo btn\" click.trigger=\"resetPathRendering()\">Reset path rendering</button></div><div class=\"col s6\"><div class=\"row\"><p>Next destination --> <span class=\"text-number\">(${chosen_x_position}, ${chosen_y_position})</span></p><input value.bind=\"theta\" placeholder=\"theta\"></div><ul class=\"collection center-align\"><li class=\"collection-item\"><go-to-position x-position=\"${chosen_x_position}\" y-position=\"${chosen_y_position}\" theta=\"${theta}\" pathfinder=\"true\"></go-to-position></li><li class=\"collection-item\"><go-to-position x-position=\"${chosen_x_position}\" y-position=\"${chosen_y_position}\" theta=\"${theta}\"></go-to-position></li></ul></div></div></div></div></template>"; });

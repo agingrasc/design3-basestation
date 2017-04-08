@@ -1,11 +1,14 @@
 import { inject } from 'aurelia-framework';
 
 import { Timer } from '../../services/timer';
+import { Task } from '../../services/task';
 
-@inject(Timer)
+@inject(Timer, Task)
 export class RobotController {
-  constructor(timer) {
+  constructor(timer, task) {
     this.timer = timer;
+    this.taskService = task;
+
     this.currentCommand = null;
     this.currentScaling = null;
     this.currentOrientation = null;
@@ -30,7 +33,9 @@ export class RobotController {
         '7 - Draw Figure',
         '8 - Go Out of Drawing Area',
         '9 - Light Red Led',
-        '10 - Toggle Pencil'
+        '10 - Toggle Pencil',
+        '11 - Null',
+        '12 - Images Routine'
     ];
 
     this.scalings = [
@@ -66,6 +71,14 @@ export class RobotController {
     };
   }
 
+  attached() {
+    this.taskService.registerCycleEnd(this.setTaskDone.bind(this));
+  }
+
+  setTaskDone() {
+    this.taskDone = true;
+  }
+
   sendCommand() {
     const taskId = this.options.indexOf(this.currentCommand).toString();
     const data = { 'task_id': taskId };
@@ -95,7 +108,7 @@ export class RobotController {
     .then((res) => res.json())
     .then((responseData) => {
       if (responseData.message) {
-        this.startTimer();
+        this.startTask();
       }
 
       if (responseData.image) {
@@ -122,16 +135,25 @@ export class RobotController {
     }
   }
 
-  startTimer() {
+  startTask() {
     this.timer.start();
+    this.taskSent = false;
   }
 
-  resetTimer() {
-    this.timer.reset();
+  resetTask() {
+    this.taskService.resetTasks(() => {
+      this.taskDone = false;
+    });
   }
 
   stopTimer() {
     this.timer.stop();
+  }
+
+  pauseTimer() {
+    this.timer.pause();
+    this.taskDone = false;
+    this.taskSent = false;
   }
 }
 

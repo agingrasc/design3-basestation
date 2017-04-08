@@ -16,6 +16,12 @@ def get_obstacles():
     return make_response(jsonify(obstacles_response.json()))
 
 
+@vision_gateway.route('/obstacles/reset', methods=["POST"])
+def reset_obstacles():
+    reset_obstacles = requests.post(VISION_SERVICE_BASE_URL + '/vision/reset-obstacles')
+    return make_response(jsonify(reset_obstacles.json()))
+
+
 @vision_gateway.route('/world-dimensions', methods=["GET"])
 def get_world_dimensions():
     world_dimensions_response = requests.get(VISION_SERVICE_BASE_URL + '/world-dimensions')
