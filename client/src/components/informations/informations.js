@@ -36,6 +36,22 @@ export class Informations {
         });
     }
 
+    resetPathRendering() {
+        fetch('http://0.0.0.0:5000/vision/reset-rendering', {
+            method: "POST",
+            headers: {
+                'content-type': 'application/json'
+            },
+            mode: 'no-cors'
+        })
+            .then((response) => {
+                console.log(response);
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }
+
     colorFor(task) {
         return 'red-text';
     }

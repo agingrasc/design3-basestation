@@ -5,11 +5,10 @@ from time import sleep
 
 import requests
 from flask import Flask, jsonify, make_response, json
-from requests import Timeout, ConnectionError
 from websocket import create_connection
 
 from api.gotoposition import gotoposition
-from api.starttasks import start_tasks, BASE_STATION_URL
+from api.starttasks import start_tasks
 from api.feedbacktask import feedback_task
 from api.visiongateway import vision_gateway
 
@@ -55,8 +54,7 @@ def send_heartbeat(robot_url, connection):
 
 
 if __name__ == '__main__':
-    url = sys.argv[1]
-    ROBOT_IP_ADRESS = url
+    ROBOT_IP_ADRESS = sys.argv[1]
 
     connection = create_connection("ws://0.0.0.0:3000/")
 

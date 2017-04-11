@@ -1,41 +1,15 @@
 <template>
-    <require from="../go-to-position/go-to-position"></require>
     <require from="../robot-controller/robot-controller"></require>
 
     <div class="card">
         <div class="card-content">
             <div class="row">
-                <h5>World Vision</h5>
+                <h5>World Vision <span>Cursor: (${x_position}, ${y_position}) -- Next Destination (${nextDestination.x}, ${nextDestination.y})</span></h5>
+
                 <div class="center-align">
-                    <img id="${canvasId}" width="640px" height="400px" src="${visionProperties.imagePath}" style="cursor: crosshair;"></img>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col s6">
-                    <p>Mouse position: <span class="text-number">(${x_position}, ${y_position})</span></p>
-
-                    <button class="indigo btn" click.trigger="resetPathRendering()">Reset path rendering</button>
-                </div>
-
-                <div class="col s6">
-                    <div class="row">
-                        <p>Next destination --> <span class="text-number">(${chosen_x_position}, ${chosen_y_position})</span></p>
-                        <input value.bind="theta" placeholder="theta">
-                    </div>
-
-                    <ul class="collection center-align">
-                        <li class="collection-item">
-                            <go-to-position x-position="${chosen_x_position}" y-position="${chosen_y_position}" theta="${theta}" pathfinder="true"></go-to-position>
-                        </li>
-
-                        <li class="collection-item">
-                            <go-to-position x-position="${chosen_x_position}" y-position="${chosen_y_position}" theta="${theta}"></go-to-position>
-                        </li>
-                    </ul>
+                    <img id="world__feed" width="640px" height="400px" src="${visionProperties.imagePath}" style="cursor: crosshair;"></img>
                 </div>
             </div>
         </div>
     </div>
-
 </template>

@@ -55,7 +55,7 @@ def take_picture():
     body = robot_response
     green_led_response = req.post(url=ROBOT_API_URL + '/light-green-led').json()
     image_service_response = req.post(url=build_vision_service_url(is_fake_segmentation(data)), json=body).json()
-    robot_confirm = req.post(url=ROBOT_API_URL + "/set-image-segments", json=image_service_response).json()
+    # robot_confirm = req.post(url=ROBOT_API_URL + "/set-image-segments", json=image_service_response).json()
     connection = create_connection("ws://localhost:3000")
     connection.send(json.dumps({"headers": "push_image_segmentation", "data": image_service_response}))
     return make_response(jsonify(image_service_response))

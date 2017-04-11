@@ -1,5 +1,4 @@
 <template>
-
     <div class="card">
         <div class="card-content">
             <div class="row">
@@ -8,6 +7,7 @@
                     <hr>
                     <p>Dimension: <span class="text-number">${informations.worldDimensions.width} x ${informations.worldDimensions.length} (${informations.worldDimensions.unit})</span></p>
                     <button class="btn blue" click.trigger="resetDetection()">Reset detection</button>
+                    <button class="indigo btn" click.trigger="resetPathRendering()">Reset path rendering</button>
                 </div>
 
                 <div class="col s6">

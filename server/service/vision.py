@@ -6,12 +6,13 @@ from tornado import ioloop
 from tornado import websocket
 from tornado import web
 
-from service import visionformat
+import visionformat
 
 REGISTERED_TO_VISION_DATA = []
 REGISTERED_TO_TASK_DATA = []
 REGISTERED_TO_IMAGE_SEGMENTATION = []
 REGISTERED_TO_ROBOT_ONLINE = []
+REGISTERED_TO_ROBOT_FEED = []
 
 ROBOT_POSITION = {}
 
@@ -24,15 +25,15 @@ WORLD_STATE = {
 def initialize_task_info():
     return {
         "data": {
-            visionformat.TASK_INITIAL_ORIENTATION: "False",
-            visionformat.TASK_IDENTEFIE_ANTENNA: "False",
-            visionformat.TASK_RECEIVE_INFORMATION: "False",
-            visionformat.TASK_GO_TO_IMAGE: "False",
-            visionformat.TASK_TAKE_PICTURE: "False",
-            visionformat.TASK_GO_TO_DRAWING_ZONE: "False",
-            visionformat.TASK_DRAW_IMAGE: "False",
-            visionformat.TASK_GO_OUT_OF_DRAWING_ZONE: "False",
-            visionformat.TASK_LIGHT_RED_LED: "False"
+            "initial_orientation": "False",
+            "identifie_antenna": "False",
+            "receive_informations": "False",
+            "go_to_image": "False",
+            "take_picture": "False",
+            "go_to_drawing_zone": "False",
+            "draw_image": "False",
+            "go_out_of_darwing_zone": "False",
+            "light_red_led": "False"
         }
     }
 
@@ -73,6 +74,9 @@ class VisionWebSocketHandler(websocket.WebSocketHandler):
         if message_type == "register_image_segmentation":
             register_to(REGISTERED_TO_IMAGE_SEGMENTATION, self)
 
+        if message_type == "register_to_robot_feed":
+            register_to(REGISTERED_TO_ROBOT_FEED, self)
+
         if message_type == "register_robot_online":
             register_to(REGISTERED_TO_ROBOT_ONLINE, self)
             if WORLD_STATE["robot_online"]:
@@ -82,6 +86,9 @@ class VisionWebSocketHandler(websocket.WebSocketHandler):
 
         if message_type == "push_vision_data":
             push_vision_data(self, message)
+
+        if message_type == "push_robot_feed":
+            notify_all(REGISTERED_TO_ROBOT_FEED, message_data)
 
         if message_type == "pull_vision_data":
             self.write_message(self._global_state["pull_vision_data"])
@@ -100,13 +107,13 @@ class VisionWebSocketHandler(websocket.WebSocketHandler):
             notify_all(REGISTERED_TO_TASK_DATA, tasks_state)
 
         if message_type == "new_round":
-            old_antenna_state = tasks_state["data"][visionformat.TASK_IDENTEFIE_ANTENNA]
-            old_orientation_state = tasks_state["data"][visionformat.TASK_INITIAL_ORIENTATION]
-            
+            old_antenna_state = tasks_state["data"]["identifie_antenna"]
+            old_orientation_state = tasks_state["data"]["initial_orientation"]
+
             reset_tasks()
 
-            tasks_state["data"][visionformat.TASK_IDENTEFIE_ANTENNA] = old_antenna_state
-            tasks_state["data"][visionformat.TASK_INITIAL_ORIENTATION] = old_orientation_state
+            tasks_state["data"]["identifie_antenna"] = old_antenna_state
+            tasks_state["data"]["initial_orientation"] = old_orientation_state
 
             notify_all(REGISTERED_TO_TASK_DATA, tasks_state)
 
@@ -188,11 +195,32 @@ def unregister(connection):
     if connection in REGISTERED_TO_ROBOT_ONLINE:
         REGISTERED_TO_ROBOT_ONLINE.remove(connection)
 
+    if connection in REGISTERED_TO_ROBOT_FEED:
+        REGISTERED_TO_ROBOT_FEED.remove(connection)
 
-application = web.Application([
-    web.url(r"/", VisionWebSocketHandler, kwargs={'global_state': WORLD_STATE, 'robot_position': ROBOT_POSITION})
-])
+
+class StartTaskRessource(web.RequestHandler):
+    def initialize(self, tasks):
+        self._tasks = tasks
+
+    def set_default_headers(self):
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+        self.set_header('Access-Control-Allow-Headers', "Origin, X-Requested-With, Content-Type, Accept")
+        self.set_header('Content-Type', 'application/json')
+
+    def post(self):
+        data = json.loads(self.request.body.decode('utf-8'))
+
+        self.write(json.dumps({"message": "ok"}))
+
 
 if __name__ == "__main__":
+    application = web.Application([
+        web.url(r"/", VisionWebSocketHandler, kwargs={'global_state': WORLD_STATE, 'robot_position': ROBOT_POSITION}),
+        web.url(r"/start-tasks", StartTaskRessource, kwargs={'tasks': tasks_state})
+    ])
+
     application.listen(3000)
+
     ioloop.IOLoop.instance().start()

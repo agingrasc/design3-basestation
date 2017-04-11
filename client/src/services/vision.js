@@ -1,18 +1,18 @@
 export class Vision {
     constructor() {
-        this.informations = undefined;
+        this.informations = {};
         this.imageView = undefined;
         this.world_information = undefined;
         this.origin = undefined;
         this.ratio = undefined;
-        this.goto = undefined;
+        this.goto = {};
     }
 
     start() {
         this.ws = new WebSocket('ws://localhost:3000');
 
         this.ws.onopen = () => {
-            let robotPositionRegisterMessage = JSON.stringify({'headers': 'register_vision_data'});
+            let robotPositionRegisterMessage = JSON.stringify({ 'headers': 'register_vision_data' });
             this.ws.send(robotPositionRegisterMessage);
         };
 
@@ -49,20 +49,20 @@ export class Vision {
                 'orientation': robot.orientation
             };
 
-            this.goto.robot = {
-                'position': {
-                    'x': robot.position.x,
-                    'y': robot.position.y,
-                    'theta': robot.theta
-                }
-            };
-
             // Update world obstacles
             this.goto.obstacles = [];
 
             // Update world dimension
             this.world_information.world_dimension = data.image.sent_dimension;
         };
+    }
+
+    setDestinationPosition(nextDestination) {
+        this.goto = { 'destination': nextDestination };
+    }
+
+    getDestinationPosition() {
+        return this.goto;
     }
 
     checkReadyToStart() {

@@ -18,23 +18,20 @@ define('app',['exports'], function (exports) {
 
         App.prototype.configureRouter = function configureRouter(config, router) {
             config.title = 'Aurelia';
+
             var navStrat = function navStrat(instruction) {
                 instruction.config.moduleId = instruction.fragment;
                 instruction.config.href = instruction.fragment;
             };
+
             config.map([{
-                route: ['', 'competition'],
-                name: 'competition',
-                moduleId: './components/competition/competition',
-                nav: true,
-                title: 'Competition'
-            }, {
-                route: 'debug',
+                route: ['', 'debug'],
                 name: 'debug',
                 moduleId: './components/debug/debug',
                 nav: true,
                 title: 'Debug'
             }]);
+
             this.router = router;
         };
 
@@ -199,7 +196,7 @@ define('services/task',['exports', 'aurelia-framework', './timer'], function (ex
         };
 
         Task.prototype.resetTasks = function resetTasks() {
-            this.ws.send(JSON.stringify({ "headers": "reset_tasks" }));
+            this.ws.send(JSON.stringify({ 'headers': 'reset_tasks' }));
         };
 
         Task.prototype.registerInformations = function registerInformations(data) {
@@ -319,12 +316,12 @@ define('services/vision',['exports'], function (exports) {
         function Vision() {
             _classCallCheck(this, Vision);
 
-            this.informations = undefined;
+            this.informations = {};
             this.imageView = undefined;
             this.world_information = undefined;
             this.origin = undefined;
             this.ratio = undefined;
-            this.goto = undefined;
+            this.goto = {};
         }
 
         Vision.prototype.start = function start() {
@@ -369,18 +366,18 @@ define('services/vision',['exports'], function (exports) {
                     'orientation': robot.orientation
                 };
 
-                _this.goto.robot = {
-                    'position': {
-                        'x': robot.position.x,
-                        'y': robot.position.y,
-                        'theta': robot.theta
-                    }
-                };
-
                 _this.goto.obstacles = [];
 
                 _this.world_information.world_dimension = data.image.sent_dimension;
             };
+        };
+
+        Vision.prototype.setDestinationPosition = function setDestinationPosition(nextDestination) {
+            this.goto = { 'destination': nextDestination };
+        };
+
+        Vision.prototype.getDestinationPosition = function getDestinationPosition() {
+            return this.goto;
         };
 
         Vision.prototype.checkReadyToStart = function checkReadyToStart() {
@@ -509,28 +506,20 @@ define('components/go-to-position/go-to-position',['exports', 'aurelia-framework
         throw new Error('Decorating class property failed. Please ensure that transform-class-properties is enabled.');
     }
 
-    var _dec, _class, _desc, _value, _class2, _descriptor, _descriptor2, _descriptor3, _descriptor4;
+    var _dec, _class, _desc, _value, _class2, _descriptor;
 
     var GoToPosition = exports.GoToPosition = (_dec = (0, _aureliaFramework.inject)(_vision.Vision), _dec(_class = (_class2 = function () {
         function GoToPosition(vision) {
             _classCallCheck(this, GoToPosition);
 
-            _initDefineProp(this, 'xPosition', _descriptor, this);
-
-            _initDefineProp(this, 'yPosition', _descriptor2, this);
-
-            _initDefineProp(this, 'theta', _descriptor3, this);
-
-            _initDefineProp(this, 'pathfinder', _descriptor4, this);
+            _initDefineProp(this, 'pathfinder', _descriptor, this);
 
             this.httpClient = new _baseStationRequest.BaseStationRequest();
             this.vision = vision;
-            this.info = {};
-            this.vision.registerGoto(this.info);
         }
 
         GoToPosition.prototype.attached = function attached() {
-            if (!this.pathfinder) {
+            if (this.pathfinder) {
                 this.buttonName = 'go to pathfinder';
                 this.endpoint = '/go-to-pathfinder';
             } else {
@@ -540,37 +529,14 @@ define('components/go-to-position/go-to-position',['exports', 'aurelia-framework
         };
 
         GoToPosition.prototype.execute = function execute() {
-            var body = {
-                'destination': {
-                    'x': this.xPosition,
-                    'y': this.yPosition,
-                    'theta': this.theta
-                }
-            };
-
-            this.httpClient.post(body, this.endpoint);
+            this.httpClient.post(this.vision.getDestinationPosition(), this.endpoint);
         };
 
         return GoToPosition;
-    }(), (_descriptor = _applyDecoratedDescriptor(_class2.prototype, 'xPosition', [_aureliaFramework.bindable], {
+    }(), (_descriptor = _applyDecoratedDescriptor(_class2.prototype, 'pathfinder', [_aureliaFramework.bindable], {
         enumerable: true,
         initializer: function initializer() {
-            return 0;
-        }
-    }), _descriptor2 = _applyDecoratedDescriptor(_class2.prototype, 'yPosition', [_aureliaFramework.bindable], {
-        enumerable: true,
-        initializer: function initializer() {
-            return 0;
-        }
-    }), _descriptor3 = _applyDecoratedDescriptor(_class2.prototype, 'theta', [_aureliaFramework.bindable], {
-        enumerable: true,
-        initializer: function initializer() {
-            return 0;
-        }
-    }), _descriptor4 = _applyDecoratedDescriptor(_class2.prototype, 'pathfinder', [_aureliaFramework.bindable], {
-        enumerable: true,
-        initializer: function initializer() {
-            return false;
+            return true;
         }
     })), _class2)) || _class);
 });
@@ -623,6 +589,20 @@ define('components/informations/informations',['exports', 'aurelia-framework', '
             });
         };
 
+        Informations.prototype.resetPathRendering = function resetPathRendering() {
+            fetch('http://0.0.0.0:5000/vision/reset-rendering', {
+                method: "POST",
+                headers: {
+                    'content-type': 'application/json'
+                },
+                mode: 'no-cors'
+            }).then(function (response) {
+                console.log(response);
+            }).catch(function (err) {
+                console.log(err);
+            });
+        };
+
         Informations.prototype.colorFor = function colorFor(task) {
             return 'red-text';
         };
@@ -631,21 +611,35 @@ define('components/informations/informations',['exports', 'aurelia-framework', '
     }()) || _class);
 });
 define('components/navbar/navbar',["exports"], function (exports) {
-  "use strict";
+    "use strict";
 
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
 
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
+    function _classCallCheck(instance, Constructor) {
+        if (!(instance instanceof Constructor)) {
+            throw new TypeError("Cannot call a class as a function");
+        }
     }
-  }
 
-  var Navbar = exports.Navbar = function Navbar() {
-    _classCallCheck(this, Navbar);
-  };
+    var Navbar = exports.Navbar = function () {
+        function Navbar() {
+            _classCallCheck(this, Navbar);
+
+            this.showNavbar = true;
+        }
+
+        Navbar.prototype.attached = function attached() {
+            var _this = this;
+
+            setTimeout(function () {
+                _this.showNavbar = false;
+            }, 3000);
+        };
+
+        return Navbar;
+    }();
 });
 define('components/robot-controller/robot-controller',['exports', 'aurelia-framework', '../../services/timer', '../../services/task'], function (exports, _aureliaFramework, _timer, _task) {
   'use strict';
@@ -827,6 +821,41 @@ define('components/robot-controller/robot-controller',['exports', 'aurelia-frame
     return [Math.round(parseFloat(coord[0])), Math.round(parseFloat(coord[1]))].toString();
   }
 });
+define('components/robot-feed/robot-feed',['exports'], function (exports) {
+    'use strict';
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    function _classCallCheck(instance, Constructor) {
+        if (!(instance instanceof Constructor)) {
+            throw new TypeError("Cannot call a class as a function");
+        }
+    }
+
+    var RobotFeed = exports.RobotFeed = function RobotFeed() {
+        var _this = this;
+
+        _classCallCheck(this, RobotFeed);
+
+        this.imagePath = 'img/placeholder_480x360.png';
+        this.ws = new WebSocket('ws://localhost:3000');
+
+        this.ws.onopen = function () {
+            var robotPositionRegisterMessage = JSON.stringify({ 'headers': 'register_to_robot_feed' });
+            _this.ws.send(robotPositionRegisterMessage);
+        };
+
+        this.ws.onmessage = function (event) {
+            var data = JSON.parse(event.data);
+
+            window.requestAnimationFrame(function () {
+                _this.imagePath = 'data:image/jpeg;base64,' + data.data.image;
+            });
+        };
+    };
+});
 define('components/stat/stat',[], function () {
   "use strict";
 });
@@ -889,10 +918,9 @@ define('components/world-vision/world-vision-debug',['exports', 'aurelia-framewo
 
             this.vision = vision;
 
-            this.canvasId = 'monCanvas';
-
-            this.visionProperties = {};
-            this.visionProperties.imagePath = './src/components/world-vision/image14.jpg';
+            this.visionProperties = {
+                'imagePath': 'img/placeholder_640x400.png'
+            };
 
             this.x_position = 0;
             this.y_position = 0;
@@ -907,7 +935,7 @@ define('components/world-vision/world-vision-debug',['exports', 'aurelia-framewo
         WorldVisionDebug.prototype.attached = function attached() {
             var _this = this;
 
-            var canvas = document.getElementById(this.canvasId);
+            var canvas = document.getElementById('world__feed');
 
             canvas.addEventListener('mousemove', function (evt) {
                 var mousePos = _this.getMousePos(canvas, evt);
@@ -917,24 +945,18 @@ define('components/world-vision/world-vision-debug',['exports', 'aurelia-framewo
             canvas.addEventListener('click', function (evt) {
                 _this.chosen_x_position = _this.x_position;
                 _this.chosen_y_position = _this.y_position;
+
+                _this.nextDestination = {
+                    'x': _this.chosen_x_position,
+                    'y': _this.chosen_y_position,
+                    'theta': _this.theta
+                };
+
+                _this.vision.setDestinationPosition(_this.nextDestination);
             }, false);
 
             this.vision.registerImageView(this.visionProperties);
             this.vision.registerGotoPosition(this.world_information);
-        };
-
-        WorldVisionDebug.prototype.resetPathRendering = function resetPathRendering() {
-            fetch('http://0.0.0.0:5000/vision/reset-rendering', {
-                method: "POST",
-                headers: {
-                    'content-type': 'application/json'
-                },
-                mode: 'no-cors'
-            }).then(function (response) {
-                console.log(response);
-            }).catch(function (err) {
-                console.log(err);
-            });
         };
 
         WorldVisionDebug.prototype.getMousePos = function getMousePos(canvas, evt) {
@@ -957,14 +979,15 @@ define('components/world-vision/world-vision-debug',['exports', 'aurelia-framewo
         return WorldVisionDebug;
     }()) || _class);
 });
-define('text!app.html', ['module'], function(module) { module.exports = "<template><div><require from=\"./components/navbar/navbar\"></require><navbar></navbar></div><router-view></router-view></template>"; });
-define('text!components/debug/debug.html', ['module'], function(module) { module.exports = "<template><require from=\"../world-vision/world-vision-debug\"></require><require from=\"../informations/informations\"></require><require from=\"../robot-controller/robot-controller\"></require><div class=\"row\"><div class=\"col s12 m12 l6\"><world-vision-debug></world-vision-debug></div><div class=\"col s12 m12 l6\"><informations></informations><robot-controller></robot-controller></div></div></template>"; });
+define('text!app.html', ['module'], function(module) { module.exports = "<template><router-view></router-view></template>"; });
 define('text!components/competition/competition.html', ['module'], function(module) { module.exports = "<template><require from=\"../world-vision/world-vision-competition\"></require><world-vision-competition></world-vision-competition></template>"; });
-define('text!components/go-to-position/go-to-position.html', ['module'], function(module) { module.exports = "<template><button class=\"btn blue\" click.trigger=\"execute()\">${buttonName}</button></template>"; });
-define('text!components/informations/informations.html', ['module'], function(module) { module.exports = "<template><div class=\"card\"><div class=\"card-content\"><div class=\"row\"><div class=\"col s6\"><h5>Monde</h5><hr><p>Dimension: <span class=\"text-number\">${informations.worldDimensions.width} x ${informations.worldDimensions.length} (${informations.worldDimensions.unit})</span></p><button class=\"btn blue\" click.trigger=\"resetDetection()\">Reset detection</button></div><div class=\"col s6\"><h5>Robot</h5><hr><p>Position x: <span class=\"text-number\">${informations.robot.position.x}</span></p><p>Position y: <span class=\"text-number\">${informations.robot.position.y}</span></p><p>Angle: <span class=\"text-number\">${informations.robot.orientation}</span></p></div><div class=\"col s12\"><h5>Obstacles</h5><hr><div repeat.for=\"obstacle of informations.obstacles\"><div class=\"col s6\"><p>Position: <span class=\"text-number\">(${obstacle.position.x}, ${obstacle.position.y})</span></p><p>Tag: <span class=\"text-number\">${obstacle.tag}</span></p></div></div></div><div class=\"col s12\"><h5>Tâches</h5><hr><div class=\"col s12\"><div repeat.for=\"task of task_information\"><div class=\"chip white-text ${task.color}\" style=\"float:left\">${$index} - ${task.name}</div></div></div></div></div></div></div></template>"; });
-define('text!components/navbar/navbar.html', ['module'], function(module) { module.exports = "<template><nav><div class=\"nav-wrapper color1\"><img width=\"55px\" height=\"55px\" src=\"./img/robot.png\"><a href=\"#\" class=\"brand-logo center\">Leonard</a><ul id=\"nav-mobile\" class=\"right hide-on-med-and-down\"><li><a href=\"#/competition\">Competition</a></li><li><a href=\"#/debug\">Debug</a></li></ul></div></nav></template>"; });
-define('text!components/robot-controller/robot-controller.html', ['module'], function(module) { module.exports = "<template><div class=\"card\"><div class=\"card-content\"><h5>Robot Controller <span if.bind=\"robotOnline\" class=\"chip green\">ROBOT ONLINE</span> <span if.bind=\"!robotOnline\" class=\"chip red\">ROBOT OFFLINE</span></h5><h5><span if.bind=\"taskSent\" class=\"chip blue\">CYCLE STARTED</span> <span if.bind=\"taskDone\" class=\"chip green\">CYCLE COMPLETE</span></h5><div class=\"row\"><div class=\"col s2\"><h5 style=\"background-color:rgba(0,0,0,.1);padding:6px;border-radius:2px;margin:0;text-align:center\">${timer.time}</h5></div><div class=\"col s8\"><button class=\"blue btn\" click.trigger=\"resetTask()\">Reset</button></div></div><div class=\"row\"><select value.bind=\"currentCommand\" change.trigger=\"onChange()\" style=\"display:block;width:80%;float:left\"><option repeat.for=\"option of options\" value.bind=\"option\">${option}</option></select><button class=\"cyan btn\" click.trigger=\"sendCommand()\" style=\"margin-left:15px\">Go</button></div><div class=\"row\" if.bind=\"takePicture\"><div><input class=\"with-gap\" type=\"checkbox\" id=\"fakeSegmentation\" checked.bind=\"fakeSegmentation\"><label for=\"fakeSegmentation\">Fake Segmentation</label></div><select value.bind=\"currentScaling\" style=\"display:block;width:50%;float:left\"><option repeat.for=\"scaling of scalings\" model.bind=\"scaling\">${scaling.name}</option></select><select value.bind=\"currentOrientation\" style=\"display:block;width:50%;float:left\"><option repeat.for=\"orientation of orientations\" model.bind=\"orientation\">${orientation.name}</option></select></div><div if.bind=\"showImage\"><img if.bind=\"segmentedImage\" src=\"data:image/png;base64,${segmentedImage}\" width=\"640px\" height=\"640px\"> <img if.bind=\"!segmentedImage\" src=\"img/default-placeholder.png\" alt=\"\" width=\"640px\" height=\"640px\"> <img if.bind=\"segmentedImage\" src=\"data:image/png;base64,${thresholdedImage}\" style=\"width:100%\"></div></div></div></template>"; });
+define('text!components/debug/debug.html', ['module'], function(module) { module.exports = "<template><require from=\"../world-vision/world-vision-debug\"></require><require from=\"../informations/informations\"></require><require from=\"../robot-controller/robot-controller\"></require><require from=\"../robot-feed/robot-feed\"></require><div class=\"row\"><div class=\"col s12 m12 l6\"><world-vision-debug></world-vision-debug><robot-feed></robot-feed></div><div class=\"col s12 m12 l6\"><informations></informations><robot-controller></robot-controller></div></div></template>"; });
+define('text!components/go-to-position/go-to-position.html', ['module'], function(module) { module.exports = "<template><button class=\"btn green\" click.trigger=\"execute()\">${buttonName}</button></template>"; });
+define('text!components/informations/informations.html', ['module'], function(module) { module.exports = "<template><div class=\"card\"><div class=\"card-content\"><div class=\"row\"><div class=\"col s6\"><h5>Monde</h5><hr><p>Dimension: <span class=\"text-number\">${informations.worldDimensions.width} x ${informations.worldDimensions.length} (${informations.worldDimensions.unit})</span></p><button class=\"btn blue\" click.trigger=\"resetDetection()\">Reset detection</button> <button class=\"indigo btn\" click.trigger=\"resetPathRendering()\">Reset path rendering</button></div><div class=\"col s6\"><h5>Robot</h5><hr><p>Position x: <span class=\"text-number\">${informations.robot.position.x}</span></p><p>Position y: <span class=\"text-number\">${informations.robot.position.y}</span></p><p>Angle: <span class=\"text-number\">${informations.robot.orientation}</span></p></div><div class=\"col s12\"><h5>Obstacles</h5><hr><div repeat.for=\"obstacle of informations.obstacles\"><div class=\"col s6\"><p>Position: <span class=\"text-number\">(${obstacle.position.x}, ${obstacle.position.y})</span></p><p>Tag: <span class=\"text-number\">${obstacle.tag}</span></p></div></div></div><div class=\"col s12\"><h5>Tâches</h5><hr><div class=\"col s12\"><div repeat.for=\"task of task_information\"><div class=\"chip white-text ${task.color}\" style=\"float:left\">${$index} - ${task.name}</div></div></div></div></div></div></div></template>"; });
+define('text!components/navbar/navbar.html', ['module'], function(module) { module.exports = "<template><nav if.bind=\"showNavbar\"><div class=\"nav-wrapper color1\"><img width=\"55px\" height=\"55px\" src=\"./img/robot.png\"><a href=\"#\" class=\"brand-logo center\">Leonard</a><ul id=\"nav-mobile\" class=\"right hide-on-med-and-down\"><li><a href=\"/\">Debug</a></li></ul></div></nav></template>"; });
+define('text!components/robot-controller/robot-controller.html', ['module'], function(module) { module.exports = "<template><require from=\"../go-to-position/go-to-position\"></require><div class=\"card\"><div class=\"card-content\"><h5>Robot Control <span if.bind=\"robotOnline\" class=\"chip green\">ROBOT ONLINE</span> <span if.bind=\"!robotOnline\" class=\"chip red\">ROBOT OFFLINE</span></h5><h5><span if.bind=\"taskSent\" class=\"chip blue\">CYCLE STARTED</span> <span if.bind=\"taskDone\" class=\"chip green\">CYCLE COMPLETE</span></h5><div class=\"row\"><div class=\"col s2\"><h5 style=\"background-color:rgba(0,0,0,.1);padding:6px;border-radius:2px;margin:0;text-align:center\">${timer.time}</h5></div><div class=\"col s8\"><button class=\"blue btn\" click.trigger=\"resetTask()\">Reset</button><go-to-position></go-to-position></div></div><div class=\"row\"><select value.bind=\"currentCommand\" change.trigger=\"onChange()\" style=\"display:block;width:80%;float:left\"><option repeat.for=\"option of options\" value.bind=\"option\">${option}</option></select><button class=\"cyan btn\" click.trigger=\"sendCommand()\" style=\"margin-left:15px\">Go</button></div><div class=\"row\" if.bind=\"takePicture\"><div><input class=\"with-gap\" type=\"checkbox\" id=\"fakeSegmentation\" checked.bind=\"fakeSegmentation\"><label for=\"fakeSegmentation\">Fake Segmentation</label></div><select value.bind=\"currentScaling\" style=\"display:block;width:50%;float:left\"><option repeat.for=\"scaling of scalings\" model.bind=\"scaling\">${scaling.name}</option></select><select value.bind=\"currentOrientation\" style=\"display:block;width:50%;float:left\"><option repeat.for=\"orientation of orientations\" model.bind=\"orientation\">${orientation.name}</option></select></div><div if.bind=\"showImage\"><img if.bind=\"segmentedImage\" src=\"data:image/png;base64,${segmentedImage}\" width=\"640px\" height=\"640px\"> <img if.bind=\"!segmentedImage\" src=\"img/default-placeholder.png\" alt=\"\" width=\"640px\" height=\"640px\"> <img if.bind=\"segmentedImage\" src=\"data:image/png;base64,${thresholdedImage}\" style=\"width:100%\"></div></div></div></template>"; });
+define('text!components/robot-feed/robot-feed.html', ['module'], function(module) { module.exports = "<template><div class=\"card\"><div class=\"card-content\"><div class=\"row\"><h5>Robot Feed</h5><div class=\"center-align\"><img id=\"robot__feed\" style=\"width:100%;height:auto\" src=\"${imagePath}\"></div></div></div></div></template>"; });
 define('text!components/stat/stat.html', ['module'], function(module) { module.exports = ""; });
-define('text!components/world-vision/world-vision-competition.html', ['module'], function(module) { module.exports = "<template><div class=\"container\"><div class=\"row\"><div class=\"col s12 m12\"><div class=\"card\"><div class=\"card-content center-align\"><h3>World Vision</h3><div><div class=\"card-image\"><canvas id=\"${canvasId}\" width=\"640px\" height=\"480px\" style=\"background:url(${imagePath})\"></canvas></div><div class=\"card-content\"><span class=\"equidistant float-left\"><label>Robot position</label><label>x :</label><label class=\"text-number\">${x_position}</label><label>y :</label><label class=\"text-number\">${y_position}</label></span><span class=\"equidistant float-right\"></span></div><div class=\"card-action\"><button class=\"color2 waves-effect waves-light btn\" click.trigger=\"start()\">Start</button></div></div></div></div></div></div></div></template>"; });
-define('text!components/world-vision/world-vision-debug.html', ['module'], function(module) { module.exports = "<template><require from=\"../go-to-position/go-to-position\"></require><require from=\"../robot-controller/robot-controller\"></require><div class=\"card\"><div class=\"card-content\"><div class=\"row\"><h5>World Vision</h5><div class=\"center-align\"><img id=\"${canvasId}\" width=\"640px\" height=\"400px\" src=\"${visionProperties.imagePath}\" style=\"cursor:crosshair\"></div></div><div class=\"row\"><div class=\"col s6\"><p>Mouse position: <span class=\"text-number\">(${x_position}, ${y_position})</span></p><button class=\"indigo btn\" click.trigger=\"resetPathRendering()\">Reset path rendering</button></div><div class=\"col s6\"><div class=\"row\"><p>Next destination --> <span class=\"text-number\">(${chosen_x_position}, ${chosen_y_position})</span></p><input value.bind=\"theta\" placeholder=\"theta\"></div><ul class=\"collection center-align\"><li class=\"collection-item\"><go-to-position x-position=\"${chosen_x_position}\" y-position=\"${chosen_y_position}\" theta=\"${theta}\" pathfinder=\"true\"></go-to-position></li><li class=\"collection-item\"><go-to-position x-position=\"${chosen_x_position}\" y-position=\"${chosen_y_position}\" theta=\"${theta}\"></go-to-position></li></ul></div></div></div></div></template>"; });
+define('text!components/world-vision/world-vision-competition.html', ['module'], function(module) { module.exports = "<template><div class=\"container\"><div class=\"row\"><div class=\"col s12 m12\"><div class=\"card\"><div class=\"card-content center-align\"><h3>World Vision</h3><span class=\"float-left\"><label>Robot position</label><label>x :</label><label class=\"text-number\">${x_position}</label><label>y :</label><label class=\"text-number\">${y_position}</label></span><div><div class=\"card-image\"><canvas id=\"${canvasId}\" width=\"640px\" height=\"480px\" style=\"background:url(${imagePath})\"></canvas></div><div class=\"card-action\"><button class=\"color2 waves-effect waves-light btn\" click.trigger=\"start()\">Start</button></div></div></div></div></div></div></div></template>"; });
+define('text!components/world-vision/world-vision-debug.html', ['module'], function(module) { module.exports = "<template><require from=\"../robot-controller/robot-controller\"></require><div class=\"card\"><div class=\"card-content\"><div class=\"row\"><h5>World Vision <span>Cursor: (${x_position}, ${y_position}) -- Next Destination (${nextDestination.x}, ${nextDestination.y})</span></h5><div class=\"center-align\"><img id=\"world__feed\" width=\"640px\" height=\"400px\" src=\"${visionProperties.imagePath}\" style=\"cursor:crosshair\"></div></div></div></div></template>"; });
 //# sourceMappingURL=app-bundle.js.map

@@ -1,5 +1,4 @@
 import { inject } from 'aurelia-framework';
-
 import { Timer } from './timer';
 
 @inject(Timer)
@@ -46,7 +45,7 @@ export class Task {
     }
 
     resetTasks() {
-        this.ws.send(JSON.stringify({ "headers": "reset_tasks" }));
+        this.ws.send(JSON.stringify({ 'headers': 'reset_tasks' }));
     }
 
     registerInformations(data) {

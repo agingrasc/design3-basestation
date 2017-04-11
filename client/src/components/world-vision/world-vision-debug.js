@@ -6,10 +6,9 @@ export class WorldVisionDebug {
     constructor(vision) {
         this.vision = vision;
 
-        this.canvasId = 'monCanvas';
-
-        this.visionProperties = {};
-        this.visionProperties.imagePath = './src/components/world-vision/image14.jpg';
+        this.visionProperties = {
+            'imagePath': 'img/placeholder_640x400.png'
+        };
 
         this.x_position = 0;
         this.y_position = 0;
@@ -22,7 +21,7 @@ export class WorldVisionDebug {
     }
 
     attached() {
-        let canvas = document.getElementById(this.canvasId);
+        let canvas = document.getElementById('world__feed');
 
         canvas.addEventListener('mousemove', (evt) => {
             let mousePos = this.getMousePos(canvas, evt);
@@ -32,26 +31,18 @@ export class WorldVisionDebug {
         canvas.addEventListener('click', (evt) => {
             this.chosen_x_position = this.x_position;
             this.chosen_y_position = this.y_position;
+
+            this.nextDestination = {
+                'x': this.chosen_x_position,
+                'y': this.chosen_y_position,
+                'theta': this.theta
+            };
+
+            this.vision.setDestinationPosition(this.nextDestination);
         }, false);
 
         this.vision.registerImageView(this.visionProperties);
         this.vision.registerGotoPosition(this.world_information);
-    }
-
-    resetPathRendering() {
-        fetch('http://0.0.0.0:5000/vision/reset-rendering', {
-            method: "POST",
-            headers: {
-                'content-type': 'application/json'
-            },
-            mode: 'no-cors'
-        })
-            .then((response) => {
-                console.log(response);
-            })
-            .catch((err) => {
-                console.log(err);
-            });
     }
 
     getMousePos(canvas, evt) {
