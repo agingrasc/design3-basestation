@@ -415,23 +415,6 @@ define('services/vision',['exports'], function (exports) {
         return Vision;
     }();
 });
-define('components/competition/competition',["exports"], function (exports) {
-  "use strict";
-
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-
-  var Competition = exports.Competition = function Competition() {
-    _classCallCheck(this, Competition);
-  };
-});
 define('components/debug/debug',["exports"], function (exports) {
   "use strict";
 
@@ -573,6 +556,22 @@ define('components/informations/informations',['exports', 'aurelia-framework', '
             this.task.registerInformations(this.task_information);
         };
 
+        Informations.prototype.resetObstaclesDetection = function resetObstaclesDetection() {
+            fetch('http://0.0.0.0:12345/obstacles/reset', {
+                method: 'POST',
+                headers: {
+                    'content-type': 'application/json'
+                },
+                mode: 'no-cors'
+            }).then(function (response) {
+                return response.json();
+            }).then(function (message) {
+                console.log(message);
+            }).catch(function (err) {
+                console.log(err);
+            });
+        };
+
         Informations.prototype.resetDetection = function resetDetection() {
             fetch('http://0.0.0.0:5000/vision/reset-detection', {
                 method: 'POST',
@@ -591,7 +590,7 @@ define('components/informations/informations',['exports', 'aurelia-framework', '
 
         Informations.prototype.resetPathRendering = function resetPathRendering() {
             fetch('http://0.0.0.0:5000/vision/reset-rendering', {
-                method: "POST",
+                method: 'POST',
                 headers: {
                     'content-type': 'application/json'
                 },
@@ -609,37 +608,6 @@ define('components/informations/informations',['exports', 'aurelia-framework', '
 
         return Informations;
     }()) || _class);
-});
-define('components/navbar/navbar',["exports"], function (exports) {
-    "use strict";
-
-    Object.defineProperty(exports, "__esModule", {
-        value: true
-    });
-
-    function _classCallCheck(instance, Constructor) {
-        if (!(instance instanceof Constructor)) {
-            throw new TypeError("Cannot call a class as a function");
-        }
-    }
-
-    var Navbar = exports.Navbar = function () {
-        function Navbar() {
-            _classCallCheck(this, Navbar);
-
-            this.showNavbar = true;
-        }
-
-        Navbar.prototype.attached = function attached() {
-            var _this = this;
-
-            setTimeout(function () {
-                _this.showNavbar = false;
-            }, 3000);
-        };
-
-        return Navbar;
-    }();
 });
 define('components/robot-controller/robot-controller',['exports', 'aurelia-framework', '../../services/timer', '../../services/task'], function (exports, _aureliaFramework, _timer, _task) {
   'use strict';
@@ -679,7 +647,7 @@ define('components/robot-controller/robot-controller',['exports', 'aurelia-frame
       this.taskSent = false;
       this.taskDone = false;
 
-      this.options = ['0 - Competition', '1 - Initial Orientation', '2 - Identify Antenna', '3 - Receive Information', '4 - Go to Image', '5 - Take Picture', '6 - Go to Drawing Area', '7 - Draw Figure', '8 - Go Out of Drawing Area', '9 - Light Red Led', '10 - Toggle Pencil', '11 - Null', '12 - Images Routine'];
+      this.options = ['0 - Competition', '1 - Initial Orientation', '2 - Identify Antenna', '3 - Receive Information', '4 - Go to Image', '5 - Take Picture', '6 - Go to Drawing Area', '7 - Draw Figure', '8 - Go Out of Drawing Area', '9 - Light Red Led', '10 - Toggle Pencil', '11 - Images Routine'];
 
       this.scalings = [{ 'value': '1', 'name': '4' }, { 'value': '0.5', 'name': '2' }];
 
@@ -690,6 +658,7 @@ define('components/robot-controller/robot-controller',['exports', 'aurelia-frame
       this.ws.onopen = function () {
         _this.ws.send(JSON.stringify({ 'headers': 'register_image_segmentation' }));
         _this.ws.send(JSON.stringify({ 'headers': 'register_robot_online' }));
+        _this.ws.send(JSON.stringify({ 'headers': 'register_robot_cycle' }));
       };
 
       this.ws.onmessage = function (event) {
@@ -699,9 +668,15 @@ define('components/robot-controller/robot-controller',['exports', 'aurelia-frame
           _this.robotOnline = true;
         } else if (data.data === 'robot_offline') {
           _this.robotOnline = false;
-        } else if (data.data.image) {
+        } else if (data.data && data.data.image) {
           _this.segmentedImage = data.data.image;
           _this.thresholdedImage = data.data.thresholded_image;
+        } else if (data.headers === 'cycle_started') {
+          _this.taskSent = true;
+          _this.taskDone = false;
+        } else if (data.headers === 'cycle_ended') {
+          _this.taskSent = false;
+          _this.taskDone = true;
         }
       };
     }
@@ -714,8 +689,24 @@ define('components/robot-controller/robot-controller',['exports', 'aurelia-frame
       this.taskDone = true;
     };
 
-    RobotController.prototype.sendCommand = function sendCommand() {
+    RobotController.prototype.startCompetition = function startCompetition() {
       var _this2 = this;
+
+      fetch('http://localhost:12345/start-tasks', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({ 'task_id': 0 })
+      }).then(function (res) {
+        return res.json();
+      }).then(function (responseData) {
+        _this2.startTask();
+      });
+    };
+
+    RobotController.prototype.sendCommand = function sendCommand() {
+      var _this3 = this;
 
       var taskId = this.options.indexOf(this.currentCommand).toString();
       var data = { 'task_id': taskId };
@@ -728,11 +719,9 @@ define('components/robot-controller/robot-controller',['exports', 'aurelia-frame
       if (isTakePicture(taskId) && this.fakeSegmentation) {
         data.fake_segmentation = true;
       } else if (isTaskCompetition(taskId)) {
-        this.taskSent = true;
-        this.taskDone = false;
+        this.startTask();
       } else if (isLightRedLedTask(taskId)) {
-        this.taskDone = true;
-        this.taskSent = false;
+        this.stopTimer();
       }
 
       fetch('http://localhost:12345/start-tasks', {
@@ -744,16 +733,12 @@ define('components/robot-controller/robot-controller',['exports', 'aurelia-frame
       }).then(function (res) {
         return res.json();
       }).then(function (responseData) {
-        if (responseData.message) {
-          _this2.startTask();
-        }
-
         if (responseData.image) {
-          _this2.segmentsCoordinates = responseData.segments.map(function (coord) {
+          _this3.segmentsCoordinates = responseData.segments.map(function (coord) {
             return coordToString(coord);
           });
-          _this2.segmentedImage = responseData.image;
-          _this2.thresholdedImage = responseData.thresholded_image;
+          _this3.segmentedImage = responseData.image;
+          _this3.thresholdedImage = responseData.thresholded_image;
         }
       });
     };
@@ -776,19 +761,22 @@ define('components/robot-controller/robot-controller',['exports', 'aurelia-frame
 
     RobotController.prototype.startTask = function startTask() {
       this.timer.start();
-      this.taskSent = false;
+      this.taskSent = true;
+      this.taskDone = false;
     };
 
     RobotController.prototype.resetTask = function resetTask() {
-      var _this3 = this;
+      var _this4 = this;
 
       this.taskService.resetTasks(function () {
-        _this3.taskDone = false;
+        _this4.taskDone = false;
       });
     };
 
     RobotController.prototype.stopTimer = function stopTimer() {
       this.timer.stop();
+      this.taskSent = false;
+      this.taskDone = true;
     };
 
     RobotController.prototype.pauseTimer = function pauseTimer() {
@@ -855,46 +843,6 @@ define('components/robot-feed/robot-feed',['exports'], function (exports) {
             });
         };
     };
-});
-define('components/stat/stat',[], function () {
-  "use strict";
-});
-define('components/world-vision/world-vision-competition',["exports"], function (exports) {
-    "use strict";
-
-    Object.defineProperty(exports, "__esModule", {
-        value: true
-    });
-
-    function _classCallCheck(instance, Constructor) {
-        if (!(instance instanceof Constructor)) {
-            throw new TypeError("Cannot call a class as a function");
-        }
-    }
-
-    var WorldVisionCompetition = exports.WorldVisionCompetition = function () {
-        function WorldVisionCompetition() {
-            _classCallCheck(this, WorldVisionCompetition);
-
-            this.canvasId = "monCanvas";
-            this.x_position = 0;
-            this.y_position = 0;
-            this.imagePath = "./src/components/world-vision/image14.jpg";
-            this.chosen_x_position = 0;
-            this.chosen_y_position = 0;
-        }
-
-        WorldVisionCompetition.prototype.attached = function attached() {
-            var canvas = document.getElementById(this.canvasId);
-            var context = canvas.getContext('2d');
-        };
-
-        WorldVisionCompetition.prototype.start = function start() {
-            console.log("Started");
-        };
-
-        return WorldVisionCompetition;
-    }();
 });
 define('components/world-vision/world-vision-debug',['exports', 'aurelia-framework', '../../services/vision'], function (exports, _aureliaFramework, _vision) {
     'use strict';
@@ -980,14 +928,10 @@ define('components/world-vision/world-vision-debug',['exports', 'aurelia-framewo
     }()) || _class);
 });
 define('text!app.html', ['module'], function(module) { module.exports = "<template><router-view></router-view></template>"; });
-define('text!components/competition/competition.html', ['module'], function(module) { module.exports = "<template><require from=\"../world-vision/world-vision-competition\"></require><world-vision-competition></world-vision-competition></template>"; });
-define('text!components/debug/debug.html', ['module'], function(module) { module.exports = "<template><require from=\"../world-vision/world-vision-debug\"></require><require from=\"../informations/informations\"></require><require from=\"../robot-controller/robot-controller\"></require><require from=\"../robot-feed/robot-feed\"></require><div class=\"row\"><div class=\"col s12 m12 l6\"><world-vision-debug></world-vision-debug><robot-feed></robot-feed></div><div class=\"col s12 m12 l6\"><informations></informations><robot-controller></robot-controller></div></div></template>"; });
+define('text!components/debug/debug.html', ['module'], function(module) { module.exports = "<template><require from=\"../world-vision/world-vision-debug\"></require><require from=\"../informations/informations\"></require><require from=\"../robot-controller/robot-controller\"></require><require from=\"../robot-feed/robot-feed\"></require><div class=\"row\"><div class=\"col s12 m12 l6\"><world-vision-debug></world-vision-debug><robot-feed></robot-feed></div><div class=\"col s12 m12 l6\"><robot-controller></robot-controller><informations></informations></div></div></template>"; });
 define('text!components/go-to-position/go-to-position.html', ['module'], function(module) { module.exports = "<template><button class=\"btn green\" click.trigger=\"execute()\">${buttonName}</button></template>"; });
-define('text!components/informations/informations.html', ['module'], function(module) { module.exports = "<template><div class=\"card\"><div class=\"card-content\"><div class=\"row\"><div class=\"col s6\"><h5>Monde</h5><hr><p>Dimension: <span class=\"text-number\">${informations.worldDimensions.width} x ${informations.worldDimensions.length} (${informations.worldDimensions.unit})</span></p><button class=\"btn blue\" click.trigger=\"resetDetection()\">Reset detection</button> <button class=\"indigo btn\" click.trigger=\"resetPathRendering()\">Reset path rendering</button></div><div class=\"col s6\"><h5>Robot</h5><hr><p>Position x: <span class=\"text-number\">${informations.robot.position.x}</span></p><p>Position y: <span class=\"text-number\">${informations.robot.position.y}</span></p><p>Angle: <span class=\"text-number\">${informations.robot.orientation}</span></p></div><div class=\"col s12\"><h5>Obstacles</h5><hr><div repeat.for=\"obstacle of informations.obstacles\"><div class=\"col s6\"><p>Position: <span class=\"text-number\">(${obstacle.position.x}, ${obstacle.position.y})</span></p><p>Tag: <span class=\"text-number\">${obstacle.tag}</span></p></div></div></div><div class=\"col s12\"><h5>Tâches</h5><hr><div class=\"col s12\"><div repeat.for=\"task of task_information\"><div class=\"chip white-text ${task.color}\" style=\"float:left\">${$index} - ${task.name}</div></div></div></div></div></div></div></template>"; });
-define('text!components/navbar/navbar.html', ['module'], function(module) { module.exports = "<template><nav if.bind=\"showNavbar\"><div class=\"nav-wrapper color1\"><img width=\"55px\" height=\"55px\" src=\"./img/robot.png\"><a href=\"#\" class=\"brand-logo center\">Leonard</a><ul id=\"nav-mobile\" class=\"right hide-on-med-and-down\"><li><a href=\"/\">Debug</a></li></ul></div></nav></template>"; });
-define('text!components/robot-controller/robot-controller.html', ['module'], function(module) { module.exports = "<template><require from=\"../go-to-position/go-to-position\"></require><div class=\"card\"><div class=\"card-content\"><h5>Robot Control <span if.bind=\"robotOnline\" class=\"chip green\">ROBOT ONLINE</span> <span if.bind=\"!robotOnline\" class=\"chip red\">ROBOT OFFLINE</span></h5><h5><span if.bind=\"taskSent\" class=\"chip blue\">CYCLE STARTED</span> <span if.bind=\"taskDone\" class=\"chip green\">CYCLE COMPLETE</span></h5><div class=\"row\"><div class=\"col s2\"><h5 style=\"background-color:rgba(0,0,0,.1);padding:6px;border-radius:2px;margin:0;text-align:center\">${timer.time}</h5></div><div class=\"col s8\"><button class=\"blue btn\" click.trigger=\"resetTask()\">Reset</button><go-to-position></go-to-position></div></div><div class=\"row\"><select value.bind=\"currentCommand\" change.trigger=\"onChange()\" style=\"display:block;width:80%;float:left\"><option repeat.for=\"option of options\" value.bind=\"option\">${option}</option></select><button class=\"cyan btn\" click.trigger=\"sendCommand()\" style=\"margin-left:15px\">Go</button></div><div class=\"row\" if.bind=\"takePicture\"><div><input class=\"with-gap\" type=\"checkbox\" id=\"fakeSegmentation\" checked.bind=\"fakeSegmentation\"><label for=\"fakeSegmentation\">Fake Segmentation</label></div><select value.bind=\"currentScaling\" style=\"display:block;width:50%;float:left\"><option repeat.for=\"scaling of scalings\" model.bind=\"scaling\">${scaling.name}</option></select><select value.bind=\"currentOrientation\" style=\"display:block;width:50%;float:left\"><option repeat.for=\"orientation of orientations\" model.bind=\"orientation\">${orientation.name}</option></select></div><div if.bind=\"showImage\"><img if.bind=\"segmentedImage\" src=\"data:image/png;base64,${segmentedImage}\" width=\"640px\" height=\"640px\"> <img if.bind=\"!segmentedImage\" src=\"img/default-placeholder.png\" alt=\"\" width=\"640px\" height=\"640px\"> <img if.bind=\"segmentedImage\" src=\"data:image/png;base64,${thresholdedImage}\" style=\"width:100%\"></div></div></div></template>"; });
+define('text!components/informations/informations.html', ['module'], function(module) { module.exports = "<template><div class=\"card\"><div class=\"card-content\"><div class=\"row\"><div class=\"col s6\"><h5>Monde</h5><hr><p>Dimension: <span class=\"text-number\">${informations.worldDimensions.width} x ${informations.worldDimensions.length} (${informations.worldDimensions.unit})</span></p><button class=\"btn red\" click.trigger=\"resetDetection()\">Reset Detection</button> <button class=\"btn green\" click.trigger=\"resetObstaclesDetection()\">Reset Obstacles Detection</button> <button class=\"btn blue\" click.trigger=\"resetPathRendering()\">Reset path rendering</button></div><div class=\"col s6\"><h5>Robot</h5><hr><p>Position x: <span class=\"text-number\">${informations.robot.position.x}</span></p><p>Position y: <span class=\"text-number\">${informations.robot.position.y}</span></p><p>Angle: <span class=\"text-number\">${informations.robot.orientation}</span></p></div><div class=\"col s12\"><h5>Obstacles</h5><hr><div repeat.for=\"obstacle of informations.obstacles\"><div class=\"col s6\"><p>Position: <span class=\"text-number\">(${obstacle.position.x}, ${obstacle.position.y})</span></p><p>Tag: <span class=\"text-number\">${obstacle.tag}</span></p></div></div></div><div class=\"col s12\"><h5>Tâches</h5><hr><div class=\"col s12\"><div repeat.for=\"task of task_information\"><div class=\"chip white-text ${task.color}\" style=\"float:left\">${$index} - ${task.name}</div></div></div></div></div></div></div></template>"; });
+define('text!components/robot-controller/robot-controller.html', ['module'], function(module) { module.exports = "<template><require from=\"../go-to-position/go-to-position\"></require><div class=\"card\"><div class=\"card-content\"><h5>Robot Control <span if.bind=\"robotOnline\" class=\"chip green\">ROBOT ONLINE</span> <span if.bind=\"!robotOnline\" class=\"chip red\">ROBOT OFFLINE</span> <span if.bind=\"taskSent\" class=\"chip blue\">CYCLE STARTED</span> <span if.bind=\"taskDone\" class=\"chip green\">CYCLE COMPLETE</span></h5><div class=\"row\"><div class=\"col s2\"><h5 style=\"background-color:rgba(0,0,0,.1);padding:6px;border-radius:2px;margin:0;text-align:center\">${timer.time}</h5></div><div class=\"col s2\"><button class=\"btn green\" click.trigger=\"startCompetition()\" style=\"margin-left:15px\">START</button></div></div><div class=\"row\"><select value.bind=\"currentCommand\" change.trigger=\"onChange()\" style=\"display:block;width:80%;float:left\"><option repeat.for=\"option of options\" value.bind=\"option\">${option}</option></select><button class=\"cyan btn\" click.trigger=\"sendCommand()\" style=\"margin-left:15px\">Go</button></div><div class=\"row\" if.bind=\"takePicture\"><div><input class=\"with-gap\" type=\"checkbox\" id=\"fakeSegmentation\" checked.bind=\"fakeSegmentation\"><label for=\"fakeSegmentation\">Fake Segmentation</label></div><select value.bind=\"currentScaling\" style=\"display:block;width:50%;float:left\"><option repeat.for=\"scaling of scalings\" model.bind=\"scaling\">${scaling.name}</option></select><select value.bind=\"currentOrientation\" style=\"display:block;width:50%;float:left\"><option repeat.for=\"orientation of orientations\" model.bind=\"orientation\">${orientation.name}</option></select></div><div if.bind=\"showImage\"><img if.bind=\"segmentedImage\" src=\"data:image/png;base64,${segmentedImage}\" width=\"640px\" height=\"640px\"> <img if.bind=\"!segmentedImage\" src=\"img/default-placeholder.png\" alt=\"\" width=\"640px\" height=\"640px\"> <img if.bind=\"segmentedImage\" src=\"data:image/png;base64,${thresholdedImage}\" style=\"width:100%\"></div></div></div></template>"; });
 define('text!components/robot-feed/robot-feed.html', ['module'], function(module) { module.exports = "<template><div class=\"card\"><div class=\"card-content\"><div class=\"row\"><h5>Robot Feed</h5><div class=\"center-align\"><img id=\"robot__feed\" style=\"width:100%;height:auto\" src=\"${imagePath}\"></div></div></div></div></template>"; });
-define('text!components/stat/stat.html', ['module'], function(module) { module.exports = ""; });
-define('text!components/world-vision/world-vision-competition.html', ['module'], function(module) { module.exports = "<template><div class=\"container\"><div class=\"row\"><div class=\"col s12 m12\"><div class=\"card\"><div class=\"card-content center-align\"><h3>World Vision</h3><span class=\"float-left\"><label>Robot position</label><label>x :</label><label class=\"text-number\">${x_position}</label><label>y :</label><label class=\"text-number\">${y_position}</label></span><div><div class=\"card-image\"><canvas id=\"${canvasId}\" width=\"640px\" height=\"480px\" style=\"background:url(${imagePath})\"></canvas></div><div class=\"card-action\"><button class=\"color2 waves-effect waves-light btn\" click.trigger=\"start()\">Start</button></div></div></div></div></div></div></div></template>"; });
 define('text!components/world-vision/world-vision-debug.html', ['module'], function(module) { module.exports = "<template><require from=\"../robot-controller/robot-controller\"></require><div class=\"card\"><div class=\"card-content\"><div class=\"row\"><h5>World Vision <span>Cursor: (${x_position}, ${y_position}) -- Next Destination (${nextDestination.x}, ${nextDestination.y})</span></h5><div class=\"center-align\"><img id=\"world__feed\" width=\"640px\" height=\"400px\" src=\"${visionProperties.imagePath}\" style=\"cursor:crosshair\"></div></div></div></div></template>"; });
 //# sourceMappingURL=app-bundle.js.map

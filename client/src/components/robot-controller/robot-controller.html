@@ -7,9 +7,6 @@
       <h5>Robot Control
         <span if.bind="robotOnline" class="chip green">ROBOT ONLINE</span>
         <span if.bind="!robotOnline" class="chip red">ROBOT OFFLINE</span>
-      </h5>
-
-      <h5>
         <span if.bind="taskSent" class="chip blue">CYCLE STARTED</span>
         <span if.bind="taskDone" class="chip green">CYCLE COMPLETE</span>
       </h5>
@@ -18,11 +15,14 @@
         <div class="col s2">
           <h5 style="background-color: rgba(0, 0, 0, 0.1); padding: 6px; border-radius: 2px; margin: 0; text-align: center;">${timer.time}</h5>
         </div>
-
+        <div class="col s2">
+          <button class='btn green' click.trigger="startCompetition()" style="margin-left: 15px;">START</button>
+        </div>
+<!--
         <div class="col s8">
             <button class="blue btn" click.trigger="resetTask()">Reset</button>
             <go-to-position></go-to-position>
-        </div>
+        </div>-->
       </div>
 
       <div class="row">

@@ -11,9 +11,10 @@ def fake_tasks():
     connection = create_connection("ws://localhost:3000")
 
     connection.send(json.dumps({"headers": "reset_tasks"}))
+    connection.send(json.dumps({"headers": "cycle_started"}))
 
     tasks = {
-        visionformat.TASK_INITIAL_ORIENTATION: "False",
+        "initial_orientation": "False",
         visionformat.TASK_IDENTEFIE_ANTENNA: "False",
         visionformat.TASK_RECEIVE_INFORMATION: "False",
         visionformat.TASK_GO_TO_IMAGE: "False",
@@ -25,7 +26,7 @@ def fake_tasks():
     }
 
     for task in tasks:
-        sleep(2)
+        sleep(1)
 
         value = {
             "headers": "push_tasks_information",
@@ -35,6 +36,9 @@ def fake_tasks():
         }
 
         connection.send(json.dumps(value))
+
+    connection.send(json.dumps({"headers": "cycle_ended"}))
+    connection.send(json.dumps({"headers": "new_round"}))
 
 
 fake_tasks()

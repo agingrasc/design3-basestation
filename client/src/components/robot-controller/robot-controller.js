@@ -34,8 +34,7 @@ export class RobotController {
         '8 - Go Out of Drawing Area',
         '9 - Light Red Led',
         '10 - Toggle Pencil',
-        '11 - Null',
-        '12 - Images Routine'
+        '11 - Images Routine'
     ];
 
     this.scalings = [
@@ -55,6 +54,7 @@ export class RobotController {
     this.ws.onopen = () => {
         this.ws.send(JSON.stringify({'headers': 'register_image_segmentation'}));
         this.ws.send(JSON.stringify({'headers': 'register_robot_online'}));
+        this.ws.send(JSON.stringify({'headers': 'register_robot_cycle'}));
     };
 
     this.ws.onmessage = (event) => {
@@ -64,9 +64,15 @@ export class RobotController {
         this.robotOnline = true;
       } else if (data.data === 'robot_offline') {
         this.robotOnline = false;
-      } else if (data.data.image) {
+      } else if (data.data && data.data.image) {
         this.segmentedImage = data.data.image;
         this.thresholdedImage = data.data.thresholded_image;
+      } else if (data.headers === 'cycle_started') {
+        this.taskSent = true;
+        this.taskDone = false;
+      } else if (data.headers === 'cycle_ended') {
+        this.taskSent = false;
+        this.taskDone = true;
       }
     };
   }
@@ -77,6 +83,20 @@ export class RobotController {
 
   setTaskDone() {
     this.taskDone = true;
+  }
+
+  startCompetition() {
+    fetch('http://localhost:12345/start-tasks', {
+        method: 'POST',
+        headers: {
+            'content-type': 'application/json'
+        },
+        body: JSON.stringify({ 'task_id': 0 })
+    })
+    .then((res) => res.json())
+    .then((responseData) => {
+      this.startTask();
+    });
   }
 
   sendCommand() {
@@ -91,11 +111,9 @@ export class RobotController {
     if (isTakePicture(taskId) && this.fakeSegmentation) {
       data.fake_segmentation = true;
     } else if (isTaskCompetition(taskId)) {
-      this.taskSent = true;
-      this.taskDone = false;
+      this.startTask();
     } else if (isLightRedLedTask(taskId)) {
-      this.taskDone = true;
-      this.taskSent = false;
+      this.stopTimer();
     }
 
     fetch('http://localhost:12345/start-tasks', {
@@ -107,10 +125,6 @@ export class RobotController {
     })
     .then((res) => res.json())
     .then((responseData) => {
-      if (responseData.message) {
-        this.startTask();
-      }
-
       if (responseData.image) {
         this.segmentsCoordinates = responseData.segments.map((coord) => coordToString(coord));
         this.segmentedImage = responseData.image;
@@ -137,7 +151,8 @@ export class RobotController {
 
   startTask() {
     this.timer.start();
-    this.taskSent = false;
+    this.taskSent = true;
+    this.taskDone = false;
   }
 
   resetTask() {
@@ -148,6 +163,8 @@ export class RobotController {
 
   stopTimer() {
     this.timer.stop();
+    this.taskSent = false;
+    this.taskDone = true;
   }
 
   pauseTimer() {

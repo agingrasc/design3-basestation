@@ -20,6 +20,22 @@ export class Informations {
         this.task.registerInformations(this.task_information);
     }
 
+    resetObstaclesDetection() {
+         fetch('http://0.0.0.0:12345/obstacles/reset', {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json'
+            },
+            mode: 'no-cors'
+        }).then(function(response) {
+            return response.json();
+        }).then(function(message) {
+            console.log(message);
+        }).catch(function(err) {
+            console.log(err);
+        });
+    }
+
     resetDetection() {
         fetch('http://0.0.0.0:5000/vision/reset-detection', {
             method: 'POST',
@@ -38,7 +54,7 @@ export class Informations {
 
     resetPathRendering() {
         fetch('http://0.0.0.0:5000/vision/reset-rendering', {
-            method: "POST",
+            method: 'POST',
             headers: {
                 'content-type': 'application/json'
             },
