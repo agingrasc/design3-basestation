@@ -9,17 +9,17 @@ export class Vision {
     }
 
     start() {
-        let ws = new WebSocket('ws://localhost:3000');
+        this.ws = new WebSocket('ws://localhost:3000');
 
-        ws.onopen = () => {
+        this.ws.onopen = () => {
             let robotPositionRegisterMessage = JSON.stringify({'headers': 'register_vision_data'});
-            ws.send(robotPositionRegisterMessage);
+            this.ws.send(robotPositionRegisterMessage);
         };
 
-        ws.onmessage = (evt) => {
+        this.ws.onmessage = (evt) => {
             let data = JSON.parse(evt.data);
 
-            if (data.image.origin.x !== "") {
+            if (data.image.origin.x !== '') {
                 this.world_information.origin = data.image.origin;
                 this.world_information.ratio = data.image.ratio;
                 this.goto.width = data.world.base_table.dimension.width;
@@ -33,7 +33,6 @@ export class Vision {
             this.informations.obstacles = data.world.obstacles;
 
             let world = data.world;
-
             this.informations.worldDimensions = {
                 'width': Math.round(parseFloat(world.base_table.dimension.width)),
                 'length': Math.round(parseFloat(world.base_table.dimension.height)),
@@ -78,6 +77,7 @@ export class Vision {
         }
         this.start();
     }
+
     registerImageView(imageView) {
         this.imageView = imageView;
         this.checkReadyToStart();
@@ -88,12 +88,11 @@ export class Vision {
         this.checkReadyToStart();
     }
 
-    registerGotoPosition(world_information) {
-        this.world_information = world_information;
+    registerGotoPosition(worldInformation) {
+        this.world_information = worldInformation;
     }
 
     registerGoto(goto) {
-        console.log(goto);
         this.goto = goto;
         this.checkReadyToStart();
     }
