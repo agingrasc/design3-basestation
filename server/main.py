@@ -8,6 +8,12 @@ from flask import Flask, jsonify, make_response, json
 from requests import Timeout, ConnectionError
 from websocket import create_connection
 
+<<<<<<< HEAD
+import requests as req
+from flask import Flask, jsonify, make_response
+
+=======
+>>>>>>> master
 from api.gotoposition import gotoposition
 from api.starttasks import start_tasks, BASE_STATION_URL
 from api.feedbacktask import feedback_task

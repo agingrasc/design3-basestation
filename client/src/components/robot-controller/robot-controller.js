@@ -12,7 +12,6 @@ export class RobotController {
         this.currentCommand = null;
         this.currentScaling = null;
         this.currentOrientation = null;
-
         this.messageReceived = false;
         this.showImage = true;
         this.fakeSegmentation = false;

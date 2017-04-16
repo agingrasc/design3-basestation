@@ -53,42 +53,42 @@ define('environment',["exports"], function (exports) {
   };
 });
 define('main',['exports', './environment'], function (exports, _environment) {
-  'use strict';
+    'use strict';
 
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  exports.configure = configure;
-
-  var _environment2 = _interopRequireDefault(_environment);
-
-  function _interopRequireDefault(obj) {
-    return obj && obj.__esModule ? obj : {
-      default: obj
-    };
-  }
-
-  Promise.config({
-    warnings: {
-      wForgottenReturn: false
-    }
-  });
-
-  function configure(aurelia) {
-    aurelia.use.standardConfiguration().feature('resources');
-
-    if (_environment2.default.debug) {
-      aurelia.use.developmentLogging();
-    }
-
-    if (_environment2.default.testing) {
-      aurelia.use.plugin('aurelia-testing');
-    }
-
-    aurelia.start().then(function () {
-      return aurelia.setRoot();
+    Object.defineProperty(exports, "__esModule", {
+        value: true
     });
-  }
+    exports.configure = configure;
+
+    var _environment2 = _interopRequireDefault(_environment);
+
+    function _interopRequireDefault(obj) {
+        return obj && obj.__esModule ? obj : {
+            default: obj
+        };
+    }
+
+    Promise.config({
+        warnings: {
+            wForgottenReturn: false
+        }
+    });
+
+    function configure(aurelia) {
+        aurelia.use.standardConfiguration().feature('resources');
+
+        if (_environment2.default.debug) {
+            aurelia.use.developmentLogging();
+        }
+
+        if (_environment2.default.testing) {
+            aurelia.use.plugin('aurelia-testing');
+        }
+
+        aurelia.start().then(function () {
+            return aurelia.setRoot();
+        });
+    }
 });
 define('http/base-station-request',['exports'], function (exports) {
     'use strict';
@@ -648,187 +648,183 @@ define('components/navbar/navbar',["exports"], function (exports) {
   };
 });
 define('components/robot-controller/robot-controller',['exports', 'aurelia-framework', '../../services/timer', '../../services/task'], function (exports, _aureliaFramework, _timer, _task) {
-  'use strict';
+    'use strict';
 
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  exports.RobotController = undefined;
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+    exports.RobotController = undefined;
 
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-
-  var _dec, _class;
-
-  var RobotController = exports.RobotController = (_dec = (0, _aureliaFramework.inject)(_timer.Timer, _task.Task), _dec(_class = function () {
-    function RobotController(timer, task) {
-      var _this = this;
-
-      _classCallCheck(this, RobotController);
-
-      this.timer = timer;
-      this.taskService = task;
-
-      this.currentCommand = null;
-      this.currentScaling = null;
-      this.currentOrientation = null;
-
-      this.messageReceived = false;
-      this.showImage = true;
-      this.fakeSegmentation = false;
-      this.takePicture = false;
-      this.showSegmentsCoordinates = false;
-      this.robotOnline = false;
-      this.taskSent = false;
-      this.taskDone = false;
-
-      this.options = ['0 - Competition', '1 - Initial Orientation', '2 - Identify Antenna', '3 - Receive Information', '4 - Go to Image', '5 - Take Picture', '6 - Go to Drawing Area', '7 - Draw Figure', '8 - Go Out of Drawing Area', '9 - Light Red Led', '10 - Toggle Pencil', '11 - Null', '12 - Images Routine'];
-
-      this.scalings = [{ 'value': '1', 'name': '4' }, { 'value': '0.5', 'name': '2' }];
-
-      this.orientations = [{ 'value': 'SOUTH', 'name': 'SUD' }, { 'value': 'NORTH', 'name': 'NORD' }, { 'value': 'EAST', 'name': 'EST' }, { 'value': 'WEST', 'name': 'WEST' }];
-
-      this.ws = new WebSocket('ws://localhost:3000');
-
-      this.ws.onopen = function () {
-        _this.ws.send(JSON.stringify({ 'headers': 'register_image_segmentation' }));
-        _this.ws.send(JSON.stringify({ 'headers': 'register_robot_online' }));
-      };
-
-      this.ws.onmessage = function (event) {
-        var data = JSON.parse(event.data);
-
-        if (data.data === 'robot_online') {
-          _this.robotOnline = true;
-        } else if (data.data === 'robot_offline') {
-          _this.robotOnline = false;
-        } else if (data.data.image) {
-          _this.segmentedImage = data.data.image;
-          _this.thresholdedImage = data.data.thresholded_image;
+    function _classCallCheck(instance, Constructor) {
+        if (!(instance instanceof Constructor)) {
+            throw new TypeError("Cannot call a class as a function");
         }
-      };
     }
 
-    RobotController.prototype.attached = function attached() {
-      this.taskService.registerCycleEnd(this.setTaskDone.bind(this));
-    };
+    var _dec, _class;
 
-    RobotController.prototype.setTaskDone = function setTaskDone() {
-      this.taskDone = true;
-    };
+    var RobotController = exports.RobotController = (_dec = (0, _aureliaFramework.inject)(_timer.Timer, _task.Task), _dec(_class = function () {
+        function RobotController(timer, task) {
+            var _this = this;
 
-    RobotController.prototype.sendCommand = function sendCommand() {
-      var _this2 = this;
+            _classCallCheck(this, RobotController);
 
-      var taskId = this.options.indexOf(this.currentCommand).toString();
-      var data = { 'task_id': taskId };
+            this.timer = timer;
+            this.taskService = task;
 
-      if (this.currentScaling) {
-        data.scaling = this.currentScaling.value;
-        data.orientation = this.currentOrientation.value;
-      }
+            this.currentCommand = null;
+            this.currentScaling = null;
+            this.currentOrientation = null;
+            this.messageReceived = false;
+            this.showImage = true;
+            this.fakeSegmentation = false;
+            this.takePicture = false;
+            this.showSegmentsCoordinates = false;
+            this.robotOnline = false;
+            this.taskSent = false;
+            this.taskDone = false;
 
-      if (isTakePicture(taskId) && this.fakeSegmentation) {
-        data.fake_segmentation = true;
-      } else if (isTaskCompetition(taskId)) {
-        this.taskSent = true;
-        this.taskDone = false;
-      } else if (isLightRedLedTask(taskId)) {
-        this.taskDone = true;
-        this.taskSent = false;
-      }
+            this.options = ['0 - Competition', '1 - Initial Orientation', '2 - Identify Antenna', '3 - Receive Information', '4 - Go to Image', '5 - Take Picture', '6 - Go to Drawing Area', '7 - Draw Figure', '8 - Go Out of Drawing Area', '9 - Light Red Led', '10 - Toggle Pencil', '11 - Null', '12 - Images Routine'];
 
-      fetch('http://localhost:12345/start-tasks', {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      }).then(function (res) {
-        return res.json();
-      }).then(function (responseData) {
-        if (responseData.message) {
-          _this2.startTask();
+            this.scalings = [{ 'value': '1', 'name': '4' }, { 'value': '0.5', 'name': '2' }];
+
+            this.orientations = [{ 'value': 'SOUTH', 'name': 'SUD' }, { 'value': 'NORTH', 'name': 'NORD' }, { 'value': 'EAST', 'name': 'EST' }, { 'value': 'WEST', 'name': 'WEST' }];
+
+            this.ws = new WebSocket('ws://localhost:3000');
+
+            this.ws.onopen = function () {
+                _this.ws.send(JSON.stringify({ 'headers': 'register_image_segmentation' }));
+                _this.ws.send(JSON.stringify({ 'headers': 'register_robot_online' }));
+            };
+
+            this.ws.onmessage = function (event) {
+                var data = JSON.parse(event.data);
+
+                if (data.data === 'robot_online') {
+                    _this.robotOnline = true;
+                } else if (data.data === 'robot_offline') {
+                    _this.robotOnline = false;
+                } else if (data.data.image) {
+                    _this.segmentedImage = data.data.image;
+                    _this.thresholdedImage = data.data.thresholded_image;
+                }
+            };
         }
 
-        if (responseData.image) {
-          _this2.segmentsCoordinates = responseData.segments.map(function (coord) {
-            return coordToString(coord);
-          });
-          _this2.segmentedImage = responseData.image;
-          _this2.thresholdedImage = responseData.thresholded_image;
-        }
-      });
-    };
+        RobotController.prototype.attached = function attached() {
+            this.taskService.registerCycleEnd(this.setTaskDone.bind(this));
+        };
 
-    RobotController.prototype.onChange = function onChange() {
-      var currentTaskIndex = this.options.indexOf(this.currentCommand);
-      if (isTakePicture(currentTaskIndex)) {
-        this.takePicture = true;
-        this.showImage = true;
-        this.showSegmentsCoordinates = false;
-      } else if (isDrawPicture(currentTaskIndex)) {
-        this.takePicture = false;
-        this.showImage = false;
-        this.showSegmentsCoordinates = true;
-      } else {
-        this.takePicture = false;
-        this.showSegmentsCoordinates = true;
-      }
-    };
+        RobotController.prototype.setTaskDone = function setTaskDone() {
+            this.taskDone = true;
+        };
 
-    RobotController.prototype.startTask = function startTask() {
-      this.timer.start();
-      this.taskSent = false;
-    };
+        RobotController.prototype.sendCommand = function sendCommand() {
+            var _this2 = this;
 
-    RobotController.prototype.resetTask = function resetTask() {
-      var _this3 = this;
+            var taskId = this.options.indexOf(this.currentCommand).toString();
+            var data = { 'task_id': taskId };
 
-      this.taskService.resetTasks(function () {
-        _this3.taskDone = false;
-      });
-    };
+            if (this.currentScaling) {
+                data.scaling = this.currentScaling.value;
+                data.orientation = this.currentOrientation.value;
+            }
 
-    RobotController.prototype.stopTimer = function stopTimer() {
-      this.timer.stop();
-    };
+            if (isTakePicture(taskId) && this.fakeSegmentation) {
+                data.fake_segmentation = true;
+            } else if (isTaskCompetition(taskId)) {
+                this.taskSent = true;
+                this.taskDone = false;
+            } else if (isLightRedLedTask(taskId)) {
+                this.taskDone = true;
+                this.taskSent = false;
+            }
 
-    RobotController.prototype.pauseTimer = function pauseTimer() {
-      this.timer.pause();
-      this.taskDone = false;
-      this.taskSent = false;
-    };
+            fetch('http://localhost:12345/start-tasks', {
+                method: 'POST',
+                headers: {
+                    'content-type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            }).then(function (res) {
+                return res.json();
+            }).then(function (responseData) {
+                if (responseData.message) {
+                    _this2.startTask();
+                }
 
-    return RobotController;
-  }()) || _class);
+                if (responseData.image) {
+                    _this2.segmentsCoordinates = responseData.segments.map(function (coord) {
+                        return coordToString(coord);
+                    });
+                    _this2.segmentedImage = responseData.image;
+                    _this2.thresholdedImage = responseData.thresholded_image;
+                }
+            });
+        };
+
+        RobotController.prototype.onChange = function onChange() {
+            var currentTaskIndex = this.options.indexOf(this.currentCommand);
+            if (isTakePicture(currentTaskIndex)) {
+                this.takePicture = true;
+                this.showImage = true;
+                this.showSegmentsCoordinates = false;
+            } else if (isDrawPicture(currentTaskIndex)) {
+                this.takePicture = false;
+                this.showImage = false;
+                this.showSegmentsCoordinates = true;
+            } else {
+                this.takePicture = false;
+                this.showSegmentsCoordinates = true;
+            }
+        };
+
+        RobotController.prototype.startTask = function startTask() {
+            this.timer.start();
+            this.taskSent = false;
+        };
+
+        RobotController.prototype.resetTask = function resetTask() {
+            var _this3 = this;
+
+            this.taskService.resetTasks(function () {
+                _this3.taskDone = false;
+            });
+        };
+
+        RobotController.prototype.stopTimer = function stopTimer() {
+            this.timer.stop();
+        };
+
+        RobotController.prototype.pauseTimer = function pauseTimer() {
+            this.timer.pause();
+            this.taskDone = false;
+            this.taskSent = false;
+        };
+
+        return RobotController;
+    }()) || _class);
 
 
-  function isTakePicture(taskId) {
-    return taskId === 5 || taskId === '5';
-  }
+    function isTakePicture(taskId) {
+        return taskId === 5 || taskId === '5';
+    }
 
-  function isTaskCompetition(taskId) {
-    return taskId === 0 || taskId === '0';
-  }
+    function isTaskCompetition(taskId) {
+        return taskId === 0 || taskId === '0';
+    }
 
-  function isDrawPicture(taskId) {
-    return taskId === 7 || taskId === '7';
-  }
+    function isDrawPicture(taskId) {
+        return taskId === 7 || taskId === '7';
+    }
 
-  function isLightRedLedTask(taskId) {
-    return taskId === 9 || taskId === '9';
-  }
+    function isLightRedLedTask(taskId) {
+        return taskId === 9 || taskId === '9';
+    }
 
-  function coordToString(coord) {
-    return [Math.round(parseFloat(coord[0])), Math.round(parseFloat(coord[1]))].toString();
-  }
-});
-define('components/stat/stat',[], function () {
-  "use strict";
+    function coordToString(coord) {
+        return [Math.round(parseFloat(coord[0])), Math.round(parseFloat(coord[1]))].toString();
+    }
 });
 define('components/world-vision/world-vision-competition',["exports"], function (exports) {
     "use strict";
@@ -958,13 +954,12 @@ define('components/world-vision/world-vision-debug',['exports', 'aurelia-framewo
     }()) || _class);
 });
 define('text!app.html', ['module'], function(module) { module.exports = "<template><div><require from=\"./components/navbar/navbar\"></require><navbar></navbar></div><router-view></router-view></template>"; });
-define('text!components/debug/debug.html', ['module'], function(module) { module.exports = "<template><require from=\"../world-vision/world-vision-debug\"></require><require from=\"../informations/informations\"></require><require from=\"../robot-controller/robot-controller\"></require><div class=\"row\"><div class=\"col s12 m12 l6\"><world-vision-debug></world-vision-debug></div><div class=\"col s12 m12 l6\"><informations></informations><robot-controller></robot-controller></div></div></template>"; });
 define('text!components/competition/competition.html', ['module'], function(module) { module.exports = "<template><require from=\"../world-vision/world-vision-competition\"></require><world-vision-competition></world-vision-competition></template>"; });
+define('text!components/debug/debug.html', ['module'], function(module) { module.exports = "<template><require from=\"../world-vision/world-vision-debug\"></require><require from=\"../informations/informations\"></require><require from=\"../robot-controller/robot-controller\"></require><div class=\"row\"><div class=\"col s12 m12 l6\"><world-vision-debug></world-vision-debug></div><div class=\"col s12 m12 l6\"><informations></informations><robot-controller></robot-controller></div></div></template>"; });
 define('text!components/go-to-position/go-to-position.html', ['module'], function(module) { module.exports = "<template><button class=\"btn blue\" click.trigger=\"execute()\">${buttonName}</button></template>"; });
 define('text!components/informations/informations.html', ['module'], function(module) { module.exports = "<template><div class=\"card\"><div class=\"card-content\"><div class=\"row\"><div class=\"col s6\"><h5>Monde</h5><hr><p>Dimension: <span class=\"text-number\">${informations.worldDimensions.width} x ${informations.worldDimensions.length} (${informations.worldDimensions.unit})</span></p><button class=\"btn blue\" click.trigger=\"resetDetection()\">Reset detection</button></div><div class=\"col s6\"><h5>Robot</h5><hr><p>Position x: <span class=\"text-number\">${informations.robot.position.x}</span></p><p>Position y: <span class=\"text-number\">${informations.robot.position.y}</span></p><p>Angle: <span class=\"text-number\">${informations.robot.orientation}</span></p></div><div class=\"col s12\"><h5>Obstacles</h5><hr><div repeat.for=\"obstacle of informations.obstacles\"><div class=\"col s6\"><p>Position: <span class=\"text-number\">(${obstacle.position.x}, ${obstacle.position.y})</span></p><p>Tag: <span class=\"text-number\">${obstacle.tag}</span></p></div></div></div><div class=\"col s12\"><h5>Tâches</h5><hr><div class=\"col s12\"><div repeat.for=\"task of task_information\"><div class=\"chip white-text ${task.color}\" style=\"float:left\">${$index} - ${task.name}</div></div></div></div></div></div></div></template>"; });
 define('text!components/navbar/navbar.html', ['module'], function(module) { module.exports = "<template><nav><div class=\"nav-wrapper color1\"><img width=\"55px\" height=\"55px\" src=\"./img/robot.png\"><a href=\"#\" class=\"brand-logo center\">Leonard</a><ul id=\"nav-mobile\" class=\"right hide-on-med-and-down\"><li><a href=\"#/competition\">Competition</a></li><li><a href=\"#/debug\">Debug</a></li></ul></div></nav></template>"; });
 define('text!components/robot-controller/robot-controller.html', ['module'], function(module) { module.exports = "<template><div class=\"card\"><div class=\"card-content\"><h5>Robot Controller <span if.bind=\"robotOnline\" class=\"chip green\">ROBOT ONLINE</span> <span if.bind=\"!robotOnline\" class=\"chip red\">ROBOT OFFLINE</span></h5><h5><span if.bind=\"taskSent\" class=\"chip blue\">CYCLE STARTED</span> <span if.bind=\"taskDone\" class=\"chip green\">CYCLE COMPLETE</span></h5><div class=\"row\"><div class=\"col s2\"><h5 style=\"background-color:rgba(0,0,0,.1);padding:6px;border-radius:2px;margin:0;text-align:center\">${timer.time}</h5></div><div class=\"col s8\"><button class=\"blue btn\" click.trigger=\"resetTask()\">Reset</button></div></div><div class=\"row\"><select value.bind=\"currentCommand\" change.trigger=\"onChange()\" style=\"display:block;width:80%;float:left\"><option repeat.for=\"option of options\" value.bind=\"option\">${option}</option></select><button class=\"cyan btn\" click.trigger=\"sendCommand()\" style=\"margin-left:15px\">Go</button></div><div class=\"row\" if.bind=\"takePicture\"><div><input class=\"with-gap\" type=\"checkbox\" id=\"fakeSegmentation\" checked.bind=\"fakeSegmentation\"><label for=\"fakeSegmentation\">Fake Segmentation</label></div><select value.bind=\"currentScaling\" style=\"display:block;width:50%;float:left\"><option repeat.for=\"scaling of scalings\" model.bind=\"scaling\">${scaling.name}</option></select><select value.bind=\"currentOrientation\" style=\"display:block;width:50%;float:left\"><option repeat.for=\"orientation of orientations\" model.bind=\"orientation\">${orientation.name}</option></select></div><div if.bind=\"showImage\"><img if.bind=\"segmentedImage\" src=\"data:image/png;base64,${segmentedImage}\" width=\"640px\" height=\"640px\"> <img if.bind=\"!segmentedImage\" src=\"img/default-placeholder.png\" alt=\"\" width=\"640px\" height=\"640px\"> <img if.bind=\"segmentedImage\" src=\"data:image/png;base64,${thresholdedImage}\" style=\"width:100%\"></div></div></div></template>"; });
-define('text!components/stat/stat.html', ['module'], function(module) { module.exports = ""; });
 define('text!components/world-vision/world-vision-competition.html', ['module'], function(module) { module.exports = "<template><div class=\"container\"><div class=\"row\"><div class=\"col s12 m12\"><div class=\"card\"><div class=\"card-content center-align\"><h3>World Vision</h3><div><div class=\"card-image\"><canvas id=\"${canvasId}\" width=\"640px\" height=\"480px\" style=\"background:url(${imagePath})\"></canvas></div><div class=\"card-content\"><span class=\"equidistant float-left\"><label>Robot position</label><label>x :</label><label class=\"text-number\">${x_position}</label><label>y :</label><label class=\"text-number\">${y_position}</label></span><span class=\"equidistant float-right\"></span></div><div class=\"card-action\"><button class=\"color2 waves-effect waves-light btn\" click.trigger=\"start()\">Start</button></div></div></div></div></div></div></div></template>"; });
 define('text!components/world-vision/world-vision-debug.html', ['module'], function(module) { module.exports = "<template><require from=\"../go-to-position/go-to-position\"></require><require from=\"../robot-controller/robot-controller\"></require><div class=\"card\"><div class=\"card-content\"><div class=\"row\"><h5>World Vision</h5><div class=\"center-align\"><img id=\"${canvasId}\" width=\"640px\" height=\"400px\" src=\"${visionProperties.imagePath}\" style=\"cursor:crosshair\"></div></div><div class=\"row\"><div class=\"col s6\"><p>Mouse position: <span class=\"text-number\">(${x_position}, ${y_position})</span></p><button class=\"indigo btn\" click.trigger=\"resetPathRendering()\">Reset path rendering</button></div><div class=\"col s6\"><div class=\"row\"><p>Next destination --> <span class=\"text-number\">(${chosen_x_position}, ${chosen_y_position})</span></p><input value.bind=\"theta\" placeholder=\"theta\"></div><ul class=\"collection center-align\"><li class=\"collection-item\"><go-to-position x-position=\"${chosen_x_position}\" y-position=\"${chosen_y_position}\" theta=\"${theta}\" pathfinder=\"true\"></go-to-position></li><li class=\"collection-item\"><go-to-position x-position=\"${chosen_x_position}\" y-position=\"${chosen_y_position}\" theta=\"${theta}\"></go-to-position></li></ul></div></div></div></div></template>"; });
 //# sourceMappingURL=app-bundle.js.map
