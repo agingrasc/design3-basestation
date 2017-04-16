@@ -14,6 +14,7 @@ import {
     Vision
 } from '../../services/vision';
 
+
 @inject(Vision)
 export class GoToPosition {
 

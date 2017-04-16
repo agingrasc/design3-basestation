@@ -62,8 +62,7 @@ def take_picture():
 
 
 def send_own_url():
-    return req.post(url=ROBOT_API_URL + "/set-url",
-                    json={"data": {"base_station_url": BASE_STATION_URL}}).json()
+    return req.post(url=ROBOT_API_URL + "/set-url", json={"data": {"base_station_url": BASE_STATION_URL}}).json()
 
 
 def build_vision_service_url(fake=False):

@@ -1,8 +1,8 @@
 import { inject } from 'aurelia-framework';
-
 import { Vision } from '../../services/vision';
 import { Timer } from '../../services/timer';
 import { Task } from '../../services/task';
+
 
 @inject(Vision, Timer, Task)
 export class Informations {

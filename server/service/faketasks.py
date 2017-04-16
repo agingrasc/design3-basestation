@@ -27,12 +27,7 @@ def fake_tasks():
     for task in tasks:
         sleep(2)
 
-        value = {
-            "headers": "push_tasks_information",
-            "data": {
-                "task_name": task
-            }
-        }
+        value = {"headers": "push_tasks_information", "data": {"task_name": task}}
 
         connection.send(json.dumps(value))
 

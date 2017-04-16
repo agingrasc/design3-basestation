@@ -1,6 +1,7 @@
 import { inject } from 'aurelia-framework';
 import { Vision } from '../../services/vision';
 
+
 @inject(Vision)
 export class WorldVisionDebug {
     constructor(vision) {
@@ -40,12 +41,12 @@ export class WorldVisionDebug {
 
     resetPathRendering() {
         fetch('http://0.0.0.0:5000/vision/reset-rendering', {
-            method: "POST",
-            headers: {
-                'content-type': 'application/json'
-            },
-            mode: 'no-cors'
-        })
+                method: "POST",
+                headers: {
+                    'content-type': 'application/json'
+                },
+                mode: 'no-cors'
+            })
             .then((response) => {
                 console.log(response);
             })

@@ -1,6 +1,6 @@
 import { inject } from 'aurelia-framework';
-
 import { Timer } from './timer';
+
 
 @inject(Timer)
 export class Task {
@@ -77,5 +77,7 @@ function colorFrom(status) {
 }
 
 function snakeToCamel(s) {
-    return s.charAt(0).toUpperCase() + s.replace(/(\_\w)/g, function(m) { return ' ' + m[1].toUpperCase(); }).slice(1);
+    return s.charAt(0).toUpperCase() + s.replace(/(\_\w)/g, function(m) {
+        return ' ' + m[1].toUpperCase();
+    }).slice(1);
 }

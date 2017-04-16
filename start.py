@@ -15,8 +15,7 @@ else:
     proc_install_ui.communicate()
     proc_ui = subprocess.Popen(["cd client;au run"], shell=True)
 
-proc_vision_fake = subprocess.Popen(
-    ["python server/service/fakevision.py"], shell=True)
+proc_vision_fake = subprocess.Popen(["python server/service/fakevision.py"], shell=True)
 proc_main_api = subprocess.Popen(["python server/main.py" + url], shell=True)
 
 proc_vision_fake.communicate()

@@ -15,10 +15,7 @@ REGISTERED_TO_ROBOT_ONLINE = []
 
 ROBOT_POSITION = {}
 
-WORLD_STATE = {
-    "pull_vision_data": "",
-    "robot_online": False
-}
+WORLD_STATE = {"pull_vision_data": "", "robot_online": False}
 
 
 def initialize_task_info():
@@ -102,7 +99,7 @@ class VisionWebSocketHandler(websocket.WebSocketHandler):
         if message_type == "new_round":
             old_antenna_state = tasks_state["data"][visionformat.TASK_IDENTEFIE_ANTENNA]
             old_orientation_state = tasks_state["data"][visionformat.TASK_INITIAL_ORIENTATION]
-            
+
             reset_tasks()
 
             tasks_state["data"][visionformat.TASK_IDENTEFIE_ANTENNA] = old_antenna_state
@@ -189,9 +186,10 @@ def unregister(connection):
         REGISTERED_TO_ROBOT_ONLINE.remove(connection)
 
 
-application = web.Application([
-    web.url(r"/", VisionWebSocketHandler, kwargs={'global_state': WORLD_STATE, 'robot_position': ROBOT_POSITION})
-])
+application = web.Application(
+    [web.url(r"/", VisionWebSocketHandler, kwargs={'global_state': WORLD_STATE,
+                                                   'robot_position': ROBOT_POSITION})]
+)
 
 if __name__ == "__main__":
     application.listen(3000)
