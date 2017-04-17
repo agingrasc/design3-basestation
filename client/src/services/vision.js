@@ -12,7 +12,7 @@ export class Vision {
         this.ws = new WebSocket('ws://localhost:3000');
 
         this.ws.onopen = () => {
-            let robotPositionRegisterMessage = JSON.stringify({'headers': 'register_vision_data'});
+            let robotPositionRegisterMessage = JSON.stringify({ 'headers': 'register_vision_data' });
             this.ws.send(robotPositionRegisterMessage);
         };
 

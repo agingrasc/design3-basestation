@@ -1,7 +1,7 @@
 import { inject } from 'aurelia-framework';
-
 import { Timer } from '../../services/timer';
 import { Task } from '../../services/task';
+
 
 @inject(Timer, Task)
 export class RobotController {
